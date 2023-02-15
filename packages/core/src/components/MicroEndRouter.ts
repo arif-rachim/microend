@@ -91,7 +91,7 @@ export class MicroEndRouter extends HTMLElement {
             console.error('[MicroEndRouter]', 'ShadowRoot is null we cant render this');
             return;
         }
-        let previousFrame: HTMLIFrameElement | null = this.currentActiveFrame;
+
         let nextFrame: HTMLIFrameElement | null = this.getFrame({route, type, caller});
         if (nextFrame === null) {
             nextFrame = document.createElement('iframe');
@@ -139,7 +139,6 @@ export class MicroEndRouter extends HTMLElement {
                     doc.write(sourceHtml);
                     doc.close();
                 }
-
             }
         } else if (nextFrame.contentWindow !== null) {
             nextFrame.setAttribute('data-route', route);
@@ -149,6 +148,11 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.contentWindow.postMessage({intent: 'paramschange', params, route, type, caller}, '*');
             nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
         }
+        if(type === 'service'){
+            // return we just ignore this, on server we don't bother the previous frame zIndex
+            return;
+        }
+        let previousFrame: HTMLIFrameElement | null = this.currentActiveFrame;
         if (previousFrame && previousFrame.contentWindow) {
             // we cant do this, this is dangerous if we make it empty
             previousFrame.style.zIndex = '-1';
@@ -219,12 +223,13 @@ export class MicroEndRouter extends HTMLElement {
 
     onMessage = (event: MessageEvent<MessageData>) => {
         if (event.data.intent === 'navigateTo') {
-            // WHAT IS THE IFRAME OF THIS !!!
+
             const params = event.data.params;
 
             const originRoute = event.data.originRoute;
             const originCaller = event.data.originCaller;
             const originType = event.data.originType;
+
             const originalFrame = this.getFrame({route: originRoute, caller: originCaller, type: originType});
             if (originalFrame === null) {
                 console.warn('WE COULDNT GET THE FRAME !!! this is wrong !!');
@@ -245,20 +250,29 @@ export class MicroEndRouter extends HTMLElement {
         }
         if (event.data.intent === 'navigateBack') {
             const {caller, type, route} = event.data;
-            const previousFrame = this.getFrame({route, type, caller});
+
             const nextFrame = this.callerIdOrigin[caller];
             if (nextFrame && nextFrame.contentWindow) {
                 delete this.callerIdOrigin[caller];
                 nextFrame.contentWindow.postMessage(event.data)
             }
+            if(type === 'service'){
+                const previousFrame = this.getFrame({route, type, caller});
+                if(previousFrame && previousFrame.contentWindow){
+                    previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
+                    previousFrame.remove();
+                }
+                return;
+            }
             if (nextFrame.contentWindow !== null) {
                 nextFrame.style.zIndex = '0';
                 nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
             }
+            const previousFrame = this.getFrame({route, type, caller});
             if (previousFrame && previousFrame.contentWindow) {
                 previousFrame.style.zIndex = '-1';
                 previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
-                if (type === "modal" || type === "service") {
+                if (type === "modal") {
                     previousFrame.remove();
                 }
             }
