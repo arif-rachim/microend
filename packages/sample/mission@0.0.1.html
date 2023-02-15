@@ -37,7 +37,7 @@
     document.getElementById('navigateToFault').addEventListener('click', async () => {
         const {params, navigateBack, navigateTo} = context;
         // ini musti di reject nih manggil navigateTo multiple !!
-        const result = await navigateTo(`fault`, {faultId: Math.random()});
+        const result = await navigateTo(`fault`, {faultId: Math.random()},'modal');
         document.getElementById('response').innerHTML = JSON.stringify(result);
     });
 
