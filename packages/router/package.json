@@ -1,0 +1,13 @@
+{
+  "name": "@microend/router",
+  "version": "1.0.0",
+  "description": "",
+  "source": "src/index.html",
+  "browserslist": "IE 11",
+  "scripts": {
+    "start" : "parcel",
+    "build" : "parcel build"
+  },
+  "author": "Arif Rachim",
+  "license": "ISC"
+}

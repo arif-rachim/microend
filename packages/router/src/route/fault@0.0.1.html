@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fault Management</title>
+    <meta name="dependency" content="identity@0.0.1">
+    <meta name="params" content="faultId">
+</head>
+<body>
+<h1>This is fault managmeent</h1>
+<div id="content"></div>
+<button id="navigateBack">Navigate back baby</button>
+<button id="fetchIdentity">FetchIdentity</button>
+</body>
+</html>
+<script>
+    if (context) {
+        const {onParamsChange, onFocusChange} = context;
+        onParamsChange((newValue, oldValue) => {
+            document.getElementById('content').innerHTML = JSON.stringify(context.params);
+        });
+        onFocusChange(() => {
+            console.log('Fault is focused context',context.params);
+            return () => {
+                console.log('Fault is lost focused',context.params);
+            }
+        })
+        const {params, navigateBack, navigateTo} = context;
+        document.getElementById('content').innerHTML = JSON.stringify(params);
+    }
+    document.getElementById('navigateBack').addEventListener('click', async () => {
+        const {params, navigateBack, navigateTo} = context;
+        navigateBack({message: 'from fault', caller: params.caller});
+    });
+    document.getElementById('fetchIdentity').addEventListener('click',async () => {
+        const result = await context.navigateTo('identity',{intent:'getCurrentUser'},'service');
+        alert('We got your identity '+result);
+    })
+</script>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule Inspection</title>
+    <meta name="dependency" content="identity-management@0.0.1">
+    <meta name="params" content="" >
+</head>
+<body>
+<h1>This is schedule inspection</h1>
+<div id="content"></div>
+</body>
+</html>
+<script>
+    if ('context' in window) {
+        const context = window.context;
+        const {params, navigateBack, navigateTo} = context;
+        document.getElementById('content').innerHTML = JSON.stringify(params);
+    }
+</script>

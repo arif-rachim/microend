@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mission Management</title>
+    <meta name="dependency" content="identity@0.0.1,fault@0.0.1">
+    <meta name="params" content="commandId,missionId">
+</head>
+
+<body>
+
+<h1>This is mission management</h1>
+<div id="content"></div>
+<div id="response"></div>
+<button id="navigateToFault">Navigate to fault</button>
+</body>
+</html>
+<script>
+
+    if (context) {
+        const {params, navigateBack, navigateTo, onParamsChange, onFocusChange} = context;
+
+        document.getElementById('content').innerHTML = JSON.stringify(params);
+
+        onFocusChange(() => {
+            console.log('Mission is focused context', context.params);
+            return () => {
+                console.log('Mission is lost focused context', context.params);
+            }
+        });
+
+        onParamsChange((newValue) => {
+            document.getElementById('content').innerHTML = JSON.stringify(newValue);
+        });
+    }
+
+    document.getElementById('navigateToFault').addEventListener('click', async () => {
+        const {params, navigateBack, navigateTo} = context;
+        // ini musti di reject nih manggil navigateTo multiple !!
+        const result = await navigateTo(`fault`, {faultId: Math.random()});
+        document.getElementById('response').innerHTML = JSON.stringify(result);
+    });
+
+</script>

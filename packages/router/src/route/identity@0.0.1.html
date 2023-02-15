@@ -1,0 +1,35 @@
+<html>
+<head>
+    <script>
+        window.context = context;
+        const {navigateBack, onParamsChange, onFocusChange} = context;
+        onFocusChange((isFocus) => {
+            console.log('Identity is focused ', isFocus);
+            return () => {
+                console.log('Identity is lost focused ');
+            }
+
+        });
+        onParamsChange((params) => {
+            console.log('ON PARAMS CHANGE ', params);
+            console.log('Identity params changed ', params);
+            if (context.params.intent === 'getCurrentUser') {
+                setTimeout(() => {
+                    navigateBack({message: 'Hello this is your user', user: 'arif'})
+                },3000)
+            }
+        });
+        window.onload = () => {
+            if (context.params.intent === 'getCurrentUser') {
+                setTimeout(() => {
+                    navigateBack({message: 'Hello this is your user', user: 'arif'})
+                },3000)
+
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>This is identity</h1>
+</body>
+</html>
