@@ -310,7 +310,9 @@ const clientTemplate = `
 const context = "@context@";
 const paramsChangeListener = [];
 const onFocusListeners = [];
+const onMountListeners = [];
 let onBlurListeners = [];
+let onUnMountListeners = [];
 
 window.context = context;
 
@@ -325,11 +327,11 @@ const messageListener = (event) => {
     if (event.data.intent === 'paramschange') {
         const old = context.params;
         const newValue = event.data.params;
-        
+
         context.route = event.data.route;
         context.type = event.data.type;
         context.caller = event.data.caller;
-        
+
         if (JSON.stringify(old) !== JSON.stringify(newValue)) {
             context.params = event.data.params;
             paramsChangeListener.forEach(callback => {
@@ -353,8 +355,27 @@ const messageListener = (event) => {
     }
 };
 
+window.addEventListener("load", () => {
+    onUnMountListeners = onMountListeners.map(callback => callback());
+},{once:true});
+
+window.addEventListener('unload',() => {
+    onUnMountListeners.forEach(callback => {
+        if(typeof callback){
+            callback();
+        }
+    })
+},{once:true})
+
 window.addEventListener('message', messageListener);
 
+context.onMount = (callback) => {
+    onMountListeners.push(callback);
+    return () => {
+        const index = onMountListeners.indexOf(callback);
+        onMountListeners.splice(index, 1);
+    }
+}
 /**
  *
  * @param callback : function(): function():void | void
