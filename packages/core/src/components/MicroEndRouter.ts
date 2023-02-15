@@ -1,274 +1,20 @@
-const DATABASE_NAME = 'routing-registry';
-const TABLE_MODULE_NAME = 'module';
+import {CallerIdOrigin, Context, MessageData, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
 
-/**
- * Ini adalah interface generic yang memiliki attribute string intent.
- */
-interface Intent {
-    intent: string
-}
+export const DATABASE_NAME = 'routing-registry';
+export const TABLE_MODULE_NAME = 'module';
 
-/**
- * Interface yang memiliki nilai property dan valuenya tipe string.
- */
-interface StringKeyValue {
-    [key: string]: string
-}
 
-/**
- * Sebuah intent yang digunakan sebagai tipe data ketika client frame ingin navigasi ke module atau memanggil module lain.
- */
-interface NavigateToMessage extends Intent {
-    intent: 'navigateTo';
-    /**
-     * Parameter yang di berikan oleh frame yang digunakan untuk memanggil module yang lain.
-     */
-    params: StringKeyValue;
-    /**
-     * Route asal si pemanggil navigasi
-     */
-    originRoute: string;
-    /**
-     * Type asal si pemanggil navigasi
-     */
-    originType: NavigateToType;
-    /**
-     * Id asal si pemanggil navigasi
-     */
-    originCaller: string;
-    /**
-     * Id dari request, digunakan untuk identifikasi nilai kembalian dari hasil pemanggilan module yang lain
-     */
-    caller: string;
-    /**
-     * Route dari navigasi yang ingin dituju
-     */
-    route: string;
-    /**
-     * Tipe dari navigate to
-     */
-    type: NavigateToType;
-}
+export class MicroEndRouter extends HTMLElement {
 
-/**
- * Navigate to type
- */
-type NavigateToType = 'default' | 'modal' | 'service'
 
-/**
- * Sebuah intent yang digunakan sebagai tipe data ketika client frame ingin navigasi balik ke si pemanggilnya.
- */
-interface NavigateBackMessage extends Intent {
-    /**
-     * Nama dari intent
-     */
-    intent: 'navigateBack',
-    /**
-     * Id dari si pemanggil
-     */
-    caller: string,
-    /**
-     * Route dari navigasi yang ingin dituju
-     */
-    route: string;
-    /**
-     * Tipe dari navigate to
-     */
-    type: NavigateToType;
-    /**
-     * Nilai dari yang akan dikembalikan kepada si pemanggil fungsi
-     */
-    value: any
-}
-
-/**
- * Type dari RoutingRegistry berisi srcdoc dan dependency
- */
-interface RoutingRegistryValue {
-    /**
-     * srcdoc html code yang akan ditampilkan di layar
-     */
-    srcdoc: string,
-    /**
-     * dependency yang digunakan oleh module
-     */
-    dependency: string[]
-}
-
-/**
- * Interface dari Routing registry
- */
-interface RoutingRegistry {
-    [key: string]: RoutingRegistryValue
-}
-
-/**
- * Iframe who initiate the call
- */
-interface CallerIdOrigin {
-    [key: string]: HTMLIFrameElement
-}
-
-/**
- * Context object yang di inject kepada frame client
- */
-interface Context {
-    /**
-     * Parameter yang berisi informasi dari user
-     */
-    params: StringKeyValue,
-    /**
-     * informasi berisikan apakah frame sedang dalam kondisi fokus
-     */
-    isFocused: boolean,
-    /**
-     * Dependency dari module
-     */
-    dependencies: StringKeyValue,
-    /**
-     * route dari frame, informasi route berasal dari routing registry key
-     */
-    route: string,
-    /**
-     * Id dari caller yang meng-initiate request
-     */
-    caller: string,
-    /**
-     * Tipe dari navigation yang meng-initiate request
-     */
-    type: NavigateToType
-}
-
-/**
- * Tipe dari message yang bisa berupa NavigateToMessage atau NavigateBackMessage
- */
-type MessageData = NavigateToMessage | NavigateBackMessage
-
-/**
- * CustomElement dari MicroEndModule
- */
-class MicroEndModuleLoader extends HTMLElement {
-
-    /**
-     * Constructor ini bertujuan membuat shadowRoot, kemudian menginject input element kedalam shadowRoot.
-     */
-    constructor() {
-        super();
-        this.attachShadow({mode: 'open'});
-        if (this.shadowRoot === null) {
-            console.warn('[MicroEndModuleLoader]', 'shadowRoot is null, exiting function');
-            return;
-        }
-        this.shadowRoot.innerHTML = `<input type="file" >`;
-        const input = this.shadowRoot.querySelector('input');
-        if (input === null) {
-            console.warn('[MicroEndModuleLoader]', 'Could not find input type file, exiting function');
-            return;
-        }
-        input.addEventListener('change', this.onChange);
-    }
-
-    /**
-     * Callback ketika input file menerima file baru. Fungsi ini akan membaca isi file, kemudian memparsing isi file tersebut.
-     * Informasi yang diparsing keluar adalah :
-     * <li> path dan versi dari file, ini didapatkan dari konvensi nama file xxxx@yyy. (path xxxx version yyy).
-     * <li> dependency: ini didapatkan dari tag meta didalam content file <code><meta name="dependency" content="fault@0.0.1,mission@0.0.01"></code>
-     *      content dari dependency dipisahkan dengan koma.
-     * <li> params: ini didapatkan dari tag meta dengan nama "params" yang ada di dalam content file <code><meta name="params" content="commandId,missionId"></code>
-     * Informasi dari file tersebut kemudian disimpan kedalam database IndexDB dengan nama table "module"
-     * @param event : Event object yang diberikan oleh input element.
-     */
-    onChange = (event: Event) => {
-        if (event === null || event.target == null) {
-            console.warn('[MicroEndModuleLoader]', 'Event on onChange parameter is null, exiting function');
-            return;
-        }
-        const input = event.target as HTMLInputElement;
-        if (input.files === null) {
-            console.warn('[MicroEndModuleLoader]', 'Files from HTMLInputElement is null, exiting function');
-            return;
-        }
-        const file = input.files[0];
-        const reader = new FileReader();
-        const moduleName = file.name.split('.html')[0];
-        const [path, version] = moduleName.split('@');
-
-        reader.addEventListener('load', (event: ProgressEvent<FileReader>) => {
-            if (event.target === null) {
-                console.warn('[MicroEndModuleLoader]', 'unable to find target of reader to read file, exiting function');
-                return;
-            }
-            const content = event.target.result as string;
-            const dependency = this.getMetaInformation('dependency', content);
-            const params = this.getMetaInformation('params', content);
-            const req = indexedDB.open(DATABASE_NAME, 1)
-            req.addEventListener('upgradeneeded', () => {
-                const db = req.result;
-                db.createObjectStore(TABLE_MODULE_NAME, {keyPath: 'name'});
-            });
-            req.addEventListener('success', () => {
-                const db = req.result;
-                const tx = db.transaction([TABLE_MODULE_NAME], 'readwrite');
-                const moduleTable = tx.objectStore(TABLE_MODULE_NAME);
-                moduleTable.put({
-                    name: moduleName,
-                    path: path,
-                    version: version,
-                    dependency: dependency.split(',').map(s => s.trim()),
-                    params: params.split(',').map(s => s.trim()),
-                    srcdoc: content
-                });
-                db.close();
-            });
-        });
-        reader.readAsText(file, 'utf-8');
-    };
-
-    /**
-     * Utilities yang digunakan untuk meng-ekstrak informasi dari htmlText
-     * @param metaName nama dari meta yang akan di extract dari htmlText
-     * @param htmlText sumber dari htmlText yang mau di extract.
-     */
-    getMetaInformation = (metaName: string, htmlText: string) => {
-        const indexOfContent = htmlText.indexOf(`name="${metaName}"`)
-        const startTagIndex = htmlText.substring(0, indexOfContent).lastIndexOf('<');
-        const endTagIndex = htmlText.substring(indexOfContent, htmlText.length).indexOf('>') + indexOfContent
-        let dependency = '';
-        if (startTagIndex >= 0 && endTagIndex > startTagIndex) {
-            dependency = htmlText.substring(startTagIndex, endTagIndex).split('content="')[1].split('"')[0];
-        }
-        return dependency;
-    }
-}
-
-/**
- * MicroEndRouter adalah CustomElement yang berfungsi untuk merender module ke element yang idnya di referensikan oleh attribute for.
- */
-class MicroEndRouter extends HTMLElement {
-
-    /**
-     * Object yang berfungsi untuk menyimpan registry dari routing,
-     * informasi yang disimpan antaralain srcdoc dan dependency dari module.
-     */
     routingRegistry: RoutingRegistry;
 
-    /**
-     * Flag yang digunakan untuk mengindikasi frame yang sedang aktif saat ini
-     */
     currentActiveFrame: HTMLIFrameElement | null;
 
-    /**
-     * Object yang berfungsi untuk menyimpan map antara Id dan Origin dari route si pemanggil.
-     */
 
     callerIdOrigin: CallerIdOrigin;
 
-    /**
-     * Konstruktor dari MicroEndRouter. Apa yang dilakukan oleh konstruktur ini meliputi
-     * <li> Membuat koneksi dengan IndexDB dan mengakses database "routing-registry"
-     * <li> Membuat table "module" seandainya belum ada
-     * <li> Membaca content dari table module, dan menyimpan data datanya kedalam routingRegistry.
-     */
+
     constructor() {
         super();
         this.routingRegistry = {};
@@ -319,22 +65,12 @@ class MicroEndRouter extends HTMLElement {
 
     }
 
-    /**
-     * Utilities untuk men-split string dengan pemisah tanda miring.
-     * @param text
-     */
+
     splitSegment = (text: string) => {
         return text.split('/').filter(s => s)
     };
 
-    /**
-     * Function yang dipanggil untuk me-render seandainya alamat dari hash berubah.
-     * <li> Pertama path dan query akan di extract dari hash dengan menggunakan tanda pemisah "?"
-     * <li> Dari path dan query di extract object "params" yang berisikan parameter string key value
-     * <li> berdasarkan "path", kemudian kita cari route yang paling matching berdasarkan key yang terdaftar di routing registry
-     * <li> mengambil container sesuai dengan nilai yang ada di attribute "for" yang akan digunakan untuk placeholder dari module.
-     * <li> merender isi container dengan frame dan srcdoc yang didapat dari hasil extract routing registry.
-     */
+
     render = (pathAndQuery: string, type: NavigateToType, caller: string) => {
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
@@ -383,7 +119,8 @@ class MicroEndRouter extends HTMLElement {
             if (headIndex > 0) {
                 headIndex = headIndex + '<head>'.length
             }
-            nextFrame.srcdoc = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
+            //nextFrame.srcdoc = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
+            const sourceHtml = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
             // THIS IS NOT REQUIRED BECAUSE THIS WILL CONFUSE THE ORIGINAL BEHAVIOUR
             // nextFrame.addEventListener('load',(evt) => {
             //     const nextFrame:any = evt.target;
@@ -396,6 +133,13 @@ class MicroEndRouter extends HTMLElement {
             const container = this.getContainer();
             if (container) {
                 container.append(nextFrame);
+                if(nextFrame.contentWindow){
+                    const doc = nextFrame.contentWindow.document;
+                    doc.open();
+                    doc.write(sourceHtml);
+                    doc.close();
+                }
+
             }
         } else if (nextFrame.contentWindow !== null) {
             nextFrame.setAttribute('data-route', route);
@@ -430,11 +174,7 @@ class MicroEndRouter extends HTMLElement {
         return null;
     }
 
-    /**
-     * Utility untuk meng-extract params dari path, yang memiliki tanda dollar $.
-     * @param route
-     * @param pathSegments
-     */
+
     extractParamsFromPath = (route: string, pathSegments: string[]) => {
         const params: StringKeyValue = {};
         this.splitSegment(route).forEach((segment, index) => {
@@ -445,10 +185,7 @@ class MicroEndRouter extends HTMLElement {
         return params;
     }
 
-    /**
-     * Utility untuk mencari route yang paling matching dengan pathSegments.
-     * @param pathSegments
-     */
+
     findMostMatchingRoute = (pathSegments: string[]) => {
         const mostMatchingPath = Object.keys(this.routingRegistry).filter(key => this.splitSegment(key).length === pathSegments.length).reduce((mostMatchingPath, key) => {
             const routeSegments = this.splitSegment(key);
@@ -467,10 +204,7 @@ class MicroEndRouter extends HTMLElement {
         return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependency: routingRegistry.dependency};
     }
 
-    /**
-     * Utility untuk meng-extract params dari query.
-     * @param query
-     */
+
     extractParamsFromQuery = (query: string) => {
         const params: StringKeyValue = {};
         (query || '').split('&').filter(s => s).forEach(qry => {
@@ -479,9 +213,8 @@ class MicroEndRouter extends HTMLElement {
         });
         return params;
     }
-    /**
-     * Render when the hash is change
-     */
+
+
     renderBasedOnHash = () => this.render(window.location.hash.substring(1), "default", "hashchange");
 
     onMessage = (event: MessageEvent<MessageData>) => {
@@ -494,8 +227,8 @@ class MicroEndRouter extends HTMLElement {
             const originType = event.data.originType;
             const originalFrame = this.getFrame({route: originRoute, caller: originCaller, type: originType});
             if (originalFrame === null) {
-                console.warn('FUCK WE COULDNT GET THE FRAME !!! this is wrong !!');
-                return null;
+                console.warn('WE COULDNT GET THE FRAME !!! this is wrong !!');
+                return;
             }
             const type = event.data.type;
             const callerId = event.data.caller;
@@ -511,7 +244,7 @@ class MicroEndRouter extends HTMLElement {
             }
         }
         if (event.data.intent === 'navigateBack') {
-            const {caller, type, route, intent, value} = event.data;
+            const {caller, type, route} = event.data;
             const previousFrame = this.getFrame({route, type, caller});
             const nextFrame = this.callerIdOrigin[caller];
             if (nextFrame && nextFrame.contentWindow) {
@@ -534,9 +267,7 @@ class MicroEndRouter extends HTMLElement {
         }
     }
 
-    /**
-     * Callack ketikan Component di mount oleh browser.
-     */
+
     connectedCallback(): void {
         console.log('[MicroEndRouter]', 'connected');
         window.addEventListener('load', this.renderBasedOnHash);
@@ -552,25 +283,13 @@ class MicroEndRouter extends HTMLElement {
     }
 }
 
-function validateNonEmpty(params: StringKeyValue) {
-    const errors: string[] = [];
-    Object.keys(params).forEach(key => {
-        const val = params[key];
-        if (val === undefined || val === null || val === '') {
-            errors.push(`attribute "${key}" is required`);
-        }
-    })
-    return errors;
-}
-
-customElements.define('microend-moduleloader', MicroEndModuleLoader);
-customElements.define('microend-router', MicroEndRouter);
 
 function createContext(context: Context): string {
     const template = clientTemplate;
     const newTemplate = template.replace('"@context@"', JSON.stringify(context));
     return newTemplate;
 }
+
 
 const clientTemplate = `
 <script>

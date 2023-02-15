@@ -1,1 +1,0 @@
-#MicroEnd Micro-frontend implementation
