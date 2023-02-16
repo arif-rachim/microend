@@ -146,8 +146,8 @@ export interface Module {
     path: string;
     version: string;
     dependency: string[];
-    params: string[]
-    srcdoc: string
+    srcdoc: string,
+    actions:string[]
 }
 
 
