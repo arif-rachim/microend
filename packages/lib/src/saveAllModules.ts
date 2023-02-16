@@ -1,8 +1,6 @@
 import {openTransaction} from "./openTransaction";
 import {Module} from "./Types";
 
-console.log("AWE")
-
 export async function saveAllModules(files: FileList) {
     const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
     const {db, tx, store} = await openTransaction("readwrite");
