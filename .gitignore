@@ -6,3 +6,4 @@ node_modules
 !.vscode/extensions.json
 .idea
 .DS_Store
+.parcel-cache

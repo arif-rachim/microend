@@ -1,4 +1,3 @@
-
 /**
  * Ini adalah interface generic yang memiliki attribute string intent.
  */
@@ -140,7 +139,16 @@ export interface Context {
 /**
  * Tipe dari message yang bisa berupa NavigateToMessage atau NavigateBackMessage
  */
-export type MessageData = NavigateToMessage | NavigateBackMessage
+export type MessageData = NavigateToMessage | NavigateBackMessage;
+
+export interface Module {
+    name: string;
+    path: string;
+    version: string;
+    dependency: string[];
+    params: string[]
+    srcdoc: string
+}
 
 
 

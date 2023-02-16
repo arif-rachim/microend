@@ -1,4 +1,6 @@
 import {CallerIdOrigin, Context, MessageData, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
+import {getAllModules} from "./getAllModules";
+
 
 export const DATABASE_NAME = 'routing-registry';
 export const TABLE_MODULE_NAME = 'module';
@@ -14,42 +16,13 @@ export class MicroEndRouter extends HTMLElement {
 
     callerIdOrigin: CallerIdOrigin;
 
-
     constructor() {
         super();
         this.routingRegistry = {};
         this.callerIdOrigin = {};
         this.currentActiveFrame = null;
-
-        const req = indexedDB.open(DATABASE_NAME, 1);
-        req.addEventListener('upgradeneeded', () => {
-            const db = req.result;
-            db.createObjectStore(TABLE_MODULE_NAME, {keyPath: 'name'});
-        });
-        req.addEventListener('success', () => {
-            const db = req.result;
-            const tx = db.transaction([TABLE_MODULE_NAME], 'readonly');
-            const moduleTable = tx.objectStore(TABLE_MODULE_NAME);
-            const request = moduleTable.getAll();
-            request.addEventListener('success', () => {
-                const data = request.result;
-                data.forEach(d => {
-                    this.routingRegistry[`/${d.path}/${d.version}`] = {
-                        srcdoc: d.srcdoc,
-                        dependency: d.dependency
-                    };
-                });
-                db.close();
-                this.renderBasedOnHash();
-            });
-            request.addEventListener('error', (error) => {
-                console.error('[MicroEndRouter]', 'Unable to read data ', error);
-                db.close();
-            })
-        });
         this.attachShadow({mode: "open"});
         if (this.shadowRoot) {
-
             const style: any = {
                 height: '100%',
                 border: '1px solid #ccc',
@@ -62,7 +35,6 @@ export class MicroEndRouter extends HTMLElement {
             const styleString = Object.keys(style).map(key => `${key}:${style[key]}`).join(';')
             this.shadowRoot.innerHTML = '<div id="container" style="' + styleString + '"></div>';
         }
-
     }
 
 
@@ -119,7 +91,7 @@ export class MicroEndRouter extends HTMLElement {
             if (headIndex > 0) {
                 headIndex = headIndex + '<head>'.length
             }
-            //nextFrame.srcdoc = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
+
             const sourceHtml = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
             // THIS IS NOT REQUIRED BECAUSE THIS WILL CONFUSE THE ORIGINAL BEHAVIOUR
             // nextFrame.addEventListener('load',(evt) => {
@@ -133,7 +105,7 @@ export class MicroEndRouter extends HTMLElement {
             const container = this.getContainer();
             if (container) {
                 container.append(nextFrame);
-                if(nextFrame.contentWindow){
+                if (nextFrame.contentWindow) {
                     const doc = nextFrame.contentWindow.document;
                     doc.open();
                     doc.write(sourceHtml);
@@ -148,7 +120,7 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.contentWindow.postMessage({intent: 'paramschange', params, route, type, caller}, '*');
             nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
         }
-        if(type === 'service'){
+        if (type === 'service') {
             // return we just ignore this, on server we don't bother the previous frame zIndex
             return;
         }
@@ -188,7 +160,6 @@ export class MicroEndRouter extends HTMLElement {
         });
         return params;
     }
-
 
     findMostMatchingRoute = (pathSegments: string[]) => {
         const mostMatchingPath = Object.keys(this.routingRegistry).filter(key => this.splitSegment(key).length === pathSegments.length).reduce((mostMatchingPath, key) => {
@@ -256,9 +227,9 @@ export class MicroEndRouter extends HTMLElement {
                 delete this.callerIdOrigin[caller];
                 nextFrame.contentWindow.postMessage(event.data)
             }
-            if(type === 'service'){
+            if (type === 'service') {
                 const previousFrame = this.getFrame({route, type, caller});
-                if(previousFrame && previousFrame.contentWindow){
+                if (previousFrame && previousFrame.contentWindow) {
                     previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
                     previousFrame.remove();
                 }
@@ -276,7 +247,6 @@ export class MicroEndRouter extends HTMLElement {
                     previousFrame.remove();
                 }
             }
-
             this.currentActiveFrame = nextFrame;
         }
     }
@@ -287,6 +257,13 @@ export class MicroEndRouter extends HTMLElement {
         window.addEventListener('load', this.renderBasedOnHash);
         window.addEventListener('hashchange', this.renderBasedOnHash);
         window.addEventListener('message', this.onMessage);
+        (async () => {
+            const modules = await getAllModules();
+            modules.forEach(d => {
+                this.routingRegistry[`/${d.path}/${d.version}`] = d;
+            });
+            this.renderBasedOnHash();
+        })();
     }
 
     disconnectedCallback(): void {
@@ -303,6 +280,7 @@ function createContext(context: Context): string {
     const newTemplate = template.replace('"@context@"', JSON.stringify(context));
     return newTemplate;
 }
+
 
 
 const clientTemplate = `
