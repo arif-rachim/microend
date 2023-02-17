@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <title>Fault Management</title>
     <meta name="dependency" content="identity@0.0.1">
-    <meta name="action" content="view:mission-detail(missionId:int,date:datetime,name:string[]):json">
-    <meta name="action" content="view:mission-detail(missionId:int,date:datetime,age:30):json">
-    <meta name="action" content="view:mission-detail(missionId:int):json">
+    <meta name="action" content="view:missionDetail(name:int,age:string)">
+    <meta name="action" content="service:getRange(name:int,jakarta:json)">
 </head>
 <body>
 <h1>This is fault managmeent</h1>
@@ -16,26 +15,27 @@
 </body>
 </html>
 <script>
-    if (context) {
-        const {onParamsChange, onFocusChange} = context;
+    if (me) {
+
+        const {onParamsChange, onFocusChange} = me;
         onParamsChange((newValue, oldValue) => {
-            document.getElementById('content').innerHTML = JSON.stringify(context.params);
+            document.getElementById('content').innerHTML = JSON.stringify(me.params);
         });
         onFocusChange(() => {
-            console.log('Fault is focused context',context.params);
+            console.log('Fault is focused context', me.params);
             return () => {
-                console.log('Fault is lost focused',context.params);
+                console.log('Fault is lost focused', me.params);
             }
         })
-        const {params, navigateBack, navigateTo} = context;
+        const {params, navigateBack, navigateTo} = me;
         document.getElementById('content').innerHTML = JSON.stringify(params);
     }
     document.getElementById('navigateBack').addEventListener('click', async () => {
-        const {params, navigateBack, navigateTo} = context;
+        const {params, navigateBack, navigateTo} = me;
         navigateBack({message: 'from fault', caller: params.caller});
     });
-    document.getElementById('fetchIdentity').addEventListener('click',async () => {
-        const result = await context.navigateTo('identity',{intent:'getCurrentUser'},'service');
-        alert('We got your identity '+result);
+    document.getElementById('fetchIdentity').addEventListener('click', async () => {
+        const result = await me.navigateTo('identity', {intent: 'getCurrentUser'}, 'service');
+        alert('We got your identity ' + result);
     })
 </script>

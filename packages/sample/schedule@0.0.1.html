@@ -12,9 +12,9 @@
 </body>
 </html>
 <script>
-    if ('context' in window) {
-        const context = window.context;
-        const {params, navigateBack, navigateTo} = context;
+    if ('me' in window) {
+        const me = window.me;
+        const {params, navigateBack, navigateTo} = me;
         document.getElementById('content').innerHTML = JSON.stringify(params);
     }
 </script>

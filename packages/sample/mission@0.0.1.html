@@ -17,15 +17,15 @@
 </html>
 <script>
 
-    if (context) {
-        const {params, navigateBack, navigateTo, onParamsChange, onFocusChange} = context;
+    if (me) {
+        const {params, navigateBack, navigateTo, onParamsChange, onFocusChange} = me;
 
         document.getElementById('content').innerHTML = JSON.stringify(params);
 
         onFocusChange(() => {
-            console.log('Mission is focused context', context.params);
+            console.log('Mission is focused me', me.params);
             return () => {
-                console.log('Mission is lost focused context', context.params);
+                console.log('Mission is lost focused me', me.params);
             }
         });
 
@@ -35,7 +35,7 @@
     }
 
     document.getElementById('navigateToFault').addEventListener('click', async () => {
-        const {params, navigateBack, navigateTo} = context;
+        const {params, navigateBack, navigateTo} = me;
         // ini musti di reject nih manggil navigateTo multiple !!
         const result = await navigateTo(`fault`, {faultId: Math.random()},'modal');
         document.getElementById('response').innerHTML = JSON.stringify(result);

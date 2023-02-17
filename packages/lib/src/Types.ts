@@ -136,6 +136,15 @@ export interface Context {
     type: NavigateToType
 }
 
+export interface MicroEnd extends Context{
+    onMount:(callback:() => (() => void)|void) => (() => void);
+    onParamsChange:(callback:(newValue:any,oldValue:any) => void) => (() => void);
+    onFocusChange:(callback:() => (() => void)|void) => (() => void);
+    navigateTo:(route:string, params:any, type:NavigateToType) => Promise<any>;
+    navigateBack:(value:any) =>void;
+
+}
+
 /**
  * Tipe dari message yang bisa berupa NavigateToMessage atau NavigateBackMessage
  */

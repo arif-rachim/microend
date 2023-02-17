@@ -285,172 +285,177 @@ function createContext(context: Context): string {
 
 const clientTemplate = `
 <script>
-const context = "@context@";
-const paramsChangeListener = [];
-const onFocusListeners = [];
-const onMountListeners = [];
-let onBlurListeners = [];
-let onUnMountListeners = [];
+    const me = "@context@";
+    const paramsChangeListener = [];
+    const onFocusListeners = [];
+    const onMountListeners = [];
+    let onBlurListeners = [];
+    let onUnMountListeners = [];
 
-window.context = context;
+    window.microend = me;
+    window.me = me;
 
-const log = (...args) => {
-    console.log('[' + context.route + ']', ...args);
-}
+    const log = (...args) => {
+        console.log('[' + me.route + ']', ...args);
+    }
 
-/**
- * @param event:MessageEvent
- */
-const messageListener = (event) => {
-    if (event.data.intent === 'paramschange') {
-        const old = context.params;
-        const newValue = event.data.params;
+    /**
+     * @param event:MessageEvent
+     */
+    const messageListener = (event) => {
+        if (event.data.intent === 'paramschange') {
+            const old = me.params;
+            const newValue = event.data.params;
 
-        context.route = event.data.route;
-        context.type = event.data.type;
-        context.caller = event.data.caller;
+            me.route = event.data.route;
+            me.type = event.data.type;
+            me.caller = event.data.caller;
 
-        if (JSON.stringify(old) !== JSON.stringify(newValue)) {
-            context.params = event.data.params;
-            paramsChangeListener.forEach(callback => {
-                callback(newValue, old);
-            })
+            if (JSON.stringify(old) !== JSON.stringify(newValue)) {
+                me.params = event.data.params;
+                paramsChangeListener.forEach(callback => {
+                    callback(newValue, old);
+                })
+            }
+        }
+        if (event.data.intent === 'focuschange') {
+            const value = event.data.value;
+            me.isFocused = value;
+            if (value) {
+                onBlurListeners = onFocusListeners.map(callback => callback());
+            } else {
+                onBlurListeners.forEach(callback => {
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                });
+                onBlurListeners = [];
+            }
+        }
+    };
+
+    window.addEventListener("load", () => {
+        onUnMountListeners = onMountListeners.map(callback => callback());
+    }, {once: true});
+
+    window.addEventListener('unload', () => {
+        onUnMountListeners.forEach(callback => {
+            if (typeof callback) {
+                callback();
+            }
+        })
+    }, {once: true})
+
+    window.addEventListener('message', messageListener);
+    /**
+     *
+     * @param callback
+     * @returns {(function(): void)|*}
+     */
+    me.onMount = (callback) => {
+        onMountListeners.push(callback);
+        return () => {
+            const index = onMountListeners.indexOf(callback);
+            onMountListeners.splice(index, 1);
         }
     }
-    if (event.data.intent === 'focuschange') {
-        const value = event.data.value;
-        context.isFocused = value;
-        if (value) {
-            onBlurListeners = onFocusListeners.map(callback => callback());
-        } else {
-            onBlurListeners.forEach(callback => {
-                if (typeof callback === 'function') {
-                    callback();
+    /**
+     *
+     * @param callback : function(): function():void | void
+     * @returns {(function(): void)|*}
+     */
+    me.onParamsChange = (callback) => {
+        paramsChangeListener.push(callback);
+        return () => {
+            const index = paramsChangeListener.indexOf(callback);
+            paramsChangeListener.splice(index, 1);
+        }
+    }
+
+    /**
+     * @param callback : function(): function():void
+     * @returns {(function(): void)|*}
+     */
+    me.onFocusChange = (callback) => {
+        onFocusListeners.push(callback);
+        return () => {
+            const index = onFocusListeners.indexOf(callback);
+            onFocusListeners.splice(index, 1);
+        }
+    }
+
+    /**
+     * navigateTo ada beberapa behaviour
+     * <li> navigateTo default
+     *     - buka function baru lewat browser hash
+     *     - ini mengakibatkan window history ke update
+     *     - ini bakalan reuse existing frame yang sudah kebuka
+     *     - ketika frame selesai dipanggil dia ga bakalan di destroy
+     *
+     * <li> navigateTo modal
+     *     * buka function baru tanpa lewat browser hash
+     *     - tidak menyebabkan window history ke update
+     *     - bakalan buka frame yang baru
+     *     - ketika frame selesai di panggil dia bakalan di destroy
+     *
+     * <li> navigateTo service
+     *    - buka function baru tanpa lewat browser hash
+     *    - tidak menampilkan frame baru
+     *    - ketika selesai frame akan di destroy
+     *
+     * @param route : string
+     * @param params : any
+     * @param type : "default"|"modal"|"service"
+     * @returns {Promise<any>}
+     */
+    me.navigateTo = (route, params, type = 'default') => {
+
+        return new Promise((resolve) => {
+            params = params || {};
+            const caller = (Math.random() * 1000000000 + new Date().getTime()).toFixed(0);
+            if (window.top === null) {
+                return;
+            }
+            const dependencyVersion = me.dependencies[route];
+            route = '/' + route + '/' + dependencyVersion;
+            const navigateTo = {
+                intent: 'navigateTo',
+                params,
+                originRoute: me.route,
+                originCaller: me.caller,
+                originType: me.type,
+                route,
+                caller,
+                type
+            }
+            window.top.postMessage(navigateTo);
+            const listener = (event) => {
+                if (event.data.intent === 'navigateBack' && event.data.caller === caller) {
+                    const value = event.data.value;
+                    window.removeEventListener('message', listener);
+                    resolve(value);
                 }
-            });
-            onBlurListeners = [];
-        }
+            }
+            window.addEventListener('message', listener);
+        })
     }
-};
 
-window.addEventListener("load", () => {
-    onUnMountListeners = onMountListeners.map(callback => callback());
-},{once:true});
-
-window.addEventListener('unload',() => {
-    onUnMountListeners.forEach(callback => {
-        if(typeof callback){
-            callback();
-        }
-    })
-},{once:true})
-
-window.addEventListener('message', messageListener);
-
-context.onMount = (callback) => {
-    onMountListeners.push(callback);
-    return () => {
-        const index = onMountListeners.indexOf(callback);
-        onMountListeners.splice(index, 1);
-    }
-}
-/**
- *
- * @param callback : function(): function():void | void
- * @returns {(function(): void)|*}
- */
-context.onParamsChange = (callback) => {
-    paramsChangeListener.push(callback);
-    return () => {
-        const index = paramsChangeListener.indexOf(callback);
-        paramsChangeListener.splice(index, 1);
-    }
-}
-
-/**
- * @param callback : function(): function():void
- * @returns {(function(): void)|*}
- */
-context.onFocusChange = (callback) => {
-    onFocusListeners.push(callback);
-    return () => {
-        const index = onFocusListeners.indexOf(callback);
-        onFocusListeners.splice(index, 1);
-    }
-}
-
-/**
- * navigateTo ada beberapa behaviour
- * <li> navigateTo default
- *     - buka function baru lewat browser hash
- *     - ini mengakibatkan window history ke update
- *     - ini bakalan reuse existing frame yang sudah kebuka
- *     - ketika frame selesai dipanggil dia ga bakalan di destroy
- *
- * <li> navigateTo modal
- *     * buka function baru tanpa lewat browser hash
- *     - tidak menyebabkan window history ke update
- *     - bakalan buka frame yang baru
- *     - ketika frame selesai di panggil dia bakalan di destroy
- *
- * <li> navigateTo service
- *    - buka function baru tanpa lewat browser hash
- *    - tidak menampilkan frame baru
- *    - ketika selesai frame akan di destroy
- *
- * @param route : string
- * @param params : any
- * @param type : "default"|"modal"|"service"
- * @returns {Promise<any>}
- */
-context.navigateTo = (route, params, type = 'default') => {
-
-    return new Promise((resolve) => {
-        params = params || {};
-        const caller = (Math.random() * 1000000000 + new Date().getTime()).toFixed(0);
+    /**
+     *
+     * @param value
+     */
+    me.navigateBack = (value) => {
         if (window.top === null) {
             return;
         }
-        const dependencyVersion = context.dependencies[route];
-        route = '/' + route + '/' + dependencyVersion;
-        const navigateTo = {
-            intent: 'navigateTo',
-            params,
-            originRoute: context.route,
-            originCaller: context.caller,
-            originType : context.type,
-            route,
-            caller,
-            type
+        const navigateBack = {
+            intent: 'navigateBack',
+            value,
+            caller: me.caller,
+            type: me.type,
+            route: me.route
         }
-        window.top.postMessage(navigateTo);
-        const listener = (event) => {
-            if (event.data.intent === 'navigateBack' && event.data.caller === caller) {
-                const value = event.data.value;
-                window.removeEventListener('message', listener);
-                resolve(value);
-            }
-        }
-        window.addEventListener('message', listener);
-    })
-}
-
-/**
- *
- * @param value : any
- */
-context.navigateBack = (value) => {
-    if (window.top === null) {
-        return;
+        window.top.postMessage(navigateBack);
     }
-    const navigateBack = {
-        intent: 'navigateBack',
-        value,
-        caller: context.caller,
-        type: context.type,
-        route: context.route
-    }
-    window.top.postMessage(navigateBack);
-}
 </script>
 `
