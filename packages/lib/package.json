@@ -12,5 +12,20 @@
     "start": "parcel watch",
     "build": "parcel build",
     "typecheck": "tsc --noEmit src/index.ts"
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.4.14"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
   }
 }

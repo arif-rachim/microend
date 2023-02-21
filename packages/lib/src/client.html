@@ -54,7 +54,7 @@
 
     window.addEventListener('unload', () => {
         onUnMountListeners.forEach(callback => {
-            if (typeof callback) {
+            if (callback && typeof callback === 'function') {
                 callback();
             }
         })
@@ -170,5 +170,49 @@
             route: me.route
         }
         window.top.postMessage(navigateBack);
+    }
+
+    me.createService = (handler) => {
+        const deregister = me.onMount(() => {
+            const __handler = handler;
+            let action = 'action' in me.params ? me.params.action : '';
+            // later on we need to be able to send json for service !!!!
+            let args = 'args' in me.params ? me.params.args : '';
+            if (me.type === 'service' && action && args) {
+                const arrayArgs = JSON.parse(decodeURI(args));
+                if (__handler && typeof __handler === 'object' && action in __handler && typeof __handler[action] === 'function') {
+                    // this is to ensure we are calling this one time
+                    deregister();
+                    const promise = Promise.resolve(__handler[action].apply(null, arrayArgs));
+                    promise.then(result => {
+                        me.navigateBack({
+                            success: true,
+                            result
+                        })
+                    }).catch(err => {
+                        me.navigateBack({
+                            success: false,
+                            message: err.message
+                        });
+                    })
+                }
+            }
+        });
+        return handler;
+    }
+
+    me.connectService = (module) => {
+        const proxy = new Proxy({}, {
+            get(_, action) {
+                return async (...args) => {
+                    const result = await me.navigateTo(module, {
+                        action,
+                        args: encodeURI(JSON.stringify(args))
+                    }, "service")
+                    return result;
+                }
+            }
+        });
+        return proxy;
     }
 </script>

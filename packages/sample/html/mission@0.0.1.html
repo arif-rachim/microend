@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Mission Management</title>
-    <meta name="dependency" content="identity@0.0.1,fault@0.0.1">
-    <meta name="params" content="commandId,missionId">
+    <meta content="identity@0.0.1,fault@0.0.1" name="dependency">
+    <meta content="commandId,missionId" name="params">
 </head>
 
 <body>
@@ -37,8 +37,9 @@
     document.getElementById('navigateToFault').addEventListener('click', async () => {
         const {params, navigateBack, navigateTo} = me;
         // ini musti di reject nih manggil navigateTo multiple !!
-        const result = await navigateTo(`fault`, {faultId: Math.random()},'modal');
+        const result = await navigateTo(`fault`, {faultId: Math.random()}, 'modal');
         document.getElementById('response').innerHTML = JSON.stringify(result);
     });
+
 
 </script>

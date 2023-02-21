@@ -1,10 +1,12 @@
-import {CallerIdOrigin, Context, MessageData, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
+import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
 import {getAllModules} from "./getAllModules";
 
 
 export const DATABASE_NAME = 'routing-registry';
 export const TABLE_MODULE_NAME = 'module';
 
+// warning use document write is slow, but the code is more cleaner when displayed in the screen.
+const useDocumentWrite = true;
 
 export class MicroEndRouter extends HTMLElement {
 
@@ -47,11 +49,13 @@ export class MicroEndRouter extends HTMLElement {
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
         const pathSegments = this.splitSegment(path);
-
         const {route, srcdoc, dependency} = this.findMostMatchingRoute(pathSegments);
         if (srcdoc === '' || srcdoc === undefined) {
+            console.debug('[MicroEndRouter]', 'Rendering ', pathAndQuery, type);
+            console.debug('[MicroEndRouter]', 'were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
             return;
         }
+        console.debug('[MicroEndRouter]', 'Route match ', pathAndQuery, route);
         const pathParams = this.extractParamsFromPath(route, pathSegments);
         const params = ({...queryParams, ...pathParams});
         const dependencies = dependency.reduce((result: StringKeyValue, dep) => {
@@ -104,13 +108,17 @@ export class MicroEndRouter extends HTMLElement {
             // });
             const container = this.getContainer();
             if (container) {
+                if (!useDocumentWrite) {
+                    nextFrame.srcdoc = sourceHtml;
+                }
                 container.append(nextFrame);
-                if (nextFrame.contentWindow) {
+                if (useDocumentWrite && nextFrame.contentWindow) {
                     const doc = nextFrame.contentWindow.document;
                     doc.open();
                     doc.write(sourceHtml);
                     doc.close();
                 }
+
             }
         } else if (nextFrame.contentWindow !== null) {
             nextFrame.setAttribute('data-route', route);
@@ -281,7 +289,56 @@ function createContext(context: Context): string {
     return newTemplate;
 }
 
+const message = (message: string) => `${message} was called from within the mock object; in order to test this correctly, please mount this page in the MicroEnd WebApp.`
+const mockObject: MicroEnd = {
+    caller: 'anonymous',
+    type: "service",
+    route: 'unknown',
+    dependencies: {},
+    isFocused: true,
+    params: {},
+    navigateBack: value => {
+        console.log(message(`navigateBack(${JSON.stringify(value)})`));
+    },
+    navigateTo: async (route, params, type) => {
+        console.log(message(`navigateTo("${route}",${JSON.stringify(params)},"${type}")`));
+        return false;
+    },
+    onFocusChange: callback => {
+        console.log(message(`onFocusChange()`));
+        return () => {
+        }
+    },
+    onMount: callback => {
+        console.log(message(`onMount()`));
+        return () => {
+        }
+    },
+    onParamsChange: callback => {
+        console.log(message(`onParamsChange()`));
+        return () => {
+        }
+    },
+    createService: handler => {
+        console.log(message(`createService(${handler})`));
+        return handler;
+    },
+    connectService: module => {
+        console.log(message(`connectService("${module}")`));
+        return {} as any;
+    }
+};
 
+export function getMicroEnd(): MicroEnd {
+    const self: any = window;
+    if ('microend' in self) {
+        return self.microend as MicroEnd;
+    }
+    if ('me' in self) {
+        return self.me as MicroEnd;
+    }
+    return mockObject;
+}
 
 const clientTemplate = `
 <script>
@@ -340,7 +397,7 @@ const clientTemplate = `
 
     window.addEventListener('unload', () => {
         onUnMountListeners.forEach(callback => {
-            if (typeof callback) {
+            if (callback && typeof callback === 'function') {
                 callback();
             }
         })
@@ -456,6 +513,50 @@ const clientTemplate = `
             route: me.route
         }
         window.top.postMessage(navigateBack);
+    }
+
+    me.createService = (handler) => {
+        const deregister = me.onMount(() => {
+            const __handler = handler;
+            let action = 'action' in me.params ? me.params.action : '';
+            // later on we need to be able to send json for service !!!!
+            let args = 'args' in me.params ? me.params.args : '';
+            if (me.type === 'service' && action && args) {
+                const arrayArgs = JSON.parse(decodeURI(args));
+                if (__handler && typeof __handler === 'object' && action in __handler && typeof __handler[action] === 'function') {
+                    // this is to ensure we are calling this one time
+                    deregister();
+                    const promise = Promise.resolve(__handler[action].apply(null, arrayArgs));
+                    promise.then(result => {
+                        me.navigateBack({
+                            success: true,
+                            result
+                        })
+                    }).catch(err => {
+                        me.navigateBack({
+                            success: false,
+                            message: err.message
+                        });
+                    })
+                }
+            }
+        });
+        return handler;
+    }
+
+    me.connectService = (module) => {
+        const proxy = new Proxy({}, {
+            get(_, action) {
+                return async (...args) => {
+                    const result = await me.navigateTo(module, {
+                        action,
+                        args: encodeURI(JSON.stringify(args))
+                    }, "service")
+                    return result;
+                }
+            }
+        });
+        return proxy;
     }
 </script>
 `
