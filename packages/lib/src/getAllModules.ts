@@ -16,9 +16,5 @@ export function getAllModules(): Promise<Module[]> {
                 db.close();
             })
         })
-
-
     })
-
-
 }

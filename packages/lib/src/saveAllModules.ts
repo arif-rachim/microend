@@ -25,6 +25,13 @@ export async function saveAllModules(files: FileList) {
     db.close();
 }
 
+export async function removeModule(moduleName:string){
+    const {db, tx, store} = await openTransaction("readwrite");
+    store.delete(moduleName);
+    tx.commit();
+    db.close();
+}
+
 function getMetaData(metaName: string, htmlText: string): string[] {
     const result: string[] = [];
     let index = 0;

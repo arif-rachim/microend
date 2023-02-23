@@ -1,33 +1,41 @@
 import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
 import {getAllModules} from "./getAllModules";
 
-
 export const DATABASE_NAME = 'routing-registry';
 export const TABLE_MODULE_NAME = 'module';
 
 // warning use document write is slow, but the code is more cleaner when displayed in the screen.
 const useDocumentWrite = true;
 
+/**
+ * Attribute
+ * @param debug : boolean flag to display debug logging
+ */
 export class MicroEndRouter extends HTMLElement {
-
 
     routingRegistry: RoutingRegistry;
 
     currentActiveFrame: HTMLIFrameElement | null;
 
-
     callerIdOrigin: CallerIdOrigin;
+
+    debugMode:boolean;
 
     constructor() {
         super();
         this.routingRegistry = {};
         this.callerIdOrigin = {};
         this.currentActiveFrame = null;
+        //height:100%;overflow: auto;display: flex;flex-direction: column;margin:10px
+        this.style.height = '100%';
+        this.style.display = 'flex';
+        this.style.flexDirection = 'column';
+        this.style.boxSizing = 'border-box';
+        this.debugMode = this.getAttribute('debug') === 'true';
         this.attachShadow({mode: "open"});
         if (this.shadowRoot) {
             const style: any = {
                 height: '100%',
-                border: '1px solid #ccc',
                 'box-sizing': 'border-box',
                 overflow: 'auto',
                 display: 'flex',
@@ -38,12 +46,14 @@ export class MicroEndRouter extends HTMLElement {
             this.shadowRoot.innerHTML = '<div id="container" style="' + styleString + '"></div>';
         }
     }
-
-
+    log = (...messages:string[]) => {
+        if(this.debugMode){
+            console.log('[MicroEndRouter]',...messages);
+        }
+    }
     splitSegment = (text: string) => {
         return text.split('/').filter(s => s)
     };
-
 
     render = (pathAndQuery: string, type: NavigateToType, caller: string) => {
         const [path, query] = pathAndQuery.split('?');
@@ -51,11 +61,11 @@ export class MicroEndRouter extends HTMLElement {
         const pathSegments = this.splitSegment(path);
         const {route, srcdoc, dependency} = this.findMostMatchingRoute(pathSegments);
         if (srcdoc === '' || srcdoc === undefined) {
-            console.debug('[MicroEndRouter]', 'Rendering ', pathAndQuery, type);
-            console.debug('[MicroEndRouter]', 'were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
+            this.log('Rendering ', pathAndQuery, type);
+            this.log('were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
             return;
         }
-        console.debug('[MicroEndRouter]', 'Route match ', pathAndQuery, route);
+        this.log('Route match ', pathAndQuery, route);
         const pathParams = this.extractParamsFromPath(route, pathSegments);
         const params = ({...queryParams, ...pathParams});
         const dependencies = dependency.reduce((result: StringKeyValue, dep) => {
@@ -118,7 +128,6 @@ export class MicroEndRouter extends HTMLElement {
                     doc.write(sourceHtml);
                     doc.close();
                 }
-
             }
         } else if (nextFrame.contentWindow !== null) {
             nextFrame.setAttribute('data-route', route);
@@ -139,14 +148,15 @@ export class MicroEndRouter extends HTMLElement {
             previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
         }
         this.currentActiveFrame = nextFrame;
-
     }
+
     getContainer = (): HTMLElement | null => {
         if (this.shadowRoot) {
             return this.shadowRoot.getElementById('container')
         }
         return null;
     }
+
     getFrame = (props: { route: string, type: NavigateToType, caller: string }): HTMLIFrameElement | null => {
         const container = this.getContainer()
         if (container) {
@@ -157,7 +167,6 @@ export class MicroEndRouter extends HTMLElement {
         }
         return null;
     }
-
 
     extractParamsFromPath = (route: string, pathSegments: string[]) => {
         const params: StringKeyValue = {};
@@ -187,7 +196,6 @@ export class MicroEndRouter extends HTMLElement {
         return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependency: routingRegistry.dependency};
     }
 
-
     extractParamsFromQuery = (query: string) => {
         const params: StringKeyValue = {};
         (query || '').split('&').filter(s => s).forEach(qry => {
@@ -196,7 +204,6 @@ export class MicroEndRouter extends HTMLElement {
         });
         return params;
     }
-
 
     renderBasedOnHash = () => this.render(window.location.hash.substring(1), "default", "hashchange");
 
@@ -259,9 +266,8 @@ export class MicroEndRouter extends HTMLElement {
         }
     }
 
-
     connectedCallback(): void {
-        console.log('[MicroEndRouter]', 'connected');
+        this.log('connected');
         window.addEventListener('load', this.renderBasedOnHash);
         window.addEventListener('hashchange', this.renderBasedOnHash);
         window.addEventListener('message', this.onMessage);
@@ -275,7 +281,7 @@ export class MicroEndRouter extends HTMLElement {
     }
 
     disconnectedCallback(): void {
-        console.log('[MicroEndRouter]', 'disconnected');
+        this.log('disconnected');
         window.removeEventListener('load', this.renderBasedOnHash);
         window.removeEventListener('hashchange', this.renderBasedOnHash);
         window.removeEventListener('message', this.onMessage);

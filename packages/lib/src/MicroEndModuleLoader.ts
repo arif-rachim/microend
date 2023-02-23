@@ -10,7 +10,15 @@ export class MicroEndModuleLoader extends HTMLElement {
             console.warn('[MicroEndModuleLoader]', 'shadowRoot is null, exiting function');
             return;
         }
-        this.shadowRoot.innerHTML = `<input type="file" multiple accept="text/html">`;
+        this.style.display = 'flex';
+        this.style.flexDirection = 'column';
+        this.style.fontFamily = 'arial';
+        this.style.fontSize = '12px';
+        this.style.border = '1px solid rgba(0,0,0,0.1)';
+        this.shadowRoot.innerHTML = `<label style="display: flex;flex-direction: column;padding: 10px">
+<span>Upload Module</span>
+<input type="file" multiple accept="text/html" style="display: none">
+</label>`;
         const input = this.shadowRoot.querySelector('input');
         if (input === null) {
             console.warn('[MicroEndModuleLoader]', 'Could not find input type file, exiting function');

@@ -6,7 +6,7 @@
   "scripts": {
     "core": "npm run start -w @microend/core",
     "lib": "npm run start -w @microend/lib",
-    "build": "npm run build -w @microend/lib && npm run build -w @microend/core && npm run build -w @microend/sample-service-one && npm run build -w @microend/sample-service-two"
+    "build": "npm run build -w @microend/lib && npm run build -w @microend/core"
   },
   "author": "",
   "license": "ISC",
