@@ -6,18 +6,23 @@ export async function saveAllModules(files: FileList) {
     const {db, tx, store} = await openTransaction("readwrite");
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
+
         const moduleName = file.name.split('.html')[0];
         const [path, version] = moduleName.split('@');
         const content = contents[i];
         const dependency = getMetaData('dependency', content)[0];
-        const actions = getMetaData('action', content);
+        const description = getMetaData('description', content)[0];
         const module: Module = {
             name: moduleName,
             path,
             version,
             dependency: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
             srcdoc: content,
-            actions
+            installedOn : new Date().getTime(),
+            size:file.size,
+            lastModified:file.lastModified,
+            description,
+            active:true
         }
         store.put(module);
     }
@@ -31,6 +36,29 @@ export async function removeModule(moduleName:string){
     tx.commit();
     db.close();
 }
+
+export async function deactivateModule(moduleName:string,deactivate:boolean){
+    const {db, tx, store} = await openTransaction("readwrite");
+    const request = store.get(moduleName);
+    return new Promise((resolve) => {
+        request.addEventListener('success', () => {
+            const data: Module = request.result;
+            data.active = !deactivate;
+            store.put(data);
+            tx.commit();
+            db.close();
+            resolve(data);
+        });
+        request.addEventListener('error', (error) => {
+            console.warn(error);
+            db.close();
+            resolve(false);
+        })
+    })
+
+
+}
+
 
 function getMetaData(metaName: string, htmlText: string): string[] {
     const result: string[] = [];

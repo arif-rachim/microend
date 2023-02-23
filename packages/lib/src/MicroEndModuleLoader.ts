@@ -40,6 +40,7 @@ export class MicroEndModuleLoader extends HTMLElement {
         }
         const files: FileList = input.files;
         await saveAllModules(files);
+        this.dispatchEvent(new CustomEvent('change'));
     };
 }
 

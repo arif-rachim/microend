@@ -1,5 +1,5 @@
 import {getAllModules} from "./getAllModules";
-import {removeModule} from "./saveAllModules";
+import {deactivateModule, removeModule} from "./saveAllModules";
 
 export class MicroEndPackageManager extends HTMLElement {
 
@@ -14,6 +14,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.fontFamily = 'arial';
         this.style.backgroundColor = '#f2f2f2';
         this.debugMode = this.getAttribute('debug') === 'true';
+
         this.render().then();
     }
 
@@ -36,22 +37,25 @@ export class MicroEndPackageManager extends HTMLElement {
                 <div style="font-size: 12px;margin-bottom: 1px">${module.version}</div>
             </div>
             <div style="height:100%">
-                This is the description of the package
+                ${module.description}
             </div>
-            
         </div>
     </div>
     <div style="display: flex;flex-direction: row">
+        <button data-button-details="true" data-module-name="${module.name}" style="margin-right: 10px">Details</button>
         <button data-button-remove="true" data-module-name="${module.name}">Remove</button>
         <div style="flex-grow: 1"></div>
         <label style="display: flex;flex-direction: row">
-        <div>Active</div>
-        <input type="checkbox" />
+            <div>Active</div>
+            <input type="checkbox" ${module.active?'checked':''} data-module-name="${module.name}"/>
         </label>
     </div>
 </div>`
         })
-        this.innerHTML = `<div style="font-size: 22px">Installed Modules</div><div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;max-width: 1200px">${modules.join('')}</div>`
+        this.innerHTML = `<div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px">Installed Modules</div>
+<microend-moduleloader style="position: absolute;top: 10px;right: 10px;background-color: white"></microend-moduleloader>
+<div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;max-width: 1200px">${modules.join('')}</div>`
+
         this.querySelectorAll('[data-button-remove]').forEach(element => {
             element.addEventListener('click',(event) => {
                 if(event.target && event.target instanceof HTMLButtonElement){
@@ -65,6 +69,17 @@ export class MicroEndPackageManager extends HTMLElement {
                 }
             })
         })
+        this.querySelector('microend-moduleloader')!.addEventListener('change',(event) => {
+            this.render();
+        });
+
+        this.querySelectorAll('[type="checkbox"]').forEach(element => {
+            element.addEventListener('change',async (event) => {
+                const moduleName = (event.target! as HTMLInputElement).getAttribute('data-module-name');
+                await deactivateModule(moduleName!,!(event.target! as HTMLInputElement).checked);
+                this.render();
+            })
+        });
     }
 
     connectedCallback() {
