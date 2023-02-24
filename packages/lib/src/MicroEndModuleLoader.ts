@@ -1,5 +1,4 @@
-import {saveAllModules} from "./saveAllModules";
-
+import {saveAllModules} from "./moduleQuery";
 
 export class MicroEndModuleLoader extends HTMLElement {
 
@@ -13,7 +12,7 @@ export class MicroEndModuleLoader extends HTMLElement {
         this.style.display = 'flex';
         this.style.flexDirection = 'column';
         this.style.fontFamily = 'arial';
-        this.style.fontSize = '12px';
+        this.style.fontSize = '14px';
         this.style.border = '1px solid rgba(0,0,0,0.1)';
         this.shadowRoot.innerHTML = `<label style="display: flex;flex-direction: column;padding: 10px">
 <span>Upload Module</span>

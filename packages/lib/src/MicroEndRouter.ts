@@ -1,5 +1,5 @@
 import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
-import {getAllModules} from "./getAllModules";
+import {getAllModules} from "./moduleQuery";
 
 export const DATABASE_NAME = 'routing-registry';
 export const TABLE_MODULE_NAME = 'module';
@@ -74,7 +74,7 @@ export class MicroEndRouter extends HTMLElement {
             return result;
         }, {});
         if (this.shadowRoot === null) {
-            console.error('[MicroEndRouter]', 'ShadowRoot is null we cant render this');
+            console.error('[MicroEndRouter]', 'ShadowRoot is null we cant renderPackageList this');
             return;
         }
 
@@ -90,7 +90,9 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.style.height = '100%';
             nextFrame.style.width = '100%';
             nextFrame.style.backgroundColor = '#FFF';
-            //nextFrame.style.position = 'absolute';
+            if(!this.debugMode){
+                nextFrame.style.position = 'absolute';
+            }
             nextFrame.style.overflow = 'auto';
             nextFrame.style.zIndex = '0';
             const contextScript = createContext({

@@ -162,7 +162,6 @@ export interface Module {
     installedOn : number,
     size : number,
     lastModified : number;
-
     active:boolean;
 }
 

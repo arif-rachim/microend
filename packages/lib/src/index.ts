@@ -1,9 +1,16 @@
 import {getMicroEnd, MicroEndRouter} from "./MicroEndRouter";
 import {MicroEndModuleLoader} from "./MicroEndModuleLoader";
 import {MicroEndPackageManager} from "./MicroEndPackageManager";
-import {getAllModules} from "./getAllModules";
-import {saveAllModules} from "./saveAllModules";
+import {deactivateModule, getAllModules,  saveAllModules} from "./moduleQuery";
 import type {MicroEnd} from "./Types";
 
-export {MicroEndRouter, MicroEndModuleLoader, MicroEndPackageManager, getAllModules, saveAllModules, getMicroEnd};
+export {
+    MicroEndRouter,
+    MicroEndModuleLoader,
+    MicroEndPackageManager,
+    getAllModules,
+    saveAllModules,
+    deactivateModule,
+    getMicroEnd
+};
 export type {MicroEnd};

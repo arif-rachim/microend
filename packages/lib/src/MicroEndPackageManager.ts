@@ -1,5 +1,5 @@
-import {getAllModules} from "./getAllModules";
-import {deactivateModule, removeModule} from "./saveAllModules";
+import {getAllModules, deactivateModule, removeModule, getModule} from "./moduleQuery";
+import {Module} from "./Types";
 
 export class MicroEndPackageManager extends HTMLElement {
 
@@ -12,10 +12,11 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.flexDirection = 'column';
         this.style.alignItems = 'center';
         this.style.fontFamily = 'arial';
-        this.style.backgroundColor = '#f2f2f2';
+        this.style.position = 'absolute';
+
         this.debugMode = this.getAttribute('debug') === 'true';
 
-        this.render().then();
+        this.renderIcon();
     }
 
     log = (...args: string[]) => {
@@ -24,7 +25,95 @@ export class MicroEndPackageManager extends HTMLElement {
         }
     }
 
-    render = async () => {
+    renderPackageDetails = async (moduleName:string) => {
+        const module:Module|false = await getModule(moduleName);
+        if(module === false){
+            alert('Module does not exit '+moduleName);
+            return;
+        }
+        this.setFullScreen(true);
+        const labelStyle = 'width: 150px;font-size: 13px;font-weight: bold';
+        const rowStyle = 'display: flex;flex-direction: row;border-bottom: 1px solid rgba(0,0,0,0.05);padding: 10px';
+        this.innerHTML = `<div style="display:flex;flex-direction:column ;width:100%;max-width: 800px">
+        <div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px;display: flex;flex-direction: row;align-items: center">
+            <div style="flex-grow: 1;">${moduleName}</div>
+            <button style="border: 1px solid rgba(0,0,0,0.1);padding:10px;border-radius: 5px;background-color: white" data-exit-button="true">Exit</button>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Description</div>
+            <div>${module.description}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Path</div>
+            <div>${module.path}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Version</div>
+            <div>${module.version}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Is Active</div>
+            <div>${module.active}</div>
+        </div>
+        <div style="${rowStyle};align-items: center">
+            <div style="${labelStyle}">Dependency</div>
+            <div style="display: flex;flex-direction: row;flex-wrap: wrap">${module.dependency.map(dep => {
+                return `<div style="border: 1px solid rgba(0,0,0,0.1);padding:5px;font-weight: bold;font-size: 12px;border-radius: 3px;background-color: white;margin-right: 5px">${dep}</div>`
+        }).join('')}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Installed On</div>
+            <div style="font-size: 13px">${formatDate(module.installedOn)}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Last modified on</div>
+            <div style="font-size: 13px">${formatDate(module.lastModified)}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Size</div>
+            <div>${formatSize(module.size)}</div>
+        </div>
+    </div>`
+
+        this.querySelector('[data-exit-button]')!.addEventListener('click',() => {
+            this.renderPackageList();
+        })
+
+
+    }
+
+    renderIcon = () => {
+        this.setFullScreen(false);
+        this.innerHTML = `<button style="border: 1px solid rgba(0,0,0,0.1);padding:10px;border-radius: 5px">Package Manager</button>`;
+        this.querySelector('button')!.addEventListener('click',() => {
+            this.renderPackageList().then();
+        })
+    }
+    setFullScreen = (fullScreen:boolean) => {
+        if(fullScreen){
+            this.style.right = 'unset';
+            this.style.top = 'unset';
+            this.style.top = '0px';
+            this.style.left = '0px';
+            this.style.width = '100%';
+            this.style.height = '100%';
+            this.style.padding = '10px';
+            this.style.background = '#f2f2f2';
+        }else{
+            this.style.top = 'unset';
+            this.style.left = 'unset';
+            this.style.width = 'unset';
+            this.style.height = 'unset';
+            this.style.padding = 'unset';
+            this.style.right = '10px';
+            this.style.top = '10px';
+        }
+
+    }
+
+    renderPackageList = async () => {
+        this.setFullScreen(true);
+
         const allModules = await getAllModules();
         const modules = allModules.map(module => {
             return `<div style="display: flex;flex-direction:column;font-family: Arial;border:1px solid rgba(0,0,0,0.1);padding:10px;box-sizing: border-box;width: 300px;height:130px;border-radius: 5px;background-color: white;box-shadow: 0 0 5px -3px rgba(0,0,0,0.4);margin:5px">
@@ -46,15 +135,32 @@ export class MicroEndPackageManager extends HTMLElement {
         <button data-button-remove="true" data-module-name="${module.name}">Remove</button>
         <div style="flex-grow: 1"></div>
         <label style="display: flex;flex-direction: row">
-            <div>Active</div>
+        <div>Active</div>
             <input type="checkbox" ${module.active?'checked':''} data-module-name="${module.name}"/>
         </label>
     </div>
 </div>`
+        });
+
+        this.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px">
+<div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px;display: flex;flex-direction: row;align-items: center">
+    <microend-moduleloader style="background-color: white;border-radius: 5px"></microend-moduleloader>
+    <div style="flex-grow: 1;align-items: center">Installed Modules</div>
+    <button style="border: 1px solid rgba(0,0,0,0.1);padding:10px;border-radius: 5px;background-color: white" data-exit-button="true">Exit</button>
+</div>
+
+<div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;">${modules.join('')}</div></div>`;
+
+        this.querySelectorAll('[data-button-details]').forEach(element => {
+            element.addEventListener('click',(event) => {
+                if(event.target && event.target instanceof HTMLButtonElement){
+                    const moduleName = event.target.getAttribute('data-module-name');
+                    if(moduleName){
+                        this.renderPackageDetails(moduleName);
+                    }
+                }
+            });
         })
-        this.innerHTML = `<div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px">Installed Modules</div>
-<microend-moduleloader style="position: absolute;top: 10px;right: 10px;background-color: white"></microend-moduleloader>
-<div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;max-width: 1200px">${modules.join('')}</div>`
 
         this.querySelectorAll('[data-button-remove]').forEach(element => {
             element.addEventListener('click',(event) => {
@@ -63,23 +169,27 @@ export class MicroEndPackageManager extends HTMLElement {
                     const result = prompt(`Please type "${moduleName}" to remove the module`);
                     if(moduleName && result === moduleName){
                         removeModule(moduleName).then(() => {
-                            this.render();
+                            this.renderPackageList();
                         });
                     }
                 }
             })
-        })
+        });
+
         this.querySelector('microend-moduleloader')!.addEventListener('change',(event) => {
-            this.render();
+            this.renderPackageList();
         });
 
         this.querySelectorAll('[type="checkbox"]').forEach(element => {
             element.addEventListener('change',async (event) => {
                 const moduleName = (event.target! as HTMLInputElement).getAttribute('data-module-name');
                 await deactivateModule(moduleName!,!(event.target! as HTMLInputElement).checked);
-                this.render();
+                this.renderPackageList();
             })
         });
+        this.querySelector('[data-exit-button]')!.addEventListener('click',() => {
+            this.renderIcon()
+        })
     }
 
     connectedCallback() {
@@ -89,4 +199,18 @@ export class MicroEndPackageManager extends HTMLElement {
     disconnectedCallback() {
 
     }
+}
+const month = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+function formatDate(time:number){
+    const date = new Date(time);
+    const pad = (time:number) => time < 10 ? '0'+time : time.toString()
+    return `${pad(date.getDate())}-${month[date.getMonth()]}-${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+function formatSize(size:number){
+    const kiloBytes = Math.ceil(size / 1000);
+    if(kiloBytes < 500){
+        return `${kiloBytes}Kb`;
+    }
+    const megaBytes = (kiloBytes / 1000).toFixed(1);
+    return `${megaBytes}Mb`;
 }

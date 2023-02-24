@@ -1,6 +1,5 @@
 import {DATABASE_NAME, TABLE_MODULE_NAME} from "./MicroEndRouter";
 
-
 export function openTransaction(type: IDBTransactionMode): Promise<{ db: IDBDatabase, tx: IDBTransaction, store: IDBObjectStore }> {
     return new Promise((resolve) => {
         const req = indexedDB.open(DATABASE_NAME, 1)

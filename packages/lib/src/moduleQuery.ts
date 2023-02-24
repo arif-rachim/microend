@@ -1,17 +1,34 @@
-import {openTransaction} from "./openTransaction";
 import {Module} from "./Types";
+import {openTransaction} from "./openTransaction";
+
+export async function getAllModules(): Promise<Module[]> {
+    const {db, tx, store} = await openTransaction('readonly');
+    const request = store.getAll();
+    const result = await forRequest<Module[]>(request);
+    if(result === false){
+        db.close();
+        return [];
+    }
+    return result;
+}
+
+export async function getModule(moduleName:string):Promise<Module|false>{
+    const {db, store} = await openTransaction("readonly");
+    const request = store.get(moduleName);
+    const data = await forRequest<Module>(request)
+    db.close();
+    return data;
+}
 
 export async function saveAllModules(files: FileList) {
     const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
-    const {db, tx, store} = await openTransaction("readwrite");
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-
+    const modules:Module[] = Array.from(files).map((file,index) => {
         const moduleName = file.name.split('.html')[0];
         const [path, version] = moduleName.split('@');
-        const content = contents[i];
+        const content = contents[index];
         const dependency = getMetaData('dependency', content)[0];
         const description = getMetaData('description', content)[0];
+        // maybe we need to have the available queryParams and available service
         const module: Module = {
             name: moduleName,
             path,
@@ -24,8 +41,22 @@ export async function saveAllModules(files: FileList) {
             description,
             active:true
         }
+        return module;
+    });
+
+    // first we need to create default routing mechanism when we are fetching the route !
+
+    // here we need to perform some validation
+    // 1. are all dependency available in the modules that going to be installed
+    // 2. if dependency is not available then the active flag is false
+    // 3. does the old modules can be upgraded
+    // 4. we need to fix the routing mechanism
+
+
+    const {db, tx, store} = await openTransaction("readwrite");
+    modules.forEach(module => {
         store.put(module);
-    }
+    })
     tx.commit();
     db.close();
 }
@@ -37,28 +68,32 @@ export async function removeModule(moduleName:string){
     db.close();
 }
 
-export async function deactivateModule(moduleName:string,deactivate:boolean){
-    const {db, tx, store} = await openTransaction("readwrite");
-    const request = store.get(moduleName);
+function forRequest<T>(request:IDBRequest):Promise<T|false>{
     return new Promise((resolve) => {
         request.addEventListener('success', () => {
-            const data: Module = request.result;
-            data.active = !deactivate;
-            store.put(data);
-            tx.commit();
-            db.close();
+            const data: T = request.result;
             resolve(data);
         });
         request.addEventListener('error', (error) => {
-            console.warn(error);
-            db.close();
             resolve(false);
         })
     })
-
-
 }
 
+export async function deactivateModule(moduleName:string,deactivate:boolean){
+    const {db, tx, store} = await openTransaction("readwrite");
+    const request = store.get(moduleName);
+    const data = await forRequest<Module>(request)
+    if(data === false){
+        db.close();
+        return;
+    }
+    data.active = !deactivate;
+    store.put(data);
+    tx.commit();
+    db.close();
+
+}
 
 function getMetaData(metaName: string, htmlText: string): string[] {
     const result: string[] = [];
@@ -86,7 +121,6 @@ function scanText(metaName: string, htmlText: string, startingIndex: number): [s
     }
     return [dependency, endTagIndex];
 }
-
 
 function readFile(file: File): Promise<string> {
     return new Promise((resolve) => {
