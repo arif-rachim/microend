@@ -11,8 +11,10 @@ export function showModal(message:string,...selects:string[]){
         div.style.flexDirection = 'column';
         div.style.alignItems = 'center';
         div.style.justifyContent = 'center';
-
-        div.innerHTML = `<div style="background-color: white;border: 1px solid rgba(0,0,0,0.1);padding: 10px;border-radius: 10px;display: flex;flex-direction: column">
+        div.style.backdropFilter = 'blur(3px)';
+        // @ts-ignore
+        div.style["-webkit-backdrop-filter"] = 'blur(3px)';
+        div.innerHTML = `<div style="background-color: rgba(255,255,255,0.9);border: 1px solid rgba(0,0,0,0.1);backdrop-filter: blur(3px);-webkit-backdrop-filter: blur(3px);padding: 10px;border-radius: 10px;display: flex;flex-direction: column">
     <div style="font-size: 14px">${message}</div>
     <div style="display: flex;flex-direction: row;justify-content: flex-end;margin-top: 10px">
         ${selects.map(select => {

@@ -164,6 +164,7 @@ export interface Module {
     size : number,
     lastModified : number;
     active:boolean;
+    deleted:boolean;
 }
 
 

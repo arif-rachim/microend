@@ -482,6 +482,11 @@ const clientTemplate = `
                 return;
             }
             const dependencyVersion = me.dependencies[route];
+
+            if(dependencyVersion === undefined){
+                const [path,version] = me.route.split('/').filter(s => s);
+                throw new Error('Please contact the author '+path+'@'+version+' to fix this module, as the author forgot to add a dependency. '+route+'@version');
+            }
             route = '/' + route + '/' + dependencyVersion;
             const navigateTo = {
                 intent: 'navigateTo',

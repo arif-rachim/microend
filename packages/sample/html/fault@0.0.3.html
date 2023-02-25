@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Fault Management</title>
-    <meta name="dependency" content="identity@0.0.1">
+    <meta name="dependency" content="identity@0.0.2">
     <meta name="description" content="Fault management component">
 </head>
 <body>
@@ -15,7 +15,6 @@
 </html>
 <script>
     if (me) {
-
         const {onParamsChange, onFocusChange} = me;
         onParamsChange((newValue, oldValue) => {
             document.getElementById('content').innerHTML = JSON.stringify(me.params);
