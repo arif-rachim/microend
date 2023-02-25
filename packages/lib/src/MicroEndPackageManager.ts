@@ -37,7 +37,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.innerHTML = `<div style="display:flex;flex-direction:column ;width:100%;max-width: 800px">
         <div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px;display: flex;flex-direction: row;align-items: center">
             <div style="flex-grow: 1;">${moduleName}</div>
-            <button style="border: 1px solid rgba(0,0,0,0.1);padding:10px;border-radius: 5px;background-color: white" data-exit-button="true">Exit</button>
+            <button style="border: 1px solid rgba(0,0,0,0.1);padding:5px 10px;border-radius: 5px;background-color: white;font-size:30px" data-exit-button="true;">🔙</button>
         </div>
         <div style="${rowStyle}">
             <div style="${labelStyle}">Description</div>
@@ -57,7 +57,7 @@ export class MicroEndPackageManager extends HTMLElement {
         </div>
         <div style="${rowStyle};align-items: center">
             <div style="${labelStyle}">Dependency</div>
-            <div style="display: flex;flex-direction: row;flex-wrap: wrap">${module.dependency.map(dep => {
+            <div style="display: flex;flex-direction: row;flex-wrap: wrap">${module.dependencies.map(dep => {
                 return `<div style="border: 1px solid rgba(0,0,0,0.1);padding:5px;font-weight: bold;font-size: 12px;border-radius: 3px;background-color: white;margin-right: 5px">${dep}</div>`
         }).join('')}</div>
         </div>
@@ -84,8 +84,8 @@ export class MicroEndPackageManager extends HTMLElement {
 
     renderIcon = () => {
         this.setFullScreen(false);
-        this.innerHTML = `<button style="border: 1px solid rgba(0,0,0,0.1);padding:10px;border-radius: 5px">Package Manager</button>`;
-        this.querySelector('button')!.addEventListener('click',() => {
+        this.innerHTML = `<div data-button-package="true" style="font-size: 40px">📦</div>`;
+        this.querySelector('[data-button-package]')!.addEventListener('click',() => {
             this.renderPackageList().then();
         })
     }
@@ -142,11 +142,11 @@ export class MicroEndPackageManager extends HTMLElement {
 </div>`
         });
 
-        this.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px">
+        this.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px;width:100%">
 <div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px;display: flex;flex-direction: row;align-items: center">
     <microend-moduleloader style="background-color: white;border-radius: 5px"></microend-moduleloader>
     <div style="flex-grow: 1;align-items: center">Installed Modules</div>
-    <button style="border: 1px solid rgba(0,0,0,0.1);padding:10px;border-radius: 5px;background-color: white" data-exit-button="true">Exit</button>
+    <button style="border: 1px solid rgba(0,0,0,0.1);padding:5px 10px;border-radius: 5px;background-color: white;font-size:30px"" data-exit-button="true">🔙</button>
 </div>
 
 <div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;">${modules.join('')}</div></div>`;

@@ -1,5 +1,6 @@
 import {Module} from "./Types";
 import {openTransaction} from "./openTransaction";
+import {showModal} from "./showModal";
 
 export async function getAllModules(): Promise<Module[]> {
     const {db, tx, store} = await openTransaction('readonly');
@@ -20,7 +21,39 @@ export async function getModule(moduleName:string):Promise<Module|false>{
     return data;
 }
 
+async function findAndUpdateMissingDependencies(modules: Module[],allInstalledModules:Module[]):Promise<string[]> {
+    const allModules = allInstalledModules.concat(modules);
+    return modules.reduce((totalMissingDependencies:string[],m) => {
+        const missingDependencies:string[] = m.dependencies.reduce((missingDependencies:string[],dependency) => {
+            const indexOfDependency = allModules.findIndex(m => m.name === dependency);
+            if(indexOfDependency < 0){
+                missingDependencies.push(dependency);
+            }
+            return missingDependencies;
+        },[]);
+        m.missingDependencies = missingDependencies;
+        if(missingDependencies.length > 0){
+            m.active = false;
+        }
+        return totalMissingDependencies.concat(missingDependencies);
+    },[]);
+}
+
+async function findModulesToBeUpgrade(modules: Module[],allInstalledModules:Module[]) {
+    return modules.reduce((result:{from:string,to:string}[],m) => {
+        const modulesToBeUpgraded:{from:string,to:string}[] = allInstalledModules.filter(s => {
+            return s.path === m.path && m.version > s.version
+        }).map(s => ({
+            from : s.name,
+            to : m.name
+        }));
+        return modulesToBeUpgraded;
+    },[]);
+
+}
+
 export async function saveAllModules(files: FileList) {
+
     const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
     const modules:Module[] = Array.from(files).map((file,index) => {
         const moduleName = file.name.split('.html')[0];
@@ -33,7 +66,8 @@ export async function saveAllModules(files: FileList) {
             name: moduleName,
             path,
             version,
-            dependency: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
+            dependencies: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
+            missingDependencies : [],
             srcdoc: content,
             installedOn : new Date().getTime(),
             size:file.size,
@@ -47,11 +81,43 @@ export async function saveAllModules(files: FileList) {
     // first we need to create default routing mechanism when we are fetching the route !
 
     // here we need to perform some validation
+    const allInstalledModules = await getAllModules();
+    const missingDependencies:string[] = await findAndUpdateMissingDependencies(modules,allInstalledModules);
+    const modulesToBeUpgrade:{from:string,to:string}[] = await findModulesToBeUpgrade(modules,allInstalledModules);
+
+    const result = await showModal(`<div style="font-family: Arial">
+<div>The modules listed below will be installed. :</div>
+<div style="display: flex;flex-direction: row;flex-wrap: wrap">${modules.map(dep => {
+        return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color:darkslateblue;margin-right: 5px;margin-bottom: 5px">${dep.name}</div>`
+    }).join('')}</div>
+${missingDependencies.length > 0 ? (() => {
+    return `
+    <div style="margin-top: 10px;">The dependent modules listed below are unavailable. :</div>
+    <div style="display: flex;flex-direction: row;flex-wrap: wrap">${missingDependencies.map(dep => {
+        return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: darkred;margin-right: 5px;margin-bottom: 5px">${dep}</div>`
+    }).join('')}</div>
+    `
+    })():''}
+${modulesToBeUpgrade.length > 0 ? (() => {
+    return `
+    <div style="margin-top: 10px">The modules listed below will be upgraded. :</div>
+    <div style="display: flex;flex-direction: row;flex-wrap: wrap">${modulesToBeUpgrade.map(dep => {
+        return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: green;margin-right: 5px;margin-bottom: 5px">${dep.from} ➡ ${dep.to}</div>`
+    }).join('')}</div>
+    `
+    })() :''}
+
+
+<div style="margin-top: 10px">Are you certain that you wish to continue?</div>
+</div>`,'Yes','No');
+
     // 1. are all dependency available in the modules that going to be installed
-    // 2. if dependency is not available then the active flag is false
+    // 2. if dependency is not available then the active flag is false [ok]
     // 3. does the old modules can be upgraded
     // 4. we need to fix the routing mechanism
-
+    if(result === 'No'){
+        return;
+    }
 
     const {db, tx, store} = await openTransaction("readwrite");
     modules.forEach(module => {

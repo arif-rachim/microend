@@ -59,7 +59,7 @@ export class MicroEndRouter extends HTMLElement {
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
         const pathSegments = this.splitSegment(path);
-        const {route, srcdoc, dependency} = this.findMostMatchingRoute(pathSegments);
+        const {route, srcdoc, dependencies:dependency} = this.findMostMatchingRoute(pathSegments);
         if (srcdoc === '' || srcdoc === undefined) {
             this.log('Rendering ', pathAndQuery, type);
             this.log('were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
@@ -195,7 +195,7 @@ export class MicroEndRouter extends HTMLElement {
             return mostMatchingPath;
         }, {path: '', total: 0});
         const routingRegistry = this.routingRegistry[mostMatchingPath.path] || {srcdoc: '', dependency: []};
-        return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependency: routingRegistry.dependency};
+        return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
     }
 
     extractParamsFromQuery = (query: string) => {

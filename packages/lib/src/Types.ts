@@ -89,7 +89,7 @@ interface RoutingRegistryValue {
     /**
      * dependency yang digunakan oleh module
      */
-    dependency: string[]
+    dependencies: string[]
 }
 
 /**
@@ -157,7 +157,8 @@ export interface Module {
     description:string;
     path: string;
     version: string;
-    dependency: string[];
+    dependencies: string[];
+    missingDependencies : string[];
     srcdoc: string,
     installedOn : number,
     size : number,
