@@ -8,5 +8,6 @@ const moduleTwoButton: HTMLButtonElement = document.querySelector('#button-calli
 //const navigateFault = <{fuck:string}>('fault');
 moduleTwoButton.addEventListener('click', async () => {
     const result = await service.hello();
-    alert('WE GOT MESSAGE FROM MODULE TWO '+result);
+    const resultTwo = await service.exampleService({name:'arif',password:'hore'});
+    alert('WE GOT MESSAGE FROM MODULE TWO '+result+ ' '+resultTwo.helloUser.name);
 })
