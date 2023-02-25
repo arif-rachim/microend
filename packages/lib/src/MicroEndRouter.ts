@@ -4,10 +4,11 @@ import {getAllModules} from "./moduleQuery";
 export const DATABASE_NAME = 'routing-registry';
 export const TABLE_MODULE_NAME = 'module';
 
-// warning use document write is slow, but the code is more cleaner when displayed in the screen.
+// warning use document write is slow, but the code is cleaner when displayed in the screen.
 const useDocumentWrite = true;
 
 const CALLER_ID_KEY = 'callerId';
+
 /**
  * Attribute
  * @param debug : boolean flag to display debug logging
@@ -20,9 +21,9 @@ export class MicroEndRouter extends HTMLElement {
 
     callerIdOrigin: CallerIdOrigin;
 
-    debugMode:boolean;
+    debugMode: boolean;
 
-    suppressRenderBasedOnHash:boolean;
+    suppressRenderBasedOnHash: boolean;
 
     constructor() {
         super();
@@ -50,9 +51,10 @@ export class MicroEndRouter extends HTMLElement {
             this.shadowRoot.innerHTML = '<div id="container" style="' + styleString + '"></div>';
         }
     }
-    log = (...messages:string[]) => {
-        if(this.debugMode){
-            console.log('[MicroEndRouter]',...messages);
+
+    log = (...messages: string[]) => {
+        if (this.debugMode) {
+            console.log('[MicroEndRouter]', ...messages);
         }
     }
     splitSegment = (text: string) => {
@@ -64,12 +66,12 @@ export class MicroEndRouter extends HTMLElement {
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
         // WE ARE REMOVING THE CALLER FROM HERE !
-        if(CALLER_ID_KEY in queryParams){
+        if (CALLER_ID_KEY in queryParams) {
             caller = queryParams[CALLER_ID_KEY];
             delete queryParams[CALLER_ID_KEY];
         }
         const pathSegments = this.splitSegment(path);
-        const {route, srcdoc, dependencies:dependency} = this.findMostMatchingRoute(pathSegments);
+        const {route, srcdoc, dependencies: dependency} = this.findMostMatchingRoute(pathSegments);
         if (srcdoc === '' || srcdoc === undefined) {
             this.log('Rendering ', pathAndQuery, type);
             this.log('were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
@@ -99,7 +101,7 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.style.height = '100%';
             nextFrame.style.width = '100%';
             nextFrame.style.backgroundColor = '#FFF';
-            if(!this.debugMode){
+            if (!this.debugMode) {
                 nextFrame.style.position = 'absolute';
             }
             nextFrame.style.overflow = 'auto';
@@ -208,16 +210,16 @@ export class MicroEndRouter extends HTMLElement {
     // }
 
     findMostMatchingRoute = (pathSegments: string[]) => {
-        const [path,version] = pathSegments;
+        const [path, version] = pathSegments;
         const mostMatchingPath = Object.keys(this.routingRegistry).find(key => {
-            const [routingPath,routingVersion] = key.split('/').filter(s => s);
+            const [routingPath, routingVersion] = key.split('/').filter(s => s);
             return routingPath === path && routingVersion >= version;
         });
-        if(!mostMatchingPath){
+        if (!mostMatchingPath) {
             throw new Error(`No available modules supporting ${path}/${version}`);
         }
         const routingRegistry = this.routingRegistry[mostMatchingPath] || {srcdoc: '', dependencies: []};
-        return {route: mostMatchingPath,srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
+        return {route: mostMatchingPath, srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
     }
 
     extractParamsFromQuery = (query: string) => {
@@ -230,7 +232,7 @@ export class MicroEndRouter extends HTMLElement {
     }
 
     renderBasedOnHash = () => {
-        if(this.suppressRenderBasedOnHash){
+        if (this.suppressRenderBasedOnHash) {
             this.suppressRenderBasedOnHash = false;
             return;
         }
@@ -260,8 +262,8 @@ export class MicroEndRouter extends HTMLElement {
             const path = '/' + event.data.route.split('/').filter(s => s).join('/');
             this.callerIdOrigin[callerId] = originalFrame;
             const pathAndQuery = path + (path.indexOf('?') >= 0 ? '&' : '?') + queryString;
-            if(type === 'default'){
-                const pathQueryAndCallerId = pathAndQuery + (pathAndQuery.indexOf('?') > 0 ? '&' : '?' )+`${CALLER_ID_KEY}=${callerId}`;
+            if (type === 'default') {
+                const pathQueryAndCallerId = pathAndQuery + (pathAndQuery.indexOf('?') > 0 ? '&' : '?') + `${CALLER_ID_KEY}=${callerId}`;
                 window.location.hash = pathQueryAndCallerId;
             } else if (type === 'modal' || type === 'service') {
                 this.render(pathAndQuery, type, callerId);
@@ -297,7 +299,7 @@ export class MicroEndRouter extends HTMLElement {
                 }
             }
             this.currentActiveFrame = nextFrame;
-            if(type === 'default'){
+            if (type === 'default') {
                 // we disable this to avoid re-rendering on next change
                 this.suppressRenderBasedOnHash = true;
                 window.history.back();

@@ -26,7 +26,7 @@ async function findAndUpdateMissingDependencies(modules: Module[], allInstalledM
     return modules.reduce((totalMissingDependencies: string[], m) => {
         const missingDependencies: string[] = m.dependencies.reduce((missingDependencies: string[], dependency) => {
             const indexOfDependency = allModules.findIndex(m => {
-                const [path,version] = dependency.split('@');
+                const [path, version] = dependency.split('@');
                 return m.path === path && m.version >= version;
             });
             if (indexOfDependency < 0) {
@@ -140,7 +140,7 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
 export async function removeModule(moduleName: string) {
     const {db, tx, store} = await openTransaction("readwrite");
     const module = await forRequest<Module>(store.get(moduleName));
-    if(module){
+    if (module) {
         module.deleted = true;
         store.put(module);
         tx.commit();

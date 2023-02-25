@@ -154,17 +154,17 @@ export type MessageData = NavigateToMessage | NavigateBackMessage;
 
 export interface Module {
     name: string;
-    description:string;
+    description: string;
     path: string;
     version: string;
     dependencies: string[];
-    missingDependencies : string[];
+    missingDependencies: string[];
     srcdoc: string,
-    installedOn : number,
-    size : number,
-    lastModified : number;
-    active:boolean;
-    deleted:boolean;
+    installedOn: number,
+    size: number,
+    lastModified: number;
+    active: boolean;
+    deleted: boolean;
 }
 
 
