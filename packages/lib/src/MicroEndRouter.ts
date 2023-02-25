@@ -56,6 +56,7 @@ export class MicroEndRouter extends HTMLElement {
     };
 
     render = (pathAndQuery: string, type: NavigateToType, caller: string) => {
+
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
         const pathSegments = this.splitSegment(path);
@@ -77,7 +78,6 @@ export class MicroEndRouter extends HTMLElement {
             console.error('[MicroEndRouter]', 'ShadowRoot is null we cant renderPackageList this');
             return;
         }
-
         let nextFrame: HTMLIFrameElement | null = this.getFrame({route, type, caller});
         if (nextFrame === null) {
             nextFrame = document.createElement('iframe');
@@ -180,22 +180,35 @@ export class MicroEndRouter extends HTMLElement {
         return params;
     }
 
+    // findMostMatchingRoute = (pathSegments: string[]) => {
+    //     const mostMatchingPath = Object.keys(this.routingRegistry).filter(key => this.splitSegment(key).length === pathSegments.length).reduce((mostMatchingPath, key) => {
+    //         const routeSegments = this.splitSegment(key);
+    //         let matchingSegment = 0;
+    //         for (let i = 0; i < routeSegments.length; i++) {
+    //             if (routeSegments[i] === pathSegments[i]) {
+    //                 matchingSegment++;
+    //             }
+    //         }
+    //         if (matchingSegment > mostMatchingPath.total) {
+    //             return {path: key, total: matchingSegment};
+    //         }
+    //         return mostMatchingPath;
+    //     }, {path: '', total: 0});
+    //     const routingRegistry = this.routingRegistry[mostMatchingPath.path] || {srcdoc: '', dependency: []};
+    //     return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
+    // }
+
     findMostMatchingRoute = (pathSegments: string[]) => {
-        const mostMatchingPath = Object.keys(this.routingRegistry).filter(key => this.splitSegment(key).length === pathSegments.length).reduce((mostMatchingPath, key) => {
-            const routeSegments = this.splitSegment(key);
-            let matchingSegment = 0;
-            for (let i = 0; i < routeSegments.length; i++) {
-                if (routeSegments[i] === pathSegments[i]) {
-                    matchingSegment++;
-                }
-            }
-            if (matchingSegment > mostMatchingPath.total) {
-                return {path: key, total: matchingSegment};
-            }
-            return mostMatchingPath;
-        }, {path: '', total: 0});
-        const routingRegistry = this.routingRegistry[mostMatchingPath.path] || {srcdoc: '', dependency: []};
-        return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
+        const [path,version] = pathSegments;
+        const mostMatchingPath = Object.keys(this.routingRegistry).find(key => {
+            const [routingPath,routingVersion] = key.split('/').filter(s => s);
+            return routingPath === path && routingVersion >= version;
+        });
+        if(!mostMatchingPath){
+            throw new Error(`No available modules supporting ${path}/${version}`);
+        }
+        const routingRegistry = this.routingRegistry[mostMatchingPath] || {srcdoc: '', dependencies: []};
+        return {route: mostMatchingPath,srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
     }
 
     extractParamsFromQuery = (query: string) => {
@@ -270,7 +283,7 @@ export class MicroEndRouter extends HTMLElement {
 
     connectedCallback(): void {
         this.log('connected');
-        window.addEventListener('load', this.renderBasedOnHash);
+        //window.addEventListener('load', this.renderBasedOnHash);
         window.addEventListener('hashchange', this.renderBasedOnHash);
         window.addEventListener('message', this.onMessage);
         (async () => {
@@ -284,7 +297,7 @@ export class MicroEndRouter extends HTMLElement {
 
     disconnectedCallback(): void {
         this.log('disconnected');
-        window.removeEventListener('load', this.renderBasedOnHash);
+        //window.removeEventListener('load', this.renderBasedOnHash);
         window.removeEventListener('hashchange', this.renderBasedOnHash);
         window.removeEventListener('message', this.onMessage);
     }
