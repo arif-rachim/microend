@@ -6,12 +6,14 @@
   "scripts": {
     "core": "npm run start -w @microend/core",
     "lib": "npm run start -w @microend/lib",
+    "module-one": "npm run start -w module-one",
     "build": "npm run build -w @microend/lib && npm run build -w @microend/core"
   },
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "sample/*"
   ],
   "dependencies": {
     "parcel": "^2.8.3",

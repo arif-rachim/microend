@@ -132,9 +132,9 @@
             }
             const dependencyVersion = me.dependencies[route];
 
-            if (dependencyVersion === undefined) {
-                const [path, version] = me.route.split('/').filter(s => s);
-                throw new Error(`Please contact the author ${path}@${version} to fix this module, as the author forgot to add a dependency. ${route}@version`);
+            if(dependencyVersion === undefined){
+                const [path,version] = me.route.split('/').filter(s => s);
+                throw new Error('Please contact the author '+path+'@'+version+' to fix this module, as the author forgot to add a dependency. '+route+'@version');
             }
             route = '/' + route + '/' + dependencyVersion;
             const navigateTo = {
@@ -210,11 +210,14 @@
         const proxy = new Proxy({}, {
             get(_, action) {
                 return async (...args) => {
-                    const result = await me.navigateTo(module, {
+                    const response = await me.navigateTo(module, {
                         action,
                         args: encodeURI(JSON.stringify(args))
-                    }, "service")
-                    return result;
+                    }, "service");
+                    if(response.success){
+                        return response.result;
+                    }
+                    throw new Error(response.message);
                 }
             }
         });

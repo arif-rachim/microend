@@ -598,11 +598,14 @@ const clientTemplate = `
         const proxy = new Proxy({}, {
             get(_, action) {
                 return async (...args) => {
-                    const result = await me.navigateTo(module, {
+                    const response = await me.navigateTo(module, {
                         action,
                         args: encodeURI(JSON.stringify(args))
-                    }, "service")
-                    return result;
+                    }, "service");
+                    if(response.success){
+                        return response.result;
+                    }
+                    throw new Error(response.message);
                 }
             }
         });

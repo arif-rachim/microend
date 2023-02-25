@@ -1,0 +1,31 @@
+{
+  "name": "module-two",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build && parcel build && mv dist/index.html dist/module-two@0.0.1.html",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  }
+}
