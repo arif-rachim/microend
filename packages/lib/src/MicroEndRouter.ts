@@ -7,6 +7,7 @@ export const TABLE_MODULE_NAME = 'module';
 // warning use document write is slow, but the code is more cleaner when displayed in the screen.
 const useDocumentWrite = true;
 
+const CALLER_ID_KEY = 'callerId';
 /**
  * Attribute
  * @param debug : boolean flag to display debug logging
@@ -21,6 +22,8 @@ export class MicroEndRouter extends HTMLElement {
 
     debugMode:boolean;
 
+    suppressRenderBasedOnHash:boolean;
+
     constructor() {
         super();
         this.routingRegistry = {};
@@ -31,6 +34,7 @@ export class MicroEndRouter extends HTMLElement {
         this.style.display = 'flex';
         this.style.flexDirection = 'column';
         this.style.boxSizing = 'border-box';
+        this.suppressRenderBasedOnHash = false;
         this.debugMode = this.getAttribute('debug') === 'true';
         this.attachShadow({mode: "open"});
         if (this.shadowRoot) {
@@ -59,6 +63,11 @@ export class MicroEndRouter extends HTMLElement {
 
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
+        // WE ARE REMOVING THE CALLER FROM HERE !
+        if(CALLER_ID_KEY in queryParams){
+            caller = queryParams[CALLER_ID_KEY];
+            delete queryParams[CALLER_ID_KEY];
+        }
         const pathSegments = this.splitSegment(path);
         const {route, srcdoc, dependencies:dependency} = this.findMostMatchingRoute(pathSegments);
         if (srcdoc === '' || srcdoc === undefined) {
@@ -220,7 +229,13 @@ export class MicroEndRouter extends HTMLElement {
         return params;
     }
 
-    renderBasedOnHash = () => this.render(window.location.hash.substring(1), "default", "hashchange");
+    renderBasedOnHash = () => {
+        if(this.suppressRenderBasedOnHash){
+            this.suppressRenderBasedOnHash = false;
+            return;
+        }
+        this.render(window.location.hash.substring(1), "default", "hashchange")
+    };
 
     onMessage = (event: MessageEvent<MessageData>) => {
         if (event.data.intent === 'navigateTo') {
@@ -245,7 +260,10 @@ export class MicroEndRouter extends HTMLElement {
             const path = '/' + event.data.route.split('/').filter(s => s).join('/');
             this.callerIdOrigin[callerId] = originalFrame;
             const pathAndQuery = path + (path.indexOf('?') >= 0 ? '&' : '?') + queryString;
-            if (type === 'default' || type === 'modal' || type === 'service') {
+            if(type === 'default'){
+                const pathQueryAndCallerId = pathAndQuery + (pathAndQuery.indexOf('?') > 0 ? '&' : '?' )+`${CALLER_ID_KEY}=${callerId}`;
+                window.location.hash = pathQueryAndCallerId;
+            } else if (type === 'modal' || type === 'service') {
                 this.render(pathAndQuery, type, callerId);
             }
         }
@@ -270,6 +288,7 @@ export class MicroEndRouter extends HTMLElement {
                 nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
             }
             const previousFrame = this.getFrame({route, type, caller});
+            // THIS IS THE PREVIOUS DATA
             if (previousFrame && previousFrame.contentWindow) {
                 previousFrame.style.zIndex = '-1';
                 previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
@@ -278,12 +297,16 @@ export class MicroEndRouter extends HTMLElement {
                 }
             }
             this.currentActiveFrame = nextFrame;
+            if(type === 'default'){
+                // we disable this to avoid re-rendering on next change
+                this.suppressRenderBasedOnHash = true;
+                window.history.back();
+            }
         }
     }
 
     connectedCallback(): void {
         this.log('connected');
-        //window.addEventListener('load', this.renderBasedOnHash);
         window.addEventListener('hashchange', this.renderBasedOnHash);
         window.addEventListener('message', this.onMessage);
         (async () => {
@@ -297,7 +320,6 @@ export class MicroEndRouter extends HTMLElement {
 
     disconnectedCallback(): void {
         this.log('disconnected');
-        //window.removeEventListener('load', this.renderBasedOnHash);
         window.removeEventListener('hashchange', this.renderBasedOnHash);
         window.removeEventListener('message', this.onMessage);
     }

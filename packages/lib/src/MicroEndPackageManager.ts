@@ -107,6 +107,7 @@ export class MicroEndPackageManager extends HTMLElement {
             this.style.padding = 'unset';
             this.style.right = '10px';
             this.style.top = '10px';
+            this.style.background = 'unset';
         }
 
     }
