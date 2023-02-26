@@ -191,24 +191,6 @@ export class MicroEndRouter extends HTMLElement {
         return params;
     }
 
-    // findMostMatchingRoute = (pathSegments: string[]) => {
-    //     const mostMatchingPath = Object.keys(this.routingRegistry).filter(key => this.splitSegment(key).length === pathSegments.length).reduce((mostMatchingPath, key) => {
-    //         const routeSegments = this.splitSegment(key);
-    //         let matchingSegment = 0;
-    //         for (let i = 0; i < routeSegments.length; i++) {
-    //             if (routeSegments[i] === pathSegments[i]) {
-    //                 matchingSegment++;
-    //             }
-    //         }
-    //         if (matchingSegment > mostMatchingPath.total) {
-    //             return {path: key, total: matchingSegment};
-    //         }
-    //         return mostMatchingPath;
-    //     }, {path: '', total: 0});
-    //     const routingRegistry = this.routingRegistry[mostMatchingPath.path] || {srcdoc: '', dependency: []};
-    //     return {route: mostMatchingPath.path, srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
-    // }
-
     findMostMatchingRoute = (pathSegments: string[]) => {
         const [path, version] = pathSegments;
         const mostMatchingPath = Object.keys(this.routingRegistry).find(key => {
@@ -371,6 +353,14 @@ const mockObject: MicroEnd = {
     connectService: module => {
         console.log(message(`connectService("${module}")`));
         return {} as any;
+    },
+    createNavigation: handler => {
+        console.log(message(`createNavigation("${handler}")`));
+        return {} as any
+    },
+    connectNavigation: module => {
+        console.log(message(`connectNavigation("${module}")`));
+        return {} as any
     }
 };
 
@@ -602,6 +592,66 @@ const clientTemplate = `
                         action,
                         args: encodeURI(JSON.stringify(args))
                     }, "service");
+                    if(response.success){
+                        return response.result;
+                    }
+                    throw new Error(response.message);
+                }
+            }
+        });
+        return proxy;
+    }
+    me.createNavigation = (handler) => {
+        const navigation = Object.keys(handler).reduce((navigation,key) => {
+            navigation[key] = {
+                params : {},
+                navigateBack : (param) => me.navigateBack({success:true,result:param})
+            }
+            return navigation;
+        },{current:''});
+
+        const paramsChangeHandler = () => {
+            const __handler = handler;
+            
+            let action = 'action' in me.params ? me.params.action : '';
+            // later on we need to be able to send json for service !!!!
+            let args = 'args' in me.params ? me.params.args : '';
+            let callbackBeforeExit = () => {};
+            if (['default','modal'].includes(me.type) && action && args) {
+                const arrayArgs = JSON.parse(decodeURI(args));
+                if (__handler && typeof __handler === 'object' && action in __handler && typeof __handler[action] === 'function') {
+                    // this is to ensure we are calling this one time
+                    try{
+                        navigation.current = action;
+                        navigation[action].params = arrayArgs.length > 0 ? arrayArgs[0] : {};
+                        callbackBeforeExit = __handler[action].apply(null, arrayArgs)
+                    }catch (err){
+                        me.navigateBack({
+                            success: false,
+                            message: err.message
+                        });
+                    }
+                }
+            }
+            // un-mounting
+            return callbackBeforeExit;
+        }
+        me.onMount(paramsChangeHandler);
+        me.onParamsChange(paramsChangeHandler);
+        return navigation;
+    }
+
+    me.connectNavigation = (module) => {
+        const proxy = new Proxy({}, {
+            get(_, action) {
+                return async (...args) => {
+                    const type = args[args.length - 1];
+                    args = args.splice(0,args.length - 1);
+                    
+                    const response = await me.navigateTo(module, {
+                        action,
+                        args: encodeURI(JSON.stringify(args))
+                    }, type);
                     if(response.success){
                         return response.result;
                     }

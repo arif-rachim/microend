@@ -142,9 +142,26 @@ export interface MicroEnd extends Context {
     onFocusChange: (callback: () => (() => void) | void) => (() => void);
     navigateTo: (route: string, params: any, type: NavigateToType) => Promise<any>;
     navigateBack: (value: any) => void;
-    createService: <T extends {[key:string] : (params:any) => Promise<any>}>(handler: T) => T
-    connectService: <T>(module: string) => T
+    createService: <T extends { [key: string]: (params: any) => Promise<any> }>(handler: T) => T
+    connectService: <T extends { [key: string]: (params: any) => Promise<any> }>(module: string) => T,
+    createNavigation: <Handler extends { [k: string]: (param: any) => () => any }>(handler: Handler) => Navigator<Handler, keyof Handler>
+    connectNavigation: <T>(module: string) => NavigatorConnector<Omit<T, 'current'>>
 }
+
+type ExtractParams<T> = T extends { params: infer R } ? R : never;
+type ExtractResults<T> = T extends { navigateBack: (params: infer R) => void } ? R : never;
+type NavigatorConnector<T> = {
+    [K in keyof T]: (params: ExtractParams<T[K]>, type: 'default' | 'modal') => Promise<ExtractResults<T[K]>>
+}
+
+type Parameter<T> = T extends (params: infer P) => any ? P : never;
+type ReturnValue<T> = T extends (params: any) => () => infer P ? P : never;
+type Navigator<Handler, HandlerKey extends keyof Handler> = {
+    [Key in HandlerKey]: {
+        params: Parameter<Handler[Key]>,
+        navigateBack: (param: ReturnValue<Handler[Key]>) => void
+    }
+} & { current: HandlerKey };
 
 
 /**

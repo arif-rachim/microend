@@ -1,2 +1,3 @@
-import type {Service} from "./main";
-export {Service};
+import type {Navigation, Service} from "./main";
+
+export {Service, Navigation};
