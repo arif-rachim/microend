@@ -36,8 +36,8 @@ export class MicroEndPackageManager extends HTMLElement {
         const rowStyle = 'display: flex;flex-direction: row;border-bottom: 1px solid rgba(0,0,0,0.05);padding: 10px';
         this.innerHTML = `<div style="display:flex;flex-direction:column ;width:100%;max-width: 800px">
         <div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px;display: flex;flex-direction: row;align-items: center">
-            <div style="flex-grow: 1;">${moduleName}</div>
-            <button style="border: 1px solid rgba(0,0,0,0.1);padding:5px 10px;border-radius: 5px;background-color: white;font-size:30px" data-exit-button="true;">🔙</button>
+            <button style="border: 1px solid rgba(0,0,0,0.1);padding:5px 10px;border-radius: 5px;background-color: white;font-size:28px" data-exit-button="true;">🔙</button>
+            <div style="flex-grow: 1;margin-left: 10px">${moduleName}</div>
         </div>
         <div style="${rowStyle}">
             <div style="${labelStyle}">Description</div>
@@ -146,9 +146,10 @@ export class MicroEndPackageManager extends HTMLElement {
 
         this.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px;width:100%">
 <div style="font-size: 22px;margin-bottom: 20px;margin-top: 10px;display: flex;flex-direction: row;align-items: center">
-    <microend-moduleloader style="background-color: white;border-radius: 5px"></microend-moduleloader>
+  
+    <button style="border: 1px solid rgba(0,0,0,0.1);padding:5px 10px;border-radius: 5px;background-color: white;font-size:28px" data-exit-button="true">🔙</button>
     <div style="flex-grow: 1;align-items: center">Installed Modules</div>
-    <button style="border: 1px solid rgba(0,0,0,0.1);padding:5px 10px;border-radius: 5px;background-color: white;font-size:30px"" data-exit-button="true">🔙</button>
+    <microend-moduleloader style="background-color: white;border-radius: 5px"></microend-moduleloader>
 </div>
 
 <div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;">${modules.join('')}</div></div>`;

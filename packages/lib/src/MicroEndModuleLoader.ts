@@ -14,7 +14,7 @@ export class MicroEndModuleLoader extends HTMLElement {
         this.style.fontFamily = 'arial';
         this.style.fontSize = '14px';
         this.style.border = '1px solid rgba(0,0,0,0.1)';
-        this.shadowRoot.innerHTML = `<label style="display: flex;flex-direction: column;padding: 10px">
+        this.shadowRoot.innerHTML = `<label style="display: flex;flex-direction: column;padding:7px 10px">
 <div style="display: flex;flex-direction: row;align-items: center">
 <span style="margin-right: 10px;font-size: 20px">📥</span><span>Install</span>
 </div>
