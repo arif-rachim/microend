@@ -77,7 +77,7 @@ export class MicroEndRouter extends HTMLElement {
             this.log('were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
             return;
         }
-        this.log('Route match ', pathAndQuery, route);
+        this.log('Handler match ', pathAndQuery, route);
         const pathParams = this.extractParamsFromPath(route, pathSegments);
         const params = ({...queryParams, ...pathParams});
         const dependencies = dependency.reduce((result: StringKeyValue, dep) => {

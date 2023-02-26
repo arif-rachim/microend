@@ -22,7 +22,7 @@ interface NavigateToMessage extends Intent {
      */
     params: StringKeyValue;
     /**
-     * Route asal si pemanggil navigasi
+     * Handler asal si pemanggil navigasi
      */
     originRoute: string;
     /**
@@ -38,7 +38,7 @@ interface NavigateToMessage extends Intent {
      */
     caller: string;
     /**
-     * Route dari navigasi yang ingin dituju
+     * Handler dari navigasi yang ingin dituju
      */
     route: string;
     /**
@@ -65,7 +65,7 @@ interface NavigateBackMessage extends Intent {
      */
     caller: string,
     /**
-     * Route dari navigasi yang ingin dituju
+     * Handler dari navigasi yang ingin dituju
      */
     route: string;
     /**
