@@ -73,12 +73,18 @@ export class MicroEndPackageManager extends HTMLElement {
             <div style="${labelStyle}">Size</div>
             <div>${formatSize(module.size)}</div>
         </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Navigate</div>
+            <a href="#/${module.path}/${module.version}" data-link="true">/${module.path}/${module.version}</a>
+        </div>
     </div>`
 
         this.querySelector('[data-exit-button]')!.addEventListener('click', () => {
             this.renderPackageList();
         })
-
+        this.querySelectorAll('[data-link]').forEach(e => e.addEventListener('click',() => {
+            this.renderIcon();
+        }))
 
     }
 
@@ -90,26 +96,15 @@ export class MicroEndPackageManager extends HTMLElement {
         })
     }
     setFullScreen = (fullScreen: boolean) => {
-        if (fullScreen) {
-            this.style.right = 'unset';
-            this.style.top = 'unset';
-            this.style.top = '0px';
-            this.style.left = '0px';
-            this.style.width = '100%';
-            this.style.height = '100%';
-            this.style.padding = '10px';
-            this.style.background = '#f2f2f2';
-        } else {
-            this.style.top = 'unset';
-            this.style.left = 'unset';
-            this.style.width = 'unset';
-            this.style.height = 'unset';
-            this.style.padding = 'unset';
-            this.style.right = '10px';
-            this.style.top = '10px';
-            this.style.background = 'unset';
-        }
-
+        this.style.right = fullScreen ? 'unset' : '10px';
+        this.style.top = fullScreen ? '0px':'unset';
+        this.style.bottom = fullScreen ? 'unset':'10px';
+        this.style.left = fullScreen ?'0px':'unset';
+        this.style.width = fullScreen ?'100%':'unset';
+        this.style.padding = fullScreen ?'10px':'unset';
+        this.style.minHeight = fullScreen ?'100%':'unset';
+        this.style.background = fullScreen ?'white':'unset';
+        this.style.overflow = fullScreen ?'unset':'unset';
     }
 
     renderPackageList = async () => {

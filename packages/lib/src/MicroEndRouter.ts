@@ -5,7 +5,7 @@ export const DATABASE_NAME = 'routing-registry';
 export const TABLE_MODULE_NAME = 'module';
 
 // warning use document write is slow, but the code is cleaner when displayed in the screen.
-const useDocumentWrite = true;
+// const useDocumentWrite = true;
 
 const CALLER_ID_KEY = 'callerId';
 
@@ -131,11 +131,11 @@ export class MicroEndRouter extends HTMLElement {
             // });
             const container = this.getContainer();
             if (container) {
-                if (!useDocumentWrite) {
+                if (!this.debugMode) {
                     nextFrame.srcdoc = sourceHtml;
                 }
                 container.append(nextFrame);
-                if (useDocumentWrite && nextFrame.contentWindow) {
+                if (this.debugMode && nextFrame.contentWindow) {
                     const doc = nextFrame.contentWindow.document;
                     doc.open();
                     doc.write(sourceHtml);
