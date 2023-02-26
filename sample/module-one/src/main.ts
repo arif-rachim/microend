@@ -18,6 +18,6 @@ document.querySelector('#button-calling-module-two-model')!.addEventListener('cl
 });
 
 document.querySelector('#button-calling-module-two-view')!.addEventListener('click', async () => {
-    const result = await navigation.getUserInfo({userId: 'Arif Rachim'}, 'default');
+    const result = await navigation.getUserInfo({userId: 'Arif Rachim '+(Math.random()* 100).toFixed()}, 'default');
     alert('WE GOT MESSAGE FROM MODULE getUserInfo ' + result.name);
 });
