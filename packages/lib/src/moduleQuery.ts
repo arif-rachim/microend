@@ -84,13 +84,13 @@ export async function saveAllModules(files: FileList) {
             errors.push(`Version error ${versioningIssue.map(version => `<span style="font-weight: bold;margin:0 5px">"${version}"</span>`).join(', ')}`)
         }
         if(errors.length > 0){
-            return `<div style="flex-direction: row">${file.name+' : '+errors.join(' ')}</div>`
+            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${file.name+' : '+errors.join(' ')}</div>`
         }
         return ''
     }).filter(s => s);
     if(errors.length > 0 ){
         const result = await showModal(`<div style="font-family: Arial">
-<div style="margin-bottom: 10px;font-weight: bold">We are unable to install the modules due to the following errors: </div>
+<div style="margin-bottom: 10px;font-weight: bold">Errors: </div>
 ${errors.map(error => error).join('')}
 </div>`,'Ok');
         return;

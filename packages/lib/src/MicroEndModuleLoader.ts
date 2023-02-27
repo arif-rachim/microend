@@ -12,11 +12,9 @@ export class MicroEndModuleLoader extends HTMLElement {
         this.style.display = 'flex';
         this.style.flexDirection = 'column';
         this.style.fontFamily = 'arial';
-        this.style.fontSize = '14px';
-        this.style.border = '1px solid rgba(0,0,0,0.1)';
         this.shadowRoot.innerHTML = `<label style="display: flex;flex-direction: column;padding:7px 10px">
 <div style="display: flex;flex-direction: row;align-items: center">
-<span style="margin-right: 10px;font-size: 20px">📥</span><span>Install</span>
+<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" width="26" height="26" viewBox="0 0 512 512"><title>Add Circle</title><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
 </div>
 <input type="file" multiple accept="text/html" style="display: none">
 </label>`;
