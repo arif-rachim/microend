@@ -1,7 +1,7 @@
 import {getMicroEnd} from "@microend/lib";
 import {StoreValueRenderer, useStore, useStoreListener} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useState} from "react";
+import {ReactElement, useEffect, useId, useState} from "react";
 import {original, produce} from "immer";
 import {nanoid} from "nanoid";
 const me = getMicroEnd();
@@ -20,6 +20,17 @@ const getPath = (tree: Tree): string => {
     }
     return tree.id;
 }
+const getLeaf = (tree:Tree,path:string) => {
+    const segments = path.split('/');
+    let leaf:Tree = tree;
+    for (const segment of segments) {
+        if(segment === '.'){
+            continue;
+        }
+        leaf = leaf.children.find(t => t.id === segment)!;
+    }
+    return leaf;
+}
 function flatTree(tree:Tree[],result:Tree[]){
     tree.forEach(leaf => {
         result.push(leaf);
@@ -28,6 +39,37 @@ function flatTree(tree:Tree[],result:Tree[]){
     });
     return result;
 }
+
+function RenderTreeNode(props:{tree: Tree,onChange:(value:string) => void}) {
+    const {tree,onChange} = props;
+    const [edit,setEdit] = useState<boolean>(false);
+    const id = useId();
+    useEffect(() => {
+        function onClick(){
+            if(edit){
+                const input:HTMLInputElement = document.getElementById(id)! as HTMLInputElement;
+                onChange(input.value);
+                setEdit(false);
+            }
+        }
+        window.addEventListener('click',onClick);
+        return () => {
+            window.removeEventListener('click',onClick);
+        }
+    },[edit]);
+    return <div key={getPath(tree)} style={{borderBottom: border, minHeight: 22,display:'flex',flexDirection:'column'}} onDoubleClick={() => {
+        setEdit(true);
+    }} onClick={(event) => {
+        if(edit){
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }}>
+        {edit && <input id={id} type="text" defaultValue={tree.name} autoFocus={true} style={{border:"none",padding:'3px 5px'}}/>}
+        {!edit && tree.name}
+    </div>;
+}
+
 function App() {
     const $selectedTab = useStore<'roles' | 'users'>('roles');
     const $showPanel = useStore<ReactElement | undefined>(undefined);
@@ -88,9 +130,17 @@ function App() {
                     Assigned Users
                 </div>
             </div>
-            <StoreValueRenderer store={$flatTree} selector={s => s} render={(tree:Tree[]) => {
+            <StoreValueRenderer store={$flatTree} selector={s => s} render={(trees:Tree[]) => {
                 return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
-
+                    {trees.map(tree => {
+                        return <RenderTreeNode tree={tree} key={getPath(tree)} onChange={(value) => {
+                            const path = getPath(tree);
+                            $dataTree.set(produce(trees => {
+                                const tree:Tree = getLeaf(trees,path);
+                                tree.name = value;
+                            }))
+                        }}/>
+                    })}
                 </div>
             }}/>
         </div>

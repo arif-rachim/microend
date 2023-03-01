@@ -30,7 +30,8 @@ export interface Store<S> {
 }
 
 export function createStoreInitValue<T>(param: T): Store<T> {
-    return { set: () => {
+    return {
+        set: () => {
         }, dispatch: () => {
         }, addListener: () => () => {
         }, get: () => param
@@ -92,8 +93,8 @@ export function useStore<S>(initializer: S | (() => S), reducer?: (action: Actio
         dispatch,
         stateRef,
         addListener,
-        set:setState,
-        get:value
+        set: setState,
+        get: value
     }), [addListener, dispatch, setState, value]);
 }
 
@@ -103,7 +104,7 @@ export function useStoreListener<T, S>(store: Store<T>, selector: (param: T) => 
     propsRef.current = {selector, listener};
     deps = noNull(deps, []);
     useEffect(() => {
-        const t:T = store.get();
+        const t: T = store.get();
         const next = propsRef.current.selector(t);
         propsRef.current.listener(next);
         return store.addListener((nextState: T, prevState: T) => {
@@ -183,8 +184,8 @@ export function StoreValueRenderer<T, S>(props: { store: Store<T>, selector: Sel
 }
 
 function Renderer<T>(props: { renderer: (value: T) => ReactElement, value?: T }) {
-    const value = props.value;
-    return props.renderer(value as any);
+    const value: any = props.value;
+    return props.renderer(value);
 }
 
 const isMatch = (a: any, b: any) => {
