@@ -13,15 +13,27 @@
   "license": "ISC",
   "workspaces": [
     "packages/*",
-    "sample/*"
+    "sample/*",
+	"modules/*"
   ],
   "dependencies": {
     "parcel": "^2.8.3",
     "typescript": "^4.9.5",
-    "@swc/helpers": "^0.4.14"
+    "@swc/helpers": "^0.4.14",
+	"react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "framer-motion": "^9.0.3",
+    "immer": "^9.0.19",
+    "nanoid": "^3.3.1",
+    "react-icons": "^4.7.1"
   },
   "devDependencies": {
     "@parcel/packager-ts": "^2.8.3",
-    "@parcel/transformer-typescript-types": "^2.8.3"
+    "@parcel/transformer-typescript-types": "^2.8.3",
+	"@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react": "^3.1.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.0"
   }
 }
