@@ -4,10 +4,12 @@ import {AnimatePresence, motion} from "framer-motion";
 import {ReactElement, useEffect, useId, useState} from "react";
 import {original, produce} from "immer";
 import {nanoid} from "nanoid";
+import {db} from "./Database";
+
 const me = getMicroEnd();
 const border = '1px solid rgba(0,0,0,0.1)';
 
-interface Tree {
+export interface Tree {
     parent: Tree | undefined,
     name: string
     id: string,
@@ -20,65 +22,82 @@ const getPath = (tree: Tree): string => {
     }
     return tree.id;
 }
-const getLeaf = (tree:Tree,path:string) => {
+const getLeaf = (tree: Tree, path: string) => {
     const segments = path.split('/');
-    let leaf:Tree = tree;
+    let leaf: Tree = tree;
     for (const segment of segments) {
-        if(segment === '.'){
+        if (segment === '.') {
             continue;
         }
         leaf = leaf.children.find(t => t.id === segment)!;
     }
     return leaf;
 }
-function flatTree(tree:Tree[],result:Tree[]){
+
+function flatTree(tree: Tree[], result: Tree[]) {
     tree.forEach(leaf => {
         result.push(leaf);
-        const trees = flatTree(leaf.children,[]);
+        const trees = flatTree(leaf.children, []);
         result = result.concat(trees);
     });
     return result;
 }
 
-function RenderTreeNode(props:{tree: Tree,onChange:(value:string) => void}) {
-    const {tree,onChange} = props;
-    const [edit,setEdit] = useState<boolean>(false);
+function RenderTreeNode(props: { tree: Tree, onChange: (value: string) => void }) {
+    const {tree, onChange} = props;
+    const [edit, setEdit] = useState<boolean>(false);
     const id = useId();
     useEffect(() => {
-        function onClick(){
-            if(edit){
-                const input:HTMLInputElement = document.getElementById(id)! as HTMLInputElement;
+        function onClick() {
+            if (edit) {
+                const input: HTMLInputElement = document.getElementById(id)! as HTMLInputElement;
                 onChange(input.value);
                 setEdit(false);
             }
         }
-        window.addEventListener('click',onClick);
+
+        window.addEventListener('click', onClick);
         return () => {
-            window.removeEventListener('click',onClick);
+            window.removeEventListener('click', onClick);
         }
-    },[edit]);
-    return <div key={getPath(tree)} style={{borderBottom: border, minHeight: 22,display:'flex',flexDirection:'column'}} onDoubleClick={() => {
-        setEdit(true);
-    }} onClick={(event) => {
-        if(edit){
+    }, [edit]);
+    return <div key={getPath(tree)}
+                style={{borderBottom: border, minHeight: 22, display: 'flex', flexDirection: 'column'}}
+                onDoubleClick={() => {
+                    setEdit(true);
+                }} onClick={(event) => {
+        if (edit) {
             event.stopPropagation();
             event.preventDefault();
         }
     }}>
-        {edit && <input id={id} type="text" defaultValue={tree.name} autoFocus={true} style={{border:"none",padding:'3px 5px'}}/>}
+        {edit && <input id={id} type="text" defaultValue={tree.name} autoFocus={true}
+                        style={{border: "none", padding: '3px 5px'}}/>}
         {!edit && tree.name}
     </div>;
 }
 
 function App() {
+
     const $selectedTab = useStore<'roles' | 'users'>('roles');
     const $showPanel = useStore<ReactElement | undefined>(undefined);
-    const $dataTree = useStore<Tree>({parent: undefined, name: '.', id: '.', children: []});
+    const $dataTree = useStore<Tree>({parent: undefined, name: '', id: '.', children: []});
     const $flatTree = useStore<Tree[]>([]);
-    useStoreListener($dataTree,s => s ,(param:Tree) => {
-        const trees:Tree[] = flatTree([param],[]);
+    useEffect(() => {
+        (async () => {
+            const data = await db.roles.get('.');
+            if(data){
+                $dataTree.set(data);
+            }
+        })();
+    },[])
+    useStoreListener($dataTree, s => s, async (param: Tree) => {
+        const trees: Tree[] = flatTree([param], []);
         $flatTree.set(trees);
-    },[]);
+        //const root:Tree|undefined = await db.roles.get('.');
+        db.roles.put(param, '.');
+    }, []);
+
     function showPanel(factory: (close: (result: any) => void) => ReactElement): Promise<any> {
         return new Promise(resolve => {
             const element: ReactElement = factory(resolve);
@@ -105,11 +124,11 @@ function App() {
                 <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
                             onClick={async () => {
                                 $dataTree.set(produce(s => {
-                                    const child:Tree = {
-                                        parent : original(s),
-                                        name : '',
-                                        id : nanoid(),
-                                        children : []
+                                    const child: Tree = {
+                                        parent: original(s),
+                                        name: '',
+                                        id: nanoid(),
+                                        children: []
                                     }
                                     s.children.push(child);
                                 }));
@@ -130,13 +149,13 @@ function App() {
                     Assigned Users
                 </div>
             </div>
-            <StoreValueRenderer store={$flatTree} selector={s => s} render={(trees:Tree[]) => {
+            <StoreValueRenderer store={$flatTree} selector={s => s} render={(trees: Tree[]) => {
                 return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
                     {trees.map(tree => {
                         return <RenderTreeNode tree={tree} key={getPath(tree)} onChange={(value) => {
                             const path = getPath(tree);
                             $dataTree.set(produce(trees => {
-                                const tree:Tree = getLeaf(trees,path);
+                                const tree: Tree = getLeaf(trees, path);
                                 tree.name = value;
                             }))
                         }}/>
