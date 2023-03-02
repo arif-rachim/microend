@@ -1,12 +1,19 @@
 import Dexie, {Table} from "dexie";
-import {Tree} from "./App";
 
-class Database extends Dexie{
-    roles! : Table<Tree>
+export interface Role {
+    parentId: string,
+    id: string,
+    name: string,
+    order: number
+}
+
+class Database extends Dexie {
+    roles!: Table<Role>
+
     constructor() {
         super('iam');
         this.version(1).stores({
-            roles: 'id,name'
+            roles: 'id,name,parentId'
         })
     }
 }

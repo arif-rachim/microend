@@ -1,19 +1,26 @@
 import {getMicroEnd} from "@microend/lib";
-import {StoreValueRenderer, useStore, useStoreListener} from "./useStore";
+import {Store, StoreValueRenderer, useStore, useStoreValue} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useEffect, useId, useState} from "react";
-import {original, produce} from "immer";
+import {ReactElement, useEffect, useId, useRef, useState} from "react";
 import {nanoid} from "nanoid";
-import {db} from "./Database";
+import {db, Role} from "./Database";
 
 const me = getMicroEnd();
 const border = '1px solid rgba(0,0,0,0.1)';
+
+const rootRole: Role = {
+    name: 'root',
+    id: '.',
+    parentId: '',
+    order: 0
+}
 
 export interface Tree {
     parent: Tree | undefined,
     name: string
     id: string,
-    children: Tree[]
+    children: Tree[],
+    order: number
 }
 
 const getPath = (tree: Tree): string => {
@@ -22,6 +29,7 @@ const getPath = (tree: Tree): string => {
     }
     return tree.id;
 }
+
 const getLeaf = (tree: Tree, path: string) => {
     const segments = path.split('/');
     let leaf: Tree = tree;
@@ -34,19 +42,79 @@ const getLeaf = (tree: Tree, path: string) => {
     return leaf;
 }
 
-function flatTree(tree: Tree[], result: Tree[]) {
-    tree.forEach(leaf => {
-        result.push(leaf);
-        const trees = flatTree(leaf.children, []);
+const constructTree = (roles: Role[]) => {
+
+    const tree: Tree = {
+        parent: undefined,
+        name: rootRole.name,
+        id: rootRole.id,
+        order: rootRole.order,
+        children: []
+    }
+    return roles.reduce((root: Tree, role) => {
+        const stacks: Role[] = [];
+        let currentRole: Role | undefined = role;
+        do {
+            if (currentRole) {
+                stacks.unshift(currentRole);
+                let parentRole = roles.find(r => r.id === currentRole!.parentId);
+                if (parentRole === undefined && currentRole.parentId === rootRole.id) {
+                    parentRole = rootRole
+                }
+                currentRole = parentRole;
+            }
+        } while (currentRole)
+
+        let leaf: Tree = root;
+        for (let i = 1; i < stacks.length; i++) {
+            const role: Role = stacks[i];
+            const child = leaf.children.find(l => l.id === role.id);
+            if (child) {
+                leaf = child;
+            } else {
+                let child: Tree = {
+                    parent: leaf,
+                    children: [],
+                    name: role.name,
+                    id: role.id,
+                    order: role.order
+                }
+                leaf.children.push(child);
+                leaf = child;
+            }
+        }
+        return root;
+    }, tree)
+}
+const getVal = (val: any, key: string, defaultVal: any): any => {
+    const keys = key.split('.');
+    for (const k of keys) {
+        if (typeof val === 'object' && k in val) {
+            val = val[k];
+        } else {
+            return defaultVal;
+        }
+    }
+    return val;
+}
+type RoleLevel = Role & { level: number }
+
+function flatTree(tree: Tree[], result: RoleLevel[], level: number) {
+    tree.sort((a, b) => a.order - b.order).forEach((leaf: Tree) => {
+        result.push({name: leaf.name, id: leaf.id, parentId: getVal(leaf, 'parent.id', ''), order: leaf.order, level});
+        const trees = flatTree(leaf.children, [], level + 1);
         result = result.concat(trees);
     });
     return result;
 }
 
-function RenderTreeNode(props: { tree: Tree, onChange: (value: string) => void }) {
-    const {tree, onChange} = props;
+function RenderTreeNode(props: { role: RoleLevel, onChange: (value: string) => void, $focusedRole: Store<Role | undefined> }) {
+    const {role, onChange, $focusedRole} = props;
     const [edit, setEdit] = useState<boolean>(false);
     const id = useId();
+    const isFocused = useStoreValue($focusedRole, param => {
+        return param && role ? param.id === role.id : false
+    }, [])
     useEffect(() => {
         function onClick() {
             if (edit) {
@@ -61,52 +129,55 @@ function RenderTreeNode(props: { tree: Tree, onChange: (value: string) => void }
             window.removeEventListener('click', onClick);
         }
     }, [edit]);
-    return <div key={getPath(tree)}
-                style={{borderBottom: border, minHeight: 22, display: 'flex', flexDirection: 'column'}}
-                onDoubleClick={() => {
-                    setEdit(true);
-                }} onClick={(event) => {
+    return <motion.div style={{
+        borderBottom: border,
+        minHeight: 22,
+        display: 'flex',
+        flexDirection: 'column',
+        paddingLeft: 10 * role.level
+    }}
+                       initial={{backgroundColor: isFocused ? '#EEEEEE' : '#FFFFFF'}}
+                       animate={{backgroundColor: isFocused ? '#EEEEEE' : '#FFFFFF'}}
+                       onDoubleClick={() => {
+                           setEdit(true);
+                       }} onClick={(event) => {
+        $focusedRole.set(role);
         if (edit) {
             event.stopPropagation();
             event.preventDefault();
         }
     }}>
-        {edit && <input id={id} type="text" defaultValue={tree.name} autoFocus={true}
+        {edit && <input id={id} type="text" defaultValue={role.name} autoFocus={true}
                         style={{border: "none", padding: '3px 5px'}}/>}
-        {!edit && tree.name}
-    </div>;
+        {!edit && <div>{role.name} : {role.order}</div>}
+    </motion.div>;
+}
+
+async function refreshTable($rolesTree: Store<Tree>, $roles: Store<RoleLevel[]>) {
+    const roles = await db.roles.toArray();
+    const roleTree: Tree = constructTree(roles);
+    const orderedRole = flatTree([roleTree], [], 0);
+    $rolesTree.set(roleTree);
+    $roles.set(orderedRole);
 }
 
 function App() {
 
     const $selectedTab = useStore<'roles' | 'users'>('roles');
     const $showPanel = useStore<ReactElement | undefined>(undefined);
-    const $dataTree = useStore<Tree>({parent: undefined, name: '', id: '.', children: []});
-    const $flatTree = useStore<Tree[]>([]);
+    const $roles = useStore<RoleLevel[]>([]);
+    const movingRow = useRef<RoleLevel[]>([]);
+    const $rolesTree = useStore<Tree>({
+        parent: undefined,
+        name: rootRole.name,
+        id: rootRole.id,
+        children: [],
+        order: 1
+    });
+    const $focusedRole = useStore<Role | undefined>(undefined);
     useEffect(() => {
-        (async () => {
-            const data = await db.roles.get('.');
-            if(data){
-                $dataTree.set(data);
-            }
-        })();
-    },[])
-    useStoreListener($dataTree, s => s, async (param: Tree) => {
-        const trees: Tree[] = flatTree([param], []);
-        $flatTree.set(trees);
-        //const root:Tree|undefined = await db.roles.get('.');
-        db.roles.put(param, '.');
+        refreshTable($rolesTree, $roles).then()
     }, []);
-
-    function showPanel(factory: (close: (result: any) => void) => ReactElement): Promise<any> {
-        return new Promise(resolve => {
-            const element: ReactElement = factory(resolve);
-            $showPanel.set(element);
-        }).then(result => {
-            $showPanel.set(undefined);
-            return Promise.resolve(result);
-        });
-    }
 
     return (<div
         style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative'}}>
@@ -123,15 +194,16 @@ function App() {
                 <div style={{flexGrow: 1}}></div>
                 <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
                             onClick={async () => {
-                                $dataTree.set(produce(s => {
-                                    const child: Tree = {
-                                        parent: original(s),
-                                        name: '',
-                                        id: nanoid(),
-                                        children: []
-                                    }
-                                    s.children.push(child);
-                                }));
+                                // here we are adding roles to data !
+                                const focusedRole = $focusedRole.get();
+                                const parentId = focusedRole ? focusedRole.id : rootRole.id;
+                                await addRole({
+                                    parentId: parentId,
+                                    id: nanoid(),
+                                    name: '',
+                                    order: 1
+                                });
+                                await refreshTable($rolesTree, $roles);
                             }}>
                     Add Roles
                 </motion.div>
@@ -149,16 +221,16 @@ function App() {
                     Assigned Users
                 </div>
             </div>
-            <StoreValueRenderer store={$flatTree} selector={s => s} render={(trees: Tree[]) => {
+            <StoreValueRenderer store={$roles} selector={s => s} render={(roles: RoleLevel[]) => {
                 return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
-                    {trees.map(tree => {
-                        return <RenderTreeNode tree={tree} key={getPath(tree)} onChange={(value) => {
-                            const path = getPath(tree);
-                            $dataTree.set(produce(trees => {
-                                const tree: Tree = getLeaf(trees, path);
-                                tree.name = value;
-                            }))
-                        }}/>
+                    {roles.filter(r => r.id !== rootRole.id).map((role, index) => {
+                        return <RenderTreeNode role={role}
+                                               key={role.id}
+                                               onChange={async (value) => {
+                                                   await renameRole(role.id, value);
+                                                   await refreshTable($rolesTree, $roles);
+                                               }}
+                                               $focusedRole={$focusedRole}/>
                     })}
                 </div>
             }}/>
@@ -198,37 +270,25 @@ function App() {
     </div>)
 }
 
-function RoleForm(params: { close: (result: any) => void }) {
-    const {close} = params;
-    return <div style={{display: 'flex', flexDirection: 'column'}}>
-        <div style={{fontSize: '1.2rem', borderBottom: border, padding: '5px 10px'}}>Add New Roles</div>
-        <div style={{padding: 10, backgroundColor: '#F9F9F9'}}>
-            <label style={{display: 'flex', flexDirection: 'column', marginBottom: 10}}>
-                <div>Role Name</div>
-                <input style={{border: border, padding: '5px 10px', width: 200, fontSize: '1rem'}}/>
-            </label>
-            <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <div style={{
-                    backgroundColor: 'white',
-                    border,
-                    padding: '5px 10px',
-                    borderRadius: 5,
-                    cursor: 'pointer',
-                    marginRight: 5
-                }} onClick={() => {
-                    close('');
-                }}>
-                    Save
-                </div>
-                <div style={{backgroundColor: 'white', border, padding: '5px 10px', borderRadius: 5, cursor: 'pointer'}}
-                     onClick={() => {
-                         close(false);
-                     }}>
-                    Cancel
-                </div>
-            </div>
-        </div>
-    </div>
+
+async function addRole(role: Role, insertBefore?: string) {
+    const children = await db.roles.where({parentId: role.parentId}).toArray();
+    role.order = children.length;
+    await db.roles.put(role, role.id);
+    const sortedChildren = children.sort((a, b) => a.order - b.order);
+    if (insertBefore) {
+        const index = sortedChildren.findIndex(c => c.id === insertBefore);
+        sortedChildren.splice(index, 0, role);
+    }
+    for (let i = 0; i < sortedChildren.length; i++) {
+        const role = sortedChildren[i];
+        role.order = i;
+        await db.roles.update(role.id, {order: i});
+    }
+}
+
+async function renameRole(id: string, name: string) {
+    await db.roles.update(id, {name})
 }
 
 export default App
