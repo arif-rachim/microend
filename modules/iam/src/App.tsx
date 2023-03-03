@@ -1,9 +1,10 @@
 import {getMicroEnd} from "@microend/lib";
 import {Store, StoreValueRenderer, useStore, useStoreValue} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useEffect, useId, useRef, useState} from "react";
+import {ReactElement, useEffect, useId, useState} from "react";
 import {nanoid} from "nanoid";
 import {db, Role} from "./Database";
+import {AiOutlineDelete} from "react-icons/ai";
 
 const me = getMicroEnd();
 const border = '1px solid rgba(0,0,0,0.1)';
@@ -28,18 +29,6 @@ const getPath = (tree: Tree): string => {
         return getPath(tree.parent) + '/' + tree.id;
     }
     return tree.id;
-}
-
-const getLeaf = (tree: Tree, path: string) => {
-    const segments = path.split('/');
-    let leaf: Tree = tree;
-    for (const segment of segments) {
-        if (segment === '.') {
-            continue;
-        }
-        leaf = leaf.children.find(t => t.id === segment)!;
-    }
-    return leaf;
 }
 
 const constructTree = (roles: Role[]) => {
@@ -97,24 +86,42 @@ const getVal = (val: any, key: string, defaultVal: any): any => {
     }
     return val;
 }
-type RoleLevel = Role & { level: number }
+type RoleLevel = Role & { level: number, children: Tree[] }
 
 function flatTree(tree: Tree[], result: RoleLevel[], level: number) {
     tree.sort((a, b) => a.order - b.order).forEach((leaf: Tree) => {
-        result.push({name: leaf.name, id: leaf.id, parentId: getVal(leaf, 'parent.id', ''), order: leaf.order, level});
+        result.push({name: leaf.name, id: leaf.id, parentId: getVal(leaf, 'parent.id', ''), order: leaf.order, level,children:leaf.children});
         const trees = flatTree(leaf.children, [], level + 1);
         result = result.concat(trees);
     });
     return result;
 }
 
-function RenderTreeNode(props: { role: RoleLevel, onChange: (value: string) => void, $focusedRole: Store<Role | undefined> }) {
-    const {role, onChange, $focusedRole} = props;
-    const [edit, setEdit] = useState<boolean>(false);
+function RenderTreeNode(props: {
+    role: RoleLevel,
+    onChange: (value: string) => void,
+    onDelete: (role: RoleLevel) => void,
+    $focusedRole: Store<Role | undefined>,
+    $rowBeingDragHover: Store<RoleLevel | undefined>,
+    $rowBeingDrag: Store<RoleLevel | undefined>
+}) {
+
+    const {role, onChange, $focusedRole, $rowBeingDragHover, $rowBeingDrag, onDelete} = props;
+    const [edit, setEdit] = useState<boolean>(true);
     const id = useId();
     const isFocused = useStoreValue($focusedRole, param => {
+        return param  && role ? param.id === role.id : false
+    }, []);
+    const isBeingDrag = useStoreValue($rowBeingDrag, param => {
         return param && role ? param.id === role.id : false
     }, [])
+    const isDragHover = useStoreValue($rowBeingDragHover, param => {
+        const rowBeingDrag = $rowBeingDrag.get();
+        if (param && rowBeingDrag && param.id === rowBeingDrag.id) {
+            return false;
+        }
+        return param && role ? param.id === role.id : false
+    }, []);
     useEffect(() => {
         function onClick() {
             if (edit) {
@@ -129,27 +136,60 @@ function RenderTreeNode(props: { role: RoleLevel, onChange: (value: string) => v
             window.removeEventListener('click', onClick);
         }
     }, [edit]);
+
     return <motion.div style={{
-        borderBottom: border,
+        opacity: isBeingDrag ? 0.2 : 1,
         minHeight: 22,
         display: 'flex',
         flexDirection: 'column',
-        paddingLeft: 10 * role.level
+        paddingLeft: 10 * role.level,
+        backgroundColor: isDragHover ? 'yellow' : isFocused ? '#EEEEEE' : '#FFFFFF',
+        borderBottom: border
     }}
-                       initial={{backgroundColor: isFocused ? '#EEEEEE' : '#FFFFFF'}}
-                       animate={{backgroundColor: isFocused ? '#EEEEEE' : '#FFFFFF'}}
                        onDoubleClick={() => {
                            setEdit(true);
-                       }} onClick={(event) => {
-        $focusedRole.set(role);
-        if (edit) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    }}>
+                       }}
+                       onClick={(event) => {
+                           $focusedRole.set(role);
+                           if (edit) {
+                               event.stopPropagation();
+                               event.preventDefault();
+                           }
+                       }}
+                       draggable={true}
+                       onDragOver={(event) => {
+                           event.preventDefault();
+                           $rowBeingDragHover.set(role);
+                       }}
+                       onDragLeave={() => {
+                           if ($rowBeingDragHover.get() === role) {
+                               $rowBeingDragHover.set(undefined);
+                           }
+                       }}
+                       onDragEnd={() => {
+                           $rowBeingDragHover.set(undefined);
+                           $rowBeingDrag.set(undefined);
+                       }}
+                       onDragStart={() => {
+                           $rowBeingDrag.set(role)
+                       }}
+    >
         {edit && <input id={id} type="text" defaultValue={role.name} autoFocus={true}
                         style={{border: "none", padding: '3px 5px'}}/>}
-        {!edit && <div>{role.name} : {role.order}</div>}
+        {!edit && <div style={{display: 'flex'}}>{role.name}
+            <div style={{flexGrow: 1}}/>
+            <div style={{
+                cursor: "pointer",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingRight: '10px'
+            }} onClick={async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onDelete(role);
+            }}><AiOutlineDelete style={{fontSize: 18}}/></div>
+        </div>}
     </motion.div>;
 }
 
@@ -166,7 +206,8 @@ function App() {
     const $selectedTab = useStore<'roles' | 'users'>('roles');
     const $showPanel = useStore<ReactElement | undefined>(undefined);
     const $roles = useStore<RoleLevel[]>([]);
-    const movingRow = useRef<RoleLevel[]>([]);
+    const $rowBeingDragHover = useStore<RoleLevel | undefined>(undefined);
+    const $rowBeingDrag = useStore<RoleLevel | undefined>(undefined);
     const $rolesTree = useStore<Tree>({
         parent: undefined,
         name: rootRole.name,
@@ -174,6 +215,7 @@ function App() {
         children: [],
         order: 1
     });
+
     const $focusedRole = useStore<Role | undefined>(undefined);
     useEffect(() => {
         refreshTable($rolesTree, $roles).then()
@@ -230,7 +272,16 @@ function App() {
                                                    await renameRole(role.id, value);
                                                    await refreshTable($rolesTree, $roles);
                                                }}
-                                               $focusedRole={$focusedRole}/>
+                                               onDelete={async (role: RoleLevel) => {
+                                                   $focusedRole.set(undefined);
+                                                   await deleteRoles([role]);
+                                                   await refreshTable($rolesTree, $roles);
+                                               }}
+                                               $focusedRole={$focusedRole}
+                                               $rowBeingDragHover={$rowBeingDragHover}
+                                               $rowBeingDrag={$rowBeingDrag}
+
+                        />
                     })}
                 </div>
             }}/>
@@ -289,6 +340,13 @@ async function addRole(role: Role, insertBefore?: string) {
 
 async function renameRole(id: string, name: string) {
     await db.roles.update(id, {name})
+}
+
+async function deleteRoles(role:{id:string,children:any[]}[]) {
+    for (const roleElement of role) {
+        await deleteRoles(roleElement.children);
+        await db.roles.delete(roleElement.id);
+    }
 }
 
 export default App
