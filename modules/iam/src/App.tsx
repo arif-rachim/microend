@@ -86,11 +86,19 @@ const getVal = (val: any, key: string, defaultVal: any): any => {
     }
     return val;
 }
-type RoleLevel = Role & { level: number, children: Tree[] }
+type RoleLevel = Role & { level: number, children: Tree[], parent: Tree | undefined }
 
 function flatTree(tree: Tree[], result: RoleLevel[], level: number) {
     tree.sort((a, b) => a.order - b.order).forEach((leaf: Tree) => {
-        result.push({name: leaf.name, id: leaf.id, parentId: getVal(leaf, 'parent.id', ''), order: leaf.order, level,children:leaf.children});
+        result.push({
+            name: leaf.name,
+            id: leaf.id,
+            parentId: getVal(leaf, 'parent.id', ''),
+            order: leaf.order,
+            level,
+            children: leaf.children,
+            parent: leaf.parent
+        });
         const trees = flatTree(leaf.children, [], level + 1);
         result = result.concat(trees);
     });
@@ -101,16 +109,17 @@ function RenderTreeNode(props: {
     role: RoleLevel,
     onChange: (value: string) => void,
     onDelete: (role: RoleLevel) => void,
+    onDrop: (role: RoleLevel) => void,
     $focusedRole: Store<Role | undefined>,
     $rowBeingDragHover: Store<RoleLevel | undefined>,
     $rowBeingDrag: Store<RoleLevel | undefined>
 }) {
 
-    const {role, onChange, $focusedRole, $rowBeingDragHover, $rowBeingDrag, onDelete} = props;
+    const {role, onChange, $focusedRole, $rowBeingDragHover, $rowBeingDrag, onDelete, onDrop} = props;
     const [edit, setEdit] = useState<boolean>(true);
     const id = useId();
     const isFocused = useStoreValue($focusedRole, param => {
-        return param  && role ? param.id === role.id : false
+        return param && role ? param.id === role.id : false
     }, []);
     const isBeingDrag = useStoreValue($rowBeingDrag, param => {
         return param && role ? param.id === role.id : false
@@ -165,6 +174,9 @@ function RenderTreeNode(props: {
                            if ($rowBeingDragHover.get() === role) {
                                $rowBeingDragHover.set(undefined);
                            }
+                       }}
+                       onDrop={() => {
+                           onDrop($rowBeingDrag.get()!)
                        }}
                        onDragEnd={() => {
                            $rowBeingDragHover.set(undefined);
@@ -277,6 +289,10 @@ function App() {
                                                    await deleteRoles([role]);
                                                    await refreshTable($rolesTree, $roles);
                                                }}
+                                               onDrop={async (draggedRole: RoleLevel) => {
+                                                   await moveRoleTo(draggedRole, role);
+                                                   await refreshTable($rolesTree, $roles);
+                                               }}
                                                $focusedRole={$focusedRole}
                                                $rowBeingDragHover={$rowBeingDragHover}
                                                $rowBeingDrag={$rowBeingDrag}
@@ -342,11 +358,26 @@ async function renameRole(id: string, name: string) {
     await db.roles.update(id, {name})
 }
 
-async function deleteRoles(role:{id:string,children:any[]}[]) {
+async function deleteRoles(role: { id: string, children: any[] }[]) {
     for (const roleElement of role) {
         await deleteRoles(roleElement.children);
         await db.roles.delete(roleElement.id);
     }
+}
+
+async function moveRoleTo(roleToMove: { id: string, parentId: string, children: { id: string }[] }, parent: { id: string, parent: any }) {
+
+    let targetParent: any = parent;
+    do{
+        if(targetParent && targetParent.id === roleToMove.id){
+            return;
+        }
+    }while(targetParent = targetParent.parent)
+
+
+    await db.roles.update(roleToMove.id, {
+        parentId: parent.id
+    });
 }
 
 export default App
