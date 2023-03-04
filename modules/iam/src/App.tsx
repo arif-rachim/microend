@@ -1,280 +1,43 @@
 import {getMicroEnd} from "@microend/lib";
-import {Store, StoreValueRenderer, useStore, useStoreListener, useStoreValue} from "./useStore";
+import {StoreValueRenderer, useStore} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useEffect, useId, useState} from "react";
+import {ReactElement, useEffect} from "react";
 import {nanoid} from "nanoid";
-import {db, Role} from "./Database";
-import {AiOutlineDelete} from "react-icons/ai";
+import {db, TreeItem} from "./Database";
+import {DataTree, rootRole} from "./tree/DataTree";
 
 const me = getMicroEnd();
+
 const border = '1px solid rgba(0,0,0,0.1)';
 
-const rootRole: Role = {
-    name: 'root',
-    id: '.',
-    parentId: '',
-    order: 0
+export interface Branch extends TreeItem {
+    parent: Branch | undefined,
+    children: Branch[]
 }
 
-export interface Tree {
-    parent: Tree | undefined,
-    name: string
-    id: string,
-    children: Tree[],
-    order: number
-}
-
-const getPath = (tree: Tree): string => {
-    if (tree.parent) {
-        return getPath(tree.parent) + '/' + tree.id;
+const getPath = (branch: Branch): string => {
+    if (branch.parent) {
+        return getPath(branch.parent) + '/' + branch.id;
     }
-    return tree.id;
+    return branch.id;
 }
 
-const constructTree = (roles: Role[]) => {
-
-    const tree: Tree = {
-        parent: undefined,
-        name: rootRole.name,
-        id: rootRole.id,
-        order: rootRole.order,
-        children: []
-    }
-    return roles.reduce((root: Tree, role) => {
-        const stacks: Role[] = [];
-        let currentRole: Role | undefined = role;
-        do {
-            if (currentRole) {
-                stacks.unshift(currentRole);
-                let parentRole = roles.find(r => r.id === currentRole!.parentId);
-                if (parentRole === undefined && currentRole.parentId === rootRole.id) {
-                    parentRole = rootRole
-                }
-                currentRole = parentRole;
-            }
-        } while (currentRole)
-
-        let leaf: Tree = root;
-        for (let i = 1; i < stacks.length; i++) {
-            const role: Role = stacks[i];
-            const child = leaf.children.find(l => l.id === role.id);
-            if (child) {
-                leaf = child;
-            } else {
-                let child: Tree = {
-                    parent: leaf,
-                    children: [],
-                    name: role.name,
-                    id: role.id,
-                    order: role.order
-                }
-                leaf.children.push(child);
-                leaf = child;
-            }
-        }
-        return root;
-    }, tree)
-}
-const getVal = (val: any, key: string, defaultVal: any): any => {
-    const keys = key.split('.');
-    for (const k of keys) {
-        if (typeof val === 'object' && k in val) {
-            val = val[k];
-        } else {
-            return defaultVal;
-        }
-    }
-    return val;
-}
-type RoleLevel = Role & { level: number, children: Tree[], parent: Tree | undefined }
-
-function flatTree(tree: Tree[], result: RoleLevel[], level: number) {
-    tree.sort((a, b) => a.order - b.order).forEach((leaf: Tree) => {
-        result.push({
-            name: leaf.name,
-            id: leaf.id,
-            parentId: getVal(leaf, 'parent.id', ''),
-            order: leaf.order,
-            level,
-            children: leaf.children,
-            parent: leaf.parent
-        });
-        const trees = flatTree(leaf.children, [], level + 1);
-        result = result.concat(trees);
-    });
-    return result;
-}
-
-function RenderTreeNode(props: {
-    role: RoleLevel,
-    onChange: (value: string) => void,
-    onDelete: (role: RoleLevel) => void,
-    onDrop: (role: RoleLevel) => void,
-    $focusedRole: Store<Role | undefined>,
-    $rowBeingDragHover: Store<RoleLevel | undefined>,
-    $rowBeingDrag: Store<RoleLevel | undefined>
-}) {
-
-    const {role, onChange, $focusedRole, $rowBeingDragHover, $rowBeingDrag, onDelete, onDrop} = props;
-    const [edit, setEdit] = useState<boolean>(true);
-    const id = useId();
-    const isFocused = useStoreValue($focusedRole, param => {
-        return param && role ? param.id === role.id : false
-    }, []);
-    const isBeingDrag = useStoreValue($rowBeingDrag, param => {
-        return param && role ? param.id === role.id : false
-    }, [])
-    const isDragHover = useStoreValue($rowBeingDragHover, param => {
-        const rowBeingDrag = $rowBeingDrag.get();
-        if (param && rowBeingDrag && param.id === rowBeingDrag.id) {
-            return false;
-        }
-        return param && role ? param.id === role.id : false
-    }, []);
-    useEffect(() => {
-        function onClick() {
-            if (edit) {
-                const input: HTMLInputElement = document.getElementById(id)! as HTMLInputElement;
-                onChange(input.value);
-                setEdit(false);
-            }
-        }
-
-        window.addEventListener('click', onClick);
-        return () => {
-            window.removeEventListener('click', onClick);
-        }
-    }, [edit]);
-
-    return <motion.div style={{
-        opacity: isBeingDrag ? 0.2 : 1,
-        minHeight: 22,
-        display: 'flex',
-        flexDirection: 'column',
-        paddingLeft: 10 * role.level,
-        backgroundColor: isDragHover ? 'yellow' : isFocused ? '#EEEEEE' : '#FFFFFF',
-        borderBottom: border
-    }}
-                       onDoubleClick={() => {
-                           setEdit(true);
-                       }}
-                       onClick={(event) => {
-                           $focusedRole.set(role);
-                           if (edit) {
-                               event.stopPropagation();
-                               event.preventDefault();
-                           }
-                       }}
-                       draggable={true}
-                       onDragOver={(event) => {
-                           event.preventDefault();
-                           $rowBeingDragHover.set(role);
-                       }}
-                       onDragLeave={() => {
-                           if ($rowBeingDragHover.get() === role) {
-                               $rowBeingDragHover.set(undefined);
-                           }
-                       }}
-                       onDrop={() => {
-                           onDrop($rowBeingDrag.get()!)
-                       }}
-                       onDragEnd={() => {
-                           $rowBeingDragHover.set(undefined);
-                           $rowBeingDrag.set(undefined);
-                       }}
-                       onDragStart={() => {
-                           $rowBeingDrag.set(role)
-                       }}
-    >
-        {edit && <input id={id} type="text" defaultValue={role.name} autoFocus={true}
-                        style={{border: "none", padding: '3px 5px'}}/>}
-        {!edit && <div style={{display: 'flex'}}>{role.name}
-            <div style={{flexGrow: 1}}/>
-            <div style={{
-                cursor: "pointer",
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingRight: '10px'
-            }} onClick={async (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onDelete(role);
-            }}><AiOutlineDelete style={{fontSize: 18}}/></div>
-        </div>}
-    </motion.div>;
-}
-
-
-function DataTree(props: { $roles: Store<Role[]>, refreshTable: () => Promise<void>, $focusedRole: Store<Role | undefined> }) {
-    const {$focusedRole, refreshTable, $roles} = props;
-    const $rolesAndLevel = useStore<RoleLevel[]>([]);
-    const $rowBeingDragHover = useStore<RoleLevel | undefined>(undefined);
-    const $rowBeingDrag = useStore<RoleLevel | undefined>(undefined);
-    const $rolesTree = useStore<Tree>({
-        parent: undefined,
-        name: rootRole.name,
-        id: rootRole.id,
-        children: [],
-        order: 1
-    });
-    useStoreListener($roles, r => r, (roles) => {
-        const roleTree: Tree = constructTree(roles);
-        const orderedRole = flatTree([roleTree], [], 0);
-        $rolesTree.set(roleTree);
-        $rolesAndLevel.set(orderedRole);
-    })
-    return <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <div style={{display: 'flex', backgroundColor: '#F2F2F2', borderBottom: border, borderTop: border}}>
-            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1, borderRight: border}}>
-                <div style={{padding: '5px 10px'}}>
-                    Role Name
-                </div>
-                <input style={{border: 'none', borderTop: border, padding: '5px 10px'}}/>
-            </div>
-            <div style={{padding: '5px 10px'}}>
-                Assigned Users
-            </div>
-        </div>
-        <StoreValueRenderer store={$rolesAndLevel} selector={s => s} render={(roles: RoleLevel[]) => {
-            return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
-                {roles.filter(r => r.id !== rootRole.id).map((role, index) => {
-                    return <RenderTreeNode role={role}
-                                           key={role.id}
-                                           onChange={async (value) => {
-                                               await renameRole(role.id, value);
-                                               await refreshTable();
-                                           }}
-                                           onDelete={async (role: RoleLevel) => {
-                                               $focusedRole.set(undefined);
-                                               await deleteRoles([role]);
-                                               await refreshTable();
-                                           }}
-                                           onDrop={async (draggedRole: RoleLevel) => {
-                                               await moveRoleTo(draggedRole, role);
-                                               await refreshTable();
-                                           }}
-                                           $focusedRole={$focusedRole}
-                                           $rowBeingDragHover={$rowBeingDragHover}
-                                           $rowBeingDrag={$rowBeingDrag}
-
-                    />
-                })}
-            </div>
-        }}/>
-    </div>;
-}
 
 function App() {
 
     const $selectedTab = useStore<'roles' | 'users'>('roles');
     const $showPanel = useStore<ReactElement | undefined>(undefined);
-    const $focusedRole = useStore<Role | undefined>(undefined);
-    const $roles = useStore<Role[]>([]);
+    const $focusedRole = useStore<TreeItem | undefined>(undefined);
+    const $roles = useStore<TreeItem[]>([]);
 
     async function refreshTable() {
         const roles = await db.roles.toArray();
         $roles.set(roles);
+    }
+
+    async function onRenameItem(role: TreeItem, value: string) {
+        await renameRole(role.id, value);
+        await refreshTable();
     }
 
 
@@ -312,7 +75,20 @@ function App() {
                 </motion.div>
             </div>
         }}/>
-        <DataTree $roles={$roles} refreshTable={refreshTable} $focusedRole={$focusedRole}/>
+        <DataTree $treeData={$roles} $focusedItem={$focusedRole}
+                  onItemChange={async (id, value) => {
+                      await renameRole(id, value.name ?? '');
+                      await refreshTable();
+                  }}
+                  onItemDelete={async role => {
+                      await deleteRoles([role]);
+                      await refreshTable();
+                  }}
+                  onItemMove={async (source, target) => {
+                      await moveRoleTo(source, target);
+                      await refreshTable();
+                  }}
+        />
         <StoreValueRenderer store={$showPanel} selector={s => s} render={(s) => {
             const showPanel = s !== undefined;
             return <motion.div style={{
@@ -349,7 +125,7 @@ function App() {
 }
 
 
-async function addRole(role: Role, insertBefore?: string) {
+async function addRole(role: TreeItem, insertBefore?: string) {
     const children = await db.roles.where({parentId: role.parentId}).toArray();
     role.order = children.length;
     await db.roles.put(role, role.id);
@@ -376,7 +152,7 @@ async function deleteRoles(role: { id: string, children: any[] }[]) {
     }
 }
 
-async function moveRoleTo(roleToMove: { id: string, parentId: string, children: { id: string }[] }, parent: { id: string, parent: any }) {
+async function moveRoleTo(roleToMove: Branch, parent: Branch) {
 
     let targetParent: any = parent;
     do {

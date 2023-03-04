@@ -1,6 +1,6 @@
 import Dexie, {Table} from "dexie";
 
-export interface Role {
+export interface TreeItem {
     parentId: string,
     id: string,
     name: string,
@@ -8,7 +8,7 @@ export interface Role {
 }
 
 class Database extends Dexie {
-    roles!: Table<Role>
+    roles!: Table<TreeItem>
 
     constructor() {
         super('iam');
