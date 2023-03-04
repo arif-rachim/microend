@@ -1,5 +1,5 @@
 import {getMicroEnd} from "@microend/lib";
-import {Store, StoreValueRenderer, useStore, useStoreValue} from "./useStore";
+import {Store, StoreValueRenderer, useStore, useStoreListener, useStoreValue} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
 import {ReactElement, useEffect, useId, useState} from "react";
 import {nanoid} from "nanoid";
@@ -205,19 +205,10 @@ function RenderTreeNode(props: {
     </motion.div>;
 }
 
-async function refreshTable($rolesTree: Store<Tree>, $roles: Store<RoleLevel[]>) {
-    const roles = await db.roles.toArray();
-    const roleTree: Tree = constructTree(roles);
-    const orderedRole = flatTree([roleTree], [], 0);
-    $rolesTree.set(roleTree);
-    $roles.set(orderedRole);
-}
 
-function App() {
-
-    const $selectedTab = useStore<'roles' | 'users'>('roles');
-    const $showPanel = useStore<ReactElement | undefined>(undefined);
-    const $roles = useStore<RoleLevel[]>([]);
+function DataTree(props: { $roles: Store<Role[]>, refreshTable: () => Promise<void>, $focusedRole: Store<Role | undefined> }) {
+    const {$focusedRole, refreshTable, $roles} = props;
+    const $rolesAndLevel = useStore<RoleLevel[]>([]);
     const $rowBeingDragHover = useStore<RoleLevel | undefined>(undefined);
     const $rowBeingDrag = useStore<RoleLevel | undefined>(undefined);
     const $rolesTree = useStore<Tree>({
@@ -227,11 +218,69 @@ function App() {
         children: [],
         order: 1
     });
+    useStoreListener($roles, r => r, (roles) => {
+        const roleTree: Tree = constructTree(roles);
+        const orderedRole = flatTree([roleTree], [], 0);
+        $rolesTree.set(roleTree);
+        $rolesAndLevel.set(orderedRole);
+    })
+    return <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+        <div style={{display: 'flex', backgroundColor: '#F2F2F2', borderBottom: border, borderTop: border}}>
+            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1, borderRight: border}}>
+                <div style={{padding: '5px 10px'}}>
+                    Role Name
+                </div>
+                <input style={{border: 'none', borderTop: border, padding: '5px 10px'}}/>
+            </div>
+            <div style={{padding: '5px 10px'}}>
+                Assigned Users
+            </div>
+        </div>
+        <StoreValueRenderer store={$rolesAndLevel} selector={s => s} render={(roles: RoleLevel[]) => {
+            return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
+                {roles.filter(r => r.id !== rootRole.id).map((role, index) => {
+                    return <RenderTreeNode role={role}
+                                           key={role.id}
+                                           onChange={async (value) => {
+                                               await renameRole(role.id, value);
+                                               await refreshTable();
+                                           }}
+                                           onDelete={async (role: RoleLevel) => {
+                                               $focusedRole.set(undefined);
+                                               await deleteRoles([role]);
+                                               await refreshTable();
+                                           }}
+                                           onDrop={async (draggedRole: RoleLevel) => {
+                                               await moveRoleTo(draggedRole, role);
+                                               await refreshTable();
+                                           }}
+                                           $focusedRole={$focusedRole}
+                                           $rowBeingDragHover={$rowBeingDragHover}
+                                           $rowBeingDrag={$rowBeingDrag}
 
+                    />
+                })}
+            </div>
+        }}/>
+    </div>;
+}
+
+function App() {
+
+    const $selectedTab = useStore<'roles' | 'users'>('roles');
+    const $showPanel = useStore<ReactElement | undefined>(undefined);
     const $focusedRole = useStore<Role | undefined>(undefined);
+    const $roles = useStore<Role[]>([]);
+
+    async function refreshTable() {
+        const roles = await db.roles.toArray();
+        $roles.set(roles);
+    }
+
+
     useEffect(() => {
-        refreshTable($rolesTree, $roles).then()
-    }, []);
+        refreshTable().then()
+    }, [])
 
     return (<div
         style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative'}}>
@@ -257,51 +306,13 @@ function App() {
                                     name: '',
                                     order: 1
                                 });
-                                await refreshTable($rolesTree, $roles);
+                                await refreshTable();
                             }}>
                     Add Roles
                 </motion.div>
             </div>
         }}/>
-        <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-            <div style={{display: 'flex', backgroundColor: '#F2F2F2', borderBottom: border, borderTop: border}}>
-                <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1, borderRight: border}}>
-                    <div style={{padding: '5px 10px'}}>
-                        Role Name
-                    </div>
-                    <input style={{border: 'none', borderTop: border, padding: '5px 10px'}}/>
-                </div>
-                <div style={{padding: '5px 10px'}}>
-                    Assigned Users
-                </div>
-            </div>
-            <StoreValueRenderer store={$roles} selector={s => s} render={(roles: RoleLevel[]) => {
-                return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
-                    {roles.filter(r => r.id !== rootRole.id).map((role, index) => {
-                        return <RenderTreeNode role={role}
-                                               key={role.id}
-                                               onChange={async (value) => {
-                                                   await renameRole(role.id, value);
-                                                   await refreshTable($rolesTree, $roles);
-                                               }}
-                                               onDelete={async (role: RoleLevel) => {
-                                                   $focusedRole.set(undefined);
-                                                   await deleteRoles([role]);
-                                                   await refreshTable($rolesTree, $roles);
-                                               }}
-                                               onDrop={async (draggedRole: RoleLevel) => {
-                                                   await moveRoleTo(draggedRole, role);
-                                                   await refreshTable($rolesTree, $roles);
-                                               }}
-                                               $focusedRole={$focusedRole}
-                                               $rowBeingDragHover={$rowBeingDragHover}
-                                               $rowBeingDrag={$rowBeingDrag}
-
-                        />
-                    })}
-                </div>
-            }}/>
-        </div>
+        <DataTree $roles={$roles} refreshTable={refreshTable} $focusedRole={$focusedRole}/>
         <StoreValueRenderer store={$showPanel} selector={s => s} render={(s) => {
             const showPanel = s !== undefined;
             return <motion.div style={{
@@ -368,11 +379,11 @@ async function deleteRoles(role: { id: string, children: any[] }[]) {
 async function moveRoleTo(roleToMove: { id: string, parentId: string, children: { id: string }[] }, parent: { id: string, parent: any }) {
 
     let targetParent: any = parent;
-    do{
-        if(targetParent && targetParent.id === roleToMove.id){
+    do {
+        if (targetParent && targetParent.id === roleToMove.id) {
             return;
         }
-    }while(targetParent = targetParent.parent)
+    } while (targetParent = targetParent.parent)
 
 
     await db.roles.update(roleToMove.id, {
