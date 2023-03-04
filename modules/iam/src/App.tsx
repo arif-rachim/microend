@@ -1,43 +1,25 @@
 import {getMicroEnd} from "@microend/lib";
 import {StoreValueRenderer, useStore} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useEffect} from "react";
+import {ReactElement, useEffect, useRef} from "react";
 import {nanoid} from "nanoid";
 import {db, TreeItem} from "./Database";
-import {DataTree, rootRole} from "./tree/DataTree";
+import {Branch, DataTree, DataTreeRef, rootRole} from "./tree/DataTree";
 
 const me = getMicroEnd();
 
 const border = '1px solid rgba(0,0,0,0.1)';
 
-export interface Branch extends TreeItem {
-    parent: Branch | undefined,
-    children: Branch[]
-}
-
-const getPath = (branch: Branch): string => {
-    if (branch.parent) {
-        return getPath(branch.parent) + '/' + branch.id;
-    }
-    return branch.id;
-}
-
-
 function App() {
 
     const $selectedTab = useStore<'roles' | 'users'>('roles');
     const $showPanel = useStore<ReactElement | undefined>(undefined);
-    const $focusedRole = useStore<TreeItem | undefined>(undefined);
+    const dataTreeRef = useRef<DataTreeRef>(null);
     const $roles = useStore<TreeItem[]>([]);
 
     async function refreshTable() {
         const roles = await db.roles.toArray();
         $roles.set(roles);
-    }
-
-    async function onRenameItem(role: TreeItem, value: string) {
-        await renameRole(role.id, value);
-        await refreshTable();
     }
 
 
@@ -61,7 +43,7 @@ function App() {
                 <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
                             onClick={async () => {
                                 // here we are adding roles to data !
-                                const focusedRole = $focusedRole.get();
+                                const focusedRole = dataTreeRef.current?.$focusedItem.get();
                                 const parentId = focusedRole ? focusedRole.id : rootRole.id;
                                 await addRole({
                                     parentId: parentId,
@@ -75,7 +57,8 @@ function App() {
                 </motion.div>
             </div>
         }}/>
-        <DataTree $treeData={$roles} $focusedItem={$focusedRole}
+        <DataTree $treeData={$roles}
+                  ref={dataTreeRef}
                   onItemChange={async (id, value) => {
                       await renameRole(id, value.name ?? '');
                       await refreshTable();
