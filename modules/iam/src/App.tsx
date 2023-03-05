@@ -5,6 +5,7 @@ import {ReactElement, useEffect, useRef, useState} from "react";
 import {nanoid} from "nanoid";
 import {db} from "./Database";
 import {Branch, DataTree, DataTreeRef, rootRole, TreeItem} from "./tree/DataTree";
+import {Visible} from "./utils/Visible";
 
 const me = getMicroEnd();
 
@@ -39,8 +40,7 @@ function App() {
     return (<div
         style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative'}}>
         <div style={{display: 'flex', padding: 5}}>
-            <Toggle value={selectedTab} dataProvider={['Roles','User']} onChange={value => {
-                console.log('setting value',value);
+            <Toggle value={selectedTab} dataProvider={['Roles','Users']} onChange={value => {
                 setSelectedTab(value as any);
             }} />
             <div style={{flexGrow: 1}}></div>
@@ -57,7 +57,13 @@ function App() {
                             });
                             await refreshTable();
                         }}>
-                Add Roles
+                <Visible if={selectedTab === 'Roles'}>
+                    <div>Add Roles</div>
+                </Visible>
+                <Visible if={selectedTab === 'Users'}>
+                    <div>Add Users</div>
+                </Visible>
+
             </motion.div>
         </div>
         <DataTree $treeData={$roles}

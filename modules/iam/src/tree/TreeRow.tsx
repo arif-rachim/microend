@@ -3,7 +3,7 @@ import {useEffect, useId, useState} from "react";
 import {motion} from "framer-motion";
 import {AiOutlineDelete} from "react-icons/ai";
 import {border, BranchWithLevel, TreeItem} from "./DataTree";
-import {Visible} from "../utils/View";
+import {Visible} from "../utils/Visible";
 import {IoFolderOpenOutline, IoFolderOutline} from "react-icons/all";
 
 
@@ -66,7 +66,7 @@ export function TreeRow(props: {
         minHeight: 22,
         display: 'flex',
         flexDirection: 'column',
-        paddingLeft: 20 * row.level,
+        paddingLeft: 20 * (row.level - 1),
         backgroundColor: isDragHover ? 'yellow' : isFocused ? '#EEEEEE' : '#FFFFFF',
         borderBottom: border
     }}
@@ -107,15 +107,15 @@ export function TreeRow(props: {
         </Visible>
         <Visible if={!edit}>
             <div style={{display: 'flex', alignItems: 'center'}}>
-                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'content', marginRight: 5}}
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'content', margin: '0px 5px'}}
                      onClick={() => {
                          onToggleFolder(row);
                      }}>
                     <Visible if={!isClosed}>
-                        <IoFolderOpenOutline style={{fontSize: 20}}/>
+                        <IoFolderOpenOutline style={{fontSize: 18}}/>
                     </Visible>
                     <Visible if={isClosed}>
-                        <IoFolderOutline style={{fontSize: 20}}/>
+                        <IoFolderOutline style={{fontSize: 18}}/>
                     </Visible>
                 </div>
                 <div style={{flexGrow: 1}}>{row.name}</div>

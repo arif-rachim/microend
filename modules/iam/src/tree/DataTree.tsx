@@ -55,15 +55,15 @@ export const DataTree = forwardRef(function DataTree(props: {
         $rows.set(orderedRole);
     })
     return <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-        <div style={{display: 'flex', backgroundColor: '#F2F2F2', borderBottom: border, borderTop: border}}>
-            <div style={{display: 'flex', flexDirection: 'column', flexGrow: 1, borderRight: border}}>
-                <div style={{padding: '5px 10px'}}>
-                    Role Name
-                </div>
-                <input style={{border: 'none', borderTop: border, padding: '5px 10px'}}/>
+        <div style={{display: 'flex', backgroundColor: '#F2F2F2', borderBottom: border, borderTop: border,padding:'3px 5px'}}>
+            <div style={{flexGrow:1}}>
+                Role Name
             </div>
-            <div style={{padding: '5px 10px'}}>
+            <div>
                 Assigned Users
+            </div>
+            <div style={{width:30}}>
+
             </div>
         </div>
         <StoreValueRenderer store={$rows} selector={s => s} render={(rows: BranchWithLevel[]) => {
