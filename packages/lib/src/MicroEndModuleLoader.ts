@@ -14,7 +14,7 @@ export class MicroEndModuleLoader extends HTMLElement {
         this.style.fontFamily = 'arial';
         this.shadowRoot.innerHTML = `<label style="display: flex;flex-direction: column;padding:7px 10px">
 <div style="display: flex;flex-direction: row;align-items: center">
-<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" width="26" height="26" viewBox="0 0 512 512"><title>Add Circle</title><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" width="26" height="26" viewBox="0 0 512 512"><title>Add</title><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
 </div>
 <input type="file" multiple accept="text/html" style="display: none">
 </label>`;

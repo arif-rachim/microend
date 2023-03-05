@@ -1,9 +1,8 @@
 import {Store, useStoreValue} from "../useStore";
-import {TreeItem} from "../Database";
 import {useEffect, useId, useState} from "react";
 import {motion} from "framer-motion";
 import {AiOutlineDelete} from "react-icons/ai";
-import {border, BranchWithLevel} from "./DataTree";
+import {border, BranchWithLevel, TreeItem} from "./DataTree";
 import {Visible} from "../utils/View";
 import {IoFolderOpenOutline, IoFolderOutline} from "react-icons/all";
 

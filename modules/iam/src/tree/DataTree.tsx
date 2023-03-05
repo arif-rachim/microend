@@ -1,11 +1,17 @@
 import {Store, StoreValueRenderer, useStore, useStoreListener} from "../useStore";
-import {TreeItem} from "../Database";
 import {TreeRow} from "./TreeRow";
 import {ForwardedRef, forwardRef, useImperativeHandle} from "react";
 
-
 export type BranchWithLevel = Branch & { level: number };
 export const border = '1px solid rgba(0,0,0,0.1)';
+
+export interface TreeItem {
+    parentId: string,
+    id: string,
+    name: string,
+    order: number
+}
+
 
 export const rootRole: TreeItem = {
     name: 'root',
@@ -17,6 +23,7 @@ export const rootRole: TreeItem = {
 export type DataTreeRef = {
     $focusedItem: Store<TreeItem | undefined>
 }
+
 export const DataTree = forwardRef(function DataTree(props: {
     $treeData: Store<TreeItem[]>,
     onItemChange: (id: string, value: Partial<TreeItem>) => void,

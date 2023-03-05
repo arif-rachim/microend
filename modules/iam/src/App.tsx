@@ -1,18 +1,29 @@
 import {getMicroEnd} from "@microend/lib";
 import {StoreValueRenderer, useStore} from "./useStore";
 import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useEffect, useRef} from "react";
+import {ReactElement, useEffect, useRef, useState} from "react";
 import {nanoid} from "nanoid";
-import {db, TreeItem} from "./Database";
-import {Branch, DataTree, DataTreeRef, rootRole} from "./tree/DataTree";
+import {db} from "./Database";
+import {Branch, DataTree, DataTreeRef, rootRole, TreeItem} from "./tree/DataTree";
 
 const me = getMicroEnd();
 
 const border = '1px solid rgba(0,0,0,0.1)';
 
+function Toggle(props: { value: string, dataProvider: string[], onChange: (param: string) => void }) {
+    const {dataProvider, value, onChange} = props;
+    return <div style={{display: 'flex', flexDirection: 'row'}}>
+        {dataProvider.map(s => {
+            return <motion.div key={s} style={{border, padding: '3px 10px', cursor: 'pointer'}}
+                               animate={{backgroundColor: value === s ? '#CCC' : '#FFF'}}
+                               onClick={() => onChange(s)}>{s}</motion.div>
+        })}
+    </div>;
+}
+
 function App() {
 
-    const $selectedTab = useStore<'roles' | 'users'>('roles');
+    const [selectedTab,setSelectedTab] = useState<'Roles'|'Users'>('Roles')
     const $showPanel = useStore<ReactElement | undefined>(undefined);
     const dataTreeRef = useRef<DataTreeRef>(null);
     const $roles = useStore<TreeItem[]>([]);
@@ -22,41 +33,33 @@ function App() {
         $roles.set(roles);
     }
 
-
     useEffect(() => {
         refreshTable().then()
     }, [])
-
     return (<div
         style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative'}}>
-        <StoreValueRenderer store={$selectedTab} selector={s => s} render={(value) => {
-            return <div style={{display: 'flex', padding: 5}}>
-                <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}}
-                            animate={{backgroundColor: value === 'roles' ? '#CCC' : '#FFF'}}
-                            onClick={() => $selectedTab.set('roles')}>Roles
-                </motion.div>
-                <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}}
-                            animate={{backgroundColor: value === 'users' ? '#CCC' : '#FFF'}}
-                            onClick={() => $selectedTab.set('users')}>Users
-                </motion.div>
-                <div style={{flexGrow: 1}}></div>
-                <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
-                            onClick={async () => {
-                                // here we are adding roles to data !
-                                const focusedRole = dataTreeRef.current?.$focusedItem.get();
-                                const parentId = focusedRole ? focusedRole.id : rootRole.id;
-                                await addRole({
-                                    parentId: parentId,
-                                    id: nanoid(),
-                                    name: '',
-                                    order: 1
-                                });
-                                await refreshTable();
-                            }}>
-                    Add Roles
-                </motion.div>
-            </div>
-        }}/>
+        <div style={{display: 'flex', padding: 5}}>
+            <Toggle value={selectedTab} dataProvider={['Roles','User']} onChange={value => {
+                console.log('setting value',value);
+                setSelectedTab(value as any);
+            }} />
+            <div style={{flexGrow: 1}}></div>
+            <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
+                        onClick={async () => {
+                            // here we are adding roles to data !
+                            const focusedRole = dataTreeRef.current?.$focusedItem.get();
+                            const parentId = focusedRole ? focusedRole.id : rootRole.id;
+                            await addRole({
+                                parentId: parentId,
+                                id: nanoid(),
+                                name: '',
+                                order: 1
+                            });
+                            await refreshTable();
+                        }}>
+                Add Roles
+            </motion.div>
+        </div>
         <DataTree $treeData={$roles}
                   ref={dataTreeRef}
                   onItemChange={async (id, value) => {
@@ -72,6 +75,7 @@ function App() {
                       await refreshTable();
                   }}
         />
+
         <StoreValueRenderer store={$showPanel} selector={s => s} render={(s) => {
             const showPanel = s !== undefined;
             return <motion.div style={{
