@@ -32,7 +32,7 @@ the `microend` object or the `me` object, both of which are accessible via the o
 been installed into the MicroEnd App will events such as `onMount`, `onFocusChange`, and `onParamsChange` be called.
 
 Imagine you are developing a shopping cart and payment module for an e-commerce application. The Shopping Cart module
-contains a list of items the user will checkout, whereas the Payment Module contains a checkout function that accepts
+contains a list of items the user will check out, whereas the Payment Module contains a checkout function that accepts
 the total amount of items to be paid for.
 
 Using the microend object's `navigateTo` method, you can call the payment module from the shopping cart module.
@@ -47,3 +47,42 @@ to the dom when called and unmounted from the dom after `navigateBack`.
 Nonetheless, we can keep a module mounted in the browser even if it calls `navigateBack`. If this module is called
 again, the `onFocusChange` and `onParamsChange` lifecycles will be invoked, along with any parameter changes. To return
 to the calling module, `navigateBack` can be used.
+
+## Service and Navigation
+When using the `navigateTo` command to call a module, we pass the module's key and value as parameters.
+The module we want to open will then accept and process the parameters provided by the calling module.
+However, as a module grows, it necessitates a simpler, clearer communication mechanism between modules. 
+Utilizing the typescript programming language's compilation feature is one way to get around this.
+The microend adds features called `service` and `navigation` on top of the `navigateTo` communication method.
+The microend's `service` and `navigation` modules can communicate with one another by using the typescript async callback.
+This approach clarifies and streamlines communication between modules on the microend.
+
+a module registering service `hello` and `exampleService`
+```typescript jsx
+const me = getMicroEnd();
+
+const service = me.createService({
+    hello: async () => {
+        return 'world';
+    },
+    exampleService: async ({name, password}: { name: string, password: string }) => {
+        console.log('user submitting password', password);
+        return {
+            helloUser: {name},
+            message: 'This is message from client'
+        }
+    }
+});
+export type Service = typeof service;
+```
+another module consuming the service
+```typescript jsx
+const me = getMicroEnd();
+const service = me.connectService<Service>('module-two');
+
+document.querySelector('#button-calling-module-two')!.addEventListener('click', async () => {
+    const result = await service.hello();
+    const resultTwo = await service.exampleService({name: 'arif', password: 'hore'});
+    alert('WE GOT MESSAGE FROM MODULE TWO ' + result + ' ' + resultTwo.helloUser.name);
+});
+```
