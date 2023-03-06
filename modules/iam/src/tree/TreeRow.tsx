@@ -30,7 +30,7 @@ export function TreeRow(props: {
         onToggleFolder,
         $toggleRows
     } = props;
-    const [edit, setEdit] = useState<boolean>(true);
+    const [edit, setEdit] = useState<boolean>(false);
     const id = useId();
     const isFocused = useStoreValue($focusedItem, param => {
         return param && row ? param.id === row.id : false

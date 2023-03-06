@@ -1,11 +1,13 @@
 import {getMicroEnd} from "@microend/lib";
-import {StoreValueRenderer, useStore} from "./useStore";
-import {AnimatePresence, motion} from "framer-motion";
-import {ReactElement, useEffect, useRef, useState} from "react";
+import {useStore} from "./useStore";
+import {motion} from "framer-motion";
+import {useEffect, useRef, useState} from "react";
 import {nanoid} from "nanoid";
-import {db} from "./Database";
+import {db, User} from "./Database";
 import {Branch, DataTree, DataTreeRef, rootRole, TreeItem} from "./tree/DataTree";
 import {Visible} from "./utils/Visible";
+import {DataGrid} from "./grid/DataGrid";
+import {useSlidePanel} from "./slide/SlidePanel";
 
 const me = getMicroEnd();
 
@@ -23,11 +25,10 @@ function Toggle(props: { value: string, dataProvider: string[], onChange: (param
 }
 
 function App() {
-
-    const [selectedTab,setSelectedTab] = useState<'Roles'|'Users'>('Roles')
-    const $showPanel = useStore<ReactElement | undefined>(undefined);
+    const [selectedTab, setSelectedTab] = useState<'Roles' | 'Users'>('Roles')
     const dataTreeRef = useRef<DataTreeRef>(null);
     const $roles = useStore<TreeItem[]>([]);
+    const $users = useStore<User[]>([])
 
     async function refreshTable() {
         const roles = await db.roles.toArray();
@@ -36,26 +37,48 @@ function App() {
 
     useEffect(() => {
         refreshTable().then()
-    }, [])
+    }, []);
+
+    async function addNewRole() {
+        const focusedRole = dataTreeRef.current?.$focusedItem.get();
+        const parentId = focusedRole ? focusedRole.id : rootRole.id;
+        await addRole({
+            parentId: parentId,
+            id: nanoid(),
+            name: '',
+            order: 1
+        });
+        await refreshTable();
+    }
+
+    const [showPanel, SlidePanel] = useSlidePanel();
+
+    async function addNewUser() {
+
+        const result = await showPanel<string>(closePanel => {
+            return <button onClick={() => {
+                closePanel('hello')
+            }}>SEDAP GAN
+            </button>
+        });
+
+    }
+
     return (<div
         style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative'}}>
         <div style={{display: 'flex', padding: 5}}>
-            <Toggle value={selectedTab} dataProvider={['Roles','Users']} onChange={value => {
+            <Toggle value={selectedTab} dataProvider={['Roles', 'Users']} onChange={value => {
                 setSelectedTab(value as any);
-            }} />
+            }}/>
             <div style={{flexGrow: 1}}></div>
             <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
                         onClick={async () => {
-                            // here we are adding roles to data !
-                            const focusedRole = dataTreeRef.current?.$focusedItem.get();
-                            const parentId = focusedRole ? focusedRole.id : rootRole.id;
-                            await addRole({
-                                parentId: parentId,
-                                id: nanoid(),
-                                name: '',
-                                order: 1
-                            });
-                            await refreshTable();
+                            if (selectedTab === 'Roles') {
+                                await addNewRole();
+                            }
+                            if (selectedTab === 'Users') {
+                                await addNewUser();
+                            }
                         }}>
                 <Visible if={selectedTab === 'Roles'}>
                     <div>Add Roles</div>
@@ -63,57 +86,51 @@ function App() {
                 <Visible if={selectedTab === 'Users'}>
                     <div>Add Users</div>
                 </Visible>
-
             </motion.div>
         </div>
-        <DataTree $treeData={$roles}
-                  ref={dataTreeRef}
-                  onItemChange={async (id, value) => {
-                      await renameRole(id, value.name ?? '');
-                      await refreshTable();
-                  }}
-                  onItemDelete={async role => {
-                      await deleteRoles([role]);
-                      await refreshTable();
-                  }}
-                  onItemMove={async (source, target) => {
-                      await moveRoleTo(source, target);
-                      await refreshTable();
-                  }}
-        />
-
-        <StoreValueRenderer store={$showPanel} selector={s => s} render={(s) => {
-            const showPanel = s !== undefined;
-            return <motion.div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                alignItems: 'center'
-            }}
-                               initial={{y: '-100%'}}
-                               animate={{y: showPanel ? '0' : '-100%'}}
-                               exit={{y: '-100%'}}
-                               transition={{bounce: 0}}
-            >
-                <AnimatePresence>
-                    {showPanel &&
-                        <motion.div style={{
-                            backgroundColor: '#F2F2F2',
-                            boxShadow: '0 5px 5px -3px rgba(0,0,0,0.3)',
-                            borderBottomRightRadius: 10,
-                            borderBottomLeftRadius: 10
-                        }}
-                                    initial={{opacity: 0}}
-                                    animate={{opacity: 1}}
-                                    exit={{opacity: 0}}>
-                            {$showPanel.get()}
-                        </motion.div>
-                    }
-                </AnimatePresence>
-            </motion.div>
-        }}/>
+        <Visible if={selectedTab === 'Roles'}>
+            <DataTree $treeData={$roles}
+                      ref={dataTreeRef}
+                      onItemChange={async (id, value) => {
+                          await renameRole(id, value.name ?? '');
+                          await refreshTable();
+                      }}
+                      onItemDelete={async role => {
+                          await deleteRoles([role]);
+                          await refreshTable();
+                      }}
+                      onItemMove={async (source, target) => {
+                          await moveRoleTo(source, target);
+                          await refreshTable();
+                      }}
+            />
+        </Visible>
+        <Visible if={selectedTab === 'Users'}>
+            <DataGrid $gridData={$users} columns={{
+                name: {
+                    title: 'Name',
+                    headerStyle: {},
+                    cellStyle: {},
+                    width: '50%',
+                    renderer: ({value}) => <label>{value}</label>
+                },
+                email: {
+                    title: 'E-Mail',
+                    headerStyle: {},
+                    cellStyle: {},
+                    width: '25%',
+                    renderer: ({value}) => <label>{value}</label>
+                },
+                phoneNumber: {
+                    title: 'Phone Number',
+                    headerStyle: {},
+                    cellStyle: {},
+                    width: '25%',
+                    renderer: ({value}) => <label>{value}</label>
+                }
+            }} columnKey={'id'}/>
+        </Visible>
+        {SlidePanel}
     </div>)
 }
 

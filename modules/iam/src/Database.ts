@@ -1,7 +1,7 @@
 import Dexie, {Table} from "dexie";
 import {TreeItem} from "./tree/DataTree";
 
-interface User {
+export interface User {
     id: string,
     name: string,
     email: string,
