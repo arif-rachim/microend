@@ -5,11 +5,11 @@ export interface ConnectionState {
     iceConnectionState?: RTCIceConnectionState,
     connectionState?: RTCPeerConnectionState,
     signallingState?: RTCSignalingState,
-    dataState?:RTCDataChannelState
+    dataState?: RTCDataChannelState
 }
 
 export function debug(props: { peerConnection: RTCPeerConnection, name: string, $connectionState: Store<ConnectionState> }) {
-    const {peerConnection, name,$connectionState} = props;
+    const {peerConnection, name, $connectionState} = props;
     const refreshState = () => {
         $connectionState.set(old => {
             const newState = {...old};
@@ -35,11 +35,11 @@ export function debug(props: { peerConnection: RTCPeerConnection, name: string, 
 }
 
 export function debugChannel(props: { dataChannel: RTCDataChannel, name: string, $connectionState: Store<ConnectionState> }) {
-    const {dataChannel, name,$connectionState} = props;
-    const refreshState = () => $connectionState.set(data => ({...data,dataState:dataChannel.readyState}));
-    dataChannel.addEventListener('open',refreshState);
-    dataChannel.addEventListener('closing',refreshState);
-    dataChannel.addEventListener('close',refreshState);
-    dataChannel.addEventListener('error',refreshState);
+    const {dataChannel, name, $connectionState} = props;
+    const refreshState = () => $connectionState.set(data => ({...data, dataState: dataChannel.readyState}));
+    dataChannel.addEventListener('open', refreshState);
+    dataChannel.addEventListener('closing', refreshState);
+    dataChannel.addEventListener('close', refreshState);
+    dataChannel.addEventListener('error', refreshState);
 
 }

@@ -102,7 +102,7 @@ export function useStoreListener<T, S>(store: Store<T>, selector: (param: T) => 
 
     const propsRef = useRef({selector, listener});
     propsRef.current = {selector, listener};
-    deps = deps ? deps  : [];
+    deps = deps ? deps : [];
     useEffect(() => {
         const t: T = store.get();
         const next = propsRef.current.selector(t);
