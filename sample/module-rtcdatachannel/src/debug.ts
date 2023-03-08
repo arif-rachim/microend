@@ -1,25 +1,45 @@
-export function debug(props: { peerConnection: RTCPeerConnection, name: string }) {
-    const {peerConnection, name} = props;
-    peerConnection.addEventListener('icegatheringstatechange', (event) => console.log(name, 'icegatheringstatechange', peerConnection.iceGatheringState))
-    peerConnection.addEventListener('iceconnectionstatechange', (event) => console.log(name, 'iceconnectionstatechange', peerConnection.iceConnectionState))
-    peerConnection.addEventListener('icecandidateerror', (event) => console.log(name, 'icecandidateerror'))
+import {Store} from "./useStore";
+
+export interface ConnectionState {
+    iceGatheringState?: RTCIceGatheringState,
+    iceConnectionState?: RTCIceConnectionState,
+    connectionState?: RTCPeerConnectionState,
+    signallingState?: RTCSignalingState,
+    dataState?:RTCDataChannelState
+}
+
+export function debug(props: { peerConnection: RTCPeerConnection, name: string, $connectionState: Store<ConnectionState> }) {
+    const {peerConnection, name,$connectionState} = props;
+    const refreshState = () => {
+        $connectionState.set(old => {
+            const newState = {...old};
+            newState.signallingState = peerConnection.signalingState;
+            newState.connectionState = peerConnection.connectionState;
+            newState.iceGatheringState = peerConnection.iceGatheringState;
+            newState.iceConnectionState = peerConnection.iceConnectionState;
+            return newState;
+        });
+    }
+    peerConnection.addEventListener('icegatheringstatechange', refreshState)
+    peerConnection.addEventListener('iceconnectionstatechange', refreshState)
+    peerConnection.addEventListener('icecandidateerror', refreshState)
     peerConnection.addEventListener('icecandidate', (event: RTCPeerConnectionIceEvent) => {
         const candidate = event.candidate;
         if (candidate) {
             console.log(name, 'icecandidate', candidate);
         }
     })
-    peerConnection.addEventListener('connectionstatechange', (event) => console.log(name, 'connectionstatechange', peerConnection.connectionState))
-    peerConnection.addEventListener('negotiationneeded', (event) => console.log(name, 'negotiationneeded'))
-    peerConnection.addEventListener('signalingstatechange', (event) => console.log(name, 'signalingstatechange', peerConnection.signalingState))
+    peerConnection.addEventListener('connectionstatechange', refreshState)
+    peerConnection.addEventListener('negotiationneeded', refreshState)
+    peerConnection.addEventListener('signalingstatechange', refreshState)
 }
 
-export function debugChannel(props: { dataChannel: RTCDataChannel, name: string }) {
-    const {dataChannel, name} = props;
-    dataChannel.addEventListener('open', () => console.log(name, 'datachannel', 'open', dataChannel.readyState))
-    dataChannel.addEventListener('close', () => console.log(name, 'datachannel', 'close', dataChannel.readyState))
-    dataChannel.addEventListener('error', () => console.log(name, 'datachannel', 'error', dataChannel.readyState))
-    dataChannel.addEventListener('closing', () => console.log(name, 'datachannel', 'closing', dataChannel.readyState))
-
+export function debugChannel(props: { dataChannel: RTCDataChannel, name: string, $connectionState: Store<ConnectionState> }) {
+    const {dataChannel, name,$connectionState} = props;
+    const refreshState = () => $connectionState.set(data => ({...data,dataState:dataChannel.readyState}));
+    dataChannel.addEventListener('open',refreshState);
+    dataChannel.addEventListener('closing',refreshState);
+    dataChannel.addEventListener('close',refreshState);
+    dataChannel.addEventListener('error',refreshState);
 
 }
