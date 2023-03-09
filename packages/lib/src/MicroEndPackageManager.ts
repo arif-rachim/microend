@@ -84,7 +84,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.querySelector('[data-exit-button]')!.addEventListener('click', () => {
             this.renderPackageList();
         })
-        this.querySelectorAll('[data-link]').forEach(e => e.addEventListener('click',() => {
+        this.querySelectorAll('[data-link]').forEach(e => e.addEventListener('click', () => {
             this.renderIcon();
         }))
 
@@ -101,14 +101,14 @@ export class MicroEndPackageManager extends HTMLElement {
     }
     setFullScreen = (fullScreen: boolean) => {
         this.style.right = fullScreen ? 'unset' : '30px';
-        this.style.top = fullScreen ? '0px':'unset';
-        this.style.bottom = fullScreen ? 'unset':'30px';
-        this.style.left = fullScreen ?'0px':'unset';
-        this.style.width = fullScreen ?'100%':'unset';
-        this.style.padding = fullScreen ?'10px':'unset';
-        this.style.minHeight = fullScreen ?'100%':'unset';
-        this.style.background = fullScreen ?'white':'unset';
-        this.style.overflow = fullScreen ?'unset':'unset';
+        this.style.top = fullScreen ? '0px' : 'unset';
+        this.style.bottom = fullScreen ? 'unset' : '30px';
+        this.style.left = fullScreen ? '0px' : 'unset';
+        this.style.width = fullScreen ? '100%' : 'unset';
+        this.style.padding = fullScreen ? '10px' : 'unset';
+        this.style.minHeight = fullScreen ? '100%' : 'unset';
+        this.style.background = fullScreen ? 'white' : 'unset';
+        this.style.overflow = fullScreen ? 'unset' : 'unset';
     }
 
     renderPackageList = async () => {

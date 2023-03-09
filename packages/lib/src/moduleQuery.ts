@@ -54,68 +54,83 @@ async function findModulesToBeUpgrade(modules: Module[], allInstalledModules: Mo
     }, []);
 
 }
-const validate = (value:any,errors:string[],message:string) => (value === undefined || value === null || value === '') && errors.push(message)
-const versionIsValid = (version:string) => version.split('.').reduce((isNumber,number) => parseInt(number) >= 0 && isNumber,true)
-const validateVersioning = (value:string,errors:string[],message:string) => ((value.split('@').filter(s => s).length !== 2) || (!versionIsValid(value.split('@')[1]))) && errors.push(message);
-export async function saveAllModules(files: FileList) {
 
+const validate = (value: any, errors: string[], message: string) => (value === undefined || value === null || value === '') && errors.push(message)
+const versionIsValid = (version: string) => version.split('.').reduce((isNumber, number) => parseInt(number) >= 0 && isNumber, true)
+const validateVersioning = (value: string, errors: string[], message: string) => ((value.split('@').filter(s => s).length !== 2) || (!versionIsValid(value.split('@')[1]))) && errors.push(message);
+
+async function validateModules(files: FileList) {
     const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
-    const errors:string[] = Array.from(files).map((file, index) => {
+    const errors: string[] = Array.from(files).map((file, index) => {
         const content = contents[index];
-        const missingRequiredMeta:string[] = [];
-        const versioningIssue:string[] = [];
+        const missingRequiredMeta: string[] = [];
+        const versioningIssue: string[] = [];
         const moduleName = getMetaData('module', content)[0];
         const dependency = getMetaData('dependency', content)[0];
         const description = getMetaData('description', content)[0];
-        validate(moduleName,missingRequiredMeta,'module');
-        validate(description,missingRequiredMeta,'description');
-        validateVersioning(moduleName ?? '',versioningIssue,`${moduleName}(module)`);
-        if(dependency){
+        const author = getMetaData('author', content)[0];
+        validate(moduleName, missingRequiredMeta, 'module');
+        validate(description, missingRequiredMeta, 'description');
+        validate(author, missingRequiredMeta, 'author');
+        validateVersioning(moduleName ?? '', versioningIssue, `${moduleName}(module)`);
+        if (dependency) {
             const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
             dependencies.forEach(dep => {
-                validateVersioning(dep,versioningIssue,`${dep}`)
+                validateVersioning(dep, versioningIssue, `${dep}`)
             })
         }
         const errors = [];
-        if(missingRequiredMeta.length > 0){
+        if (missingRequiredMeta.length > 0) {
             errors.push(`Missing ${missingRequiredMeta.map(meta => `<span style="font-weight: bold;margin:0 5px">"${meta}"</span>`).join(', ')}`);
         }
-        if(versioningIssue.length > 0){
+        if (versioningIssue.length > 0) {
             errors.push(`Version error ${versioningIssue.map(version => `<span style="font-weight: bold;margin:0 5px">"${version}"</span>`).join(', ')}`)
         }
-        if(errors.length > 0){
-            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${file.name+' : '+errors.join(' ')}</div>`
+        if (errors.length > 0) {
+            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${file.name + ' : ' + errors.join(' ')}</div>`
         }
         return ''
     }).filter(s => s);
-    if(errors.length > 0 ){
+    return {contents, errors};
+}
+
+export function contentMeta(content: string, file: {size:number,lastModified:number}) {
+    const moduleName = getMetaData('module', content)[0];
+    const dependency = getMetaData('dependency', content)[0];
+    const description = getMetaData('description', content)[0];
+    const author = getMetaData('author', content)[0];
+    const [path, version] = moduleName.split('@');
+    // maybe we need to have the available queryParams and available service
+    const module: Module = {
+        name: moduleName,
+        path,
+        version,
+        dependencies: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
+        missingDependencies: [],
+        srcdoc: content,
+        installedOn: new Date().getTime(),
+        size: file.size,
+        lastModified: file.lastModified,
+        description,
+        active: true,
+        deleted: false,
+        author
+    }
+    return module;
+}
+
+export async function saveAllModules(files: FileList) {
+    const {contents, errors} = await validateModules(files);
+    if (errors.length > 0) {
         const result = await showModal(`<div style="font-family: Arial">
 <div style="margin-bottom: 10px;font-weight: bold">Errors: </div>
 ${errors.map(error => error).join('')}
-</div>`,'Ok');
+</div>`, 'Ok');
         return;
     }
     const modules: Module[] = Array.from(files).map((file, index) => {
         const content = contents[index];
-        const moduleName = getMetaData('module', content)[0];
-        const dependency = getMetaData('dependency', content)[0];
-        const description = getMetaData('description', content)[0];
-        const [path, version] = moduleName.split('@');
-        // maybe we need to have the available queryParams and available service
-        const module: Module = {
-            name: moduleName,
-            path,
-            version,
-            dependencies: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
-            missingDependencies: [],
-            srcdoc: content,
-            installedOn: new Date().getTime(),
-            size: file.size,
-            lastModified: file.lastModified,
-            description,
-            active: true,
-            deleted: false
-        }
+        const module = contentMeta(content, file);
         return module;
     });
 

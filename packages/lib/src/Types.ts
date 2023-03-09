@@ -182,6 +182,7 @@ export interface Module {
     lastModified: number;
     active: boolean;
     deleted: boolean;
+    author: string
 }
 
 

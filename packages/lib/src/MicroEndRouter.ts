@@ -71,7 +71,7 @@ export class MicroEndRouter extends HTMLElement {
             delete queryParams[CALLER_ID_KEY];
         }
         const pathSegments = this.splitSegment(path);
-        if(pathSegments.length === 0){
+        if (pathSegments.length === 0) {
             return;
         }
         const {route, srcdoc, dependencies: dependency} = this.findMostMatchingRoute(pathSegments);
