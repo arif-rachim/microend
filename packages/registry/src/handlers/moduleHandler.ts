@@ -1,5 +1,5 @@
 import {Handler} from "./Handler";
-import {access, mkdir, readdir, writeFile,readFile,stat} from "fs/promises";
+import {access, mkdir, readdir, readFile, stat, writeFile} from "fs/promises";
 import {constants} from "fs";
 import p from "path";
 
@@ -17,7 +17,6 @@ export interface Module {
     lastModified: number,
     author: string
 }
-
 
 
 async function getRegistry(): Promise<Registry> {
@@ -40,15 +39,15 @@ async function getRegistry(): Promise<Registry> {
     const files = await readdir(REPO_NAME);
     registry = {};
     for (const file of files) {
-        const moduleFiles:string[] = await readdir(p.join(REPO_NAME,file));
-        let latestVersion:{version:string,lastModified:number} = {version:'',lastModified:0}
-        registry[file] = registry[file] || {latest:'',version:{}};
+        const moduleFiles: string[] = await readdir(p.join(REPO_NAME, file));
+        let latestVersion: { version: string, lastModified: number } = {version: '', lastModified: 0}
+        registry[file] = registry[file] || {latest: '', version: {}};
         for (const moduleFile of moduleFiles) {
-            const filePath = p.join(REPO_NAME,file,moduleFile)
+            const filePath = p.join(REPO_NAME, file, moduleFile)
             const status = await stat(filePath);
-            const content = await readFile(filePath,{encoding:'utf-8'});
-            const module = contentMeta(content,{size:status.size,lastModified:status.birthtimeMs})
-            if(latestVersion.lastModified < status.birthtimeMs){
+            const content = await readFile(filePath, {encoding: 'utf-8'});
+            const module = contentMeta(content, {size: status.size, lastModified: status.birthtimeMs})
+            if (latestVersion.lastModified < status.birthtimeMs) {
                 latestVersion.lastModified = status.birthtimeMs;
                 latestVersion.version = module.version;
             }
@@ -59,7 +58,7 @@ async function getRegistry(): Promise<Registry> {
     return registry;
 }
 
-export function contentMeta(content: string, file: {size:number,lastModified:number}) {
+export function contentMeta(content: string, file: { size: number, lastModified: number }) {
     const moduleName = getMetaData('module', content)[0];
     const dependency = getMetaData('dependency', content)[0];
     const description = getMetaData('description', content)[0];

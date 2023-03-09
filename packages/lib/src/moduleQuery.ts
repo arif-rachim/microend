@@ -94,7 +94,7 @@ async function validateModules(files: FileList) {
     return {contents, errors};
 }
 
-export function contentMeta(content: string, file: {size:number,lastModified:number}) {
+export function contentMeta(content: string, file: { size: number, lastModified: number }) {
     const moduleName = getMetaData('module', content)[0];
     const dependency = getMetaData('dependency', content)[0];
     const description = getMetaData('description', content)[0];
