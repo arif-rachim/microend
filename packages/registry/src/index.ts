@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import {createServer, IncomingMessage, ServerResponse} from "http";
 import {options} from "./middleware/options";
-import {json} from "./middleware/json";
+import {post} from "./middleware/post";
 import {get} from "./middleware/get";
 import {Middleware} from "./middleware/Middleware";
 
@@ -36,7 +36,7 @@ function runServer() {
     const middleware = createMiddleware();
     middleware.addMiddleware(options);
     middleware.addMiddleware(get);
-    middleware.addMiddleware(json);
+    middleware.addMiddleware(post);
 
 
     const server = createServer((req, res) => middleware.run(req, res));

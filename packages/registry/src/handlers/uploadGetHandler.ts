@@ -1,6 +1,7 @@
 import {Handler} from "./Handler";
 
 export const uploadGetHandler: Handler = async (params, resolve) => {
+
     resolve(`<html>
 
 <style>
@@ -101,8 +102,8 @@ body {
                 const response = await fetch('upload',{
                     method : 'POST',
                     headers : {
-                        'Accept' : 'application/json',
-                        'Content-Type' : 'application/json'
+                        'Accept' : 'application/post',
+                        'Content-Type' : 'application/post'
                     },
                     body : JSON.stringify(modules)
                 });

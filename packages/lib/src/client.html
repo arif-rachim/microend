@@ -181,7 +181,7 @@
         const deregister = me.onMount(() => {
             const __handler = handler;
             let action = 'action' in me.params ? me.params.action : '';
-            // later on we need to be able to send json for service !!!!
+            // later on we need to be able to send post for service !!!!
             let args = 'args' in me.params ? me.params.args : '';
             if (me.type === 'service' && action && args) {
                 const arrayArgs = JSON.parse(decodeURI(args));
@@ -236,7 +236,7 @@
             const __handler = handler;
 
             let action = 'action' in me.params ? me.params.action : '';
-            // later on we need to be able to send json for service !!!!
+            // later on we need to be able to send post for service !!!!
             let args = 'args' in me.params ? me.params.args : '';
             let callbackBeforeExit = () => {
             };

@@ -11,7 +11,7 @@ interface ClientModule extends Module {
 }
 
 export const uploadPostHandler: Handler = async (params, resolve) => {
-    const modules: ClientModule[] = params;
+    const modules: ClientModule[] = params.body;
     const allInstalledModules = await getAllModules();
     const missingDependencies = findAndUpdateMissingDependencies({modules, allInstalledModules});
     if (missingDependencies.length > 0) {

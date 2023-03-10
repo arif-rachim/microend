@@ -15,8 +15,9 @@
 </body>
 </html>
 <script>
-    if (me) {
-        const {onParamsChange, onFocusChange} = me;
+    if (window.me) {
+
+        const {onParamsChange, onFocusChange} = window.me;
         onParamsChange((newValue, oldValue) => {
             document.getElementById('content').innerHTML = JSON.stringify(me.params);
         });

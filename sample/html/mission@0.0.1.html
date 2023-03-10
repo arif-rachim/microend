@@ -18,7 +18,7 @@
 </html>
 <script>
 
-    if (me) {
+    if (window.me) {
         const {params, navigateBack, navigateTo, onParamsChange, onFocusChange} = me;
 
         document.getElementById('content').innerHTML = JSON.stringify(params);
@@ -33,14 +33,16 @@
         onParamsChange((newValue) => {
             document.getElementById('content').innerHTML = JSON.stringify(newValue);
         });
+
+        document.getElementById('navigateToFault').addEventListener('click', async () => {
+            const {params, navigateBack, navigateTo} = me;
+            // ini musti di reject nih manggil navigateTo multiple !!
+            const result = await navigateTo(`fault`, {faultId: Math.random()});
+            document.getElementById('response').innerHTML = JSON.stringify(result);
+        });
     }
 
-    document.getElementById('navigateToFault').addEventListener('click', async () => {
-        const {params, navigateBack, navigateTo} = me;
-        // ini musti di reject nih manggil navigateTo multiple !!
-        const result = await navigateTo(`fault`, {faultId: Math.random()});
-        document.getElementById('response').innerHTML = JSON.stringify(result);
-    });
+
 
 
 </script>

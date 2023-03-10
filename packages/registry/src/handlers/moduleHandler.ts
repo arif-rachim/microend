@@ -18,8 +18,15 @@ export interface Module {
     author: string
 }
 
+let registryCache: Registry | null = null;
 
-async function getRegistry(): Promise<Registry> {
+async function getRegistry(useCache: boolean = true): Promise<Registry> {
+    if (useCache === false) {
+        registryCache = null;
+    }
+    if (registryCache !== null) {
+        return registryCache;
+    }
     let registry: Registry | null = null;
     let canAccessFolder = false
     try {
@@ -127,7 +134,36 @@ export async function getAllModules() {
     return modules;
 }
 
+export async function getModule(name: string) {
+    let moduleName = name;
+    let moduleVersion = '';
+    if (name.indexOf('@') > 0) {
+        const [modName,modVersion] = name.split('@');
+        moduleName = modName;
+        moduleVersion = modVersion;
+    }
+    const registry: Registry = await getRegistry();
+    const moduleInfo = registry[moduleName];
+    if(moduleVersion){
+        return moduleInfo.version[moduleVersion];
+    }
+    return moduleInfo;
+}
+
 export const moduleHandler: Handler = async (params, resolve) => {
-    const modules = await getAllModules();
-    resolve(modules);
+    const moduleName = params.moduleName;
+    if (moduleName) {
+        const module = await getModule(moduleName);
+        resolve(module);
+    } else {
+        const modules = await getAllModules();
+        resolve(modules);
+    }
+}
+
+export const moduleContentHandler: Handler = async (params, resolve) => {
+    const moduleName = params.moduleName;
+    const module = moduleName.split('@')[0];
+    const content = await readFile(p.join(REPO_NAME,module,`${moduleName}.html`),{encoding:"utf-8"});
+    resolve(content);
 }

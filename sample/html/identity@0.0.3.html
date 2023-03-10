@@ -4,35 +4,37 @@
     <meta content="" name="dependency">
     <meta content="Identity management component" name="description">
     <script>
+        if(window.me){
+            const {navigateBack, onParamsChange, onFocusChange, onMount} = me;
 
-        const {navigateBack, onParamsChange, onFocusChange, onMount} = me;
+            onFocusChange((isFocus) => {
+                console.log('Identity is focused ', isFocus);
+                return () => {
+                    console.log('Identity is lost focused ');
+                }
+            });
+            onParamsChange((params) => {
+                console.log('ON PARAMS CHANGE ', params);
+                console.log('Identity params changed ', params);
+                if (me.params.intent === 'getCurrentUser') {
+                    setTimeout(() => {
+                        navigateBack({message: 'Hello this is your user', user: 'arif'})
+                    }, 3000)
+                }
+            });
+            onMount(() => {
+                console.log('Identity mounted');
+                if (me.params.intent === 'getCurrentUser') {
+                    setTimeout(() => {
+                        navigateBack({message: 'Hello this is your user', user: 'arif'})
+                    }, 3000)
+                }
+                return () => {
+                    console.log('Identity UnMounted')
+                }
+            });
+        }
 
-        onFocusChange((isFocus) => {
-            console.log('Identity is focused ', isFocus);
-            return () => {
-                console.log('Identity is lost focused ');
-            }
-        });
-        onParamsChange((params) => {
-            console.log('ON PARAMS CHANGE ', params);
-            console.log('Identity params changed ', params);
-            if (me.params.intent === 'getCurrentUser') {
-                setTimeout(() => {
-                    navigateBack({message: 'Hello this is your user', user: 'arif'})
-                }, 3000)
-            }
-        });
-        onMount(() => {
-            console.log('Identity mounted');
-            if (me.params.intent === 'getCurrentUser') {
-                setTimeout(() => {
-                    navigateBack({message: 'Hello this is your user', user: 'arif'})
-                }, 3000)
-            }
-            return () => {
-                console.log('Identity UnMounted')
-            }
-        });
     </script>
 </head>
 <body>
