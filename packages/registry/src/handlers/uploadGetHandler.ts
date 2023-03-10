@@ -2,15 +2,27 @@ import {Handler} from "./Handler";
 
 export const uploadGetHandler: Handler = async (params, resolve) => {
     resolve(`<html>
-<body>
+
 <style>
 html,body{
-    font-family : Arial
+    font-family : Arial;
+    display:flex;
+    flex-direction:column;
+    height: 100%;
+    overflow:auto;
+}
+body {
+    background-color: #f2f2f2
 }
 </style>
-<h1>You can upload your module here !</h1>
+<body>
+<div style="display:flex;flex-direction:column;max-width:800px;margin:auto;background-color:white;padding:20px;height:100%;width:100%;overflow:auto">
+<h1>Register Module</h1>
+<p>Please choose the modules you want to upload to the registry server and then click the "Submit" button. The server will reply if the modules were saved successfully or if there was dependency error.</p>
 <input id="inputUpload" type="file" multiple accept="text/html" >
 <div id="summary" style="margin-top:10px;display:flex;flex-direction:column"></div>
+<div id="serverResponse" style="margin-top:10px;display:flex;flex-direction:column"></div>
+</div>
 </body>
 <script>
     window.onload = () => {
@@ -21,6 +33,8 @@ html,body{
             const files = input.files;
             const {contents,errors} = await validateModules(files);
             const summary = document.getElementById('summary');
+            const serverResponse = document.getElementById('serverResponse');
+            serverResponse.innerHTML = '';
             if(errors.length > 0){
                 summary.innerHTML = errors.join('')
                 return;
@@ -84,7 +98,6 @@ html,body{
             summary.innerHTML = table.join('');
             const submitButton = document.getElementById('submitButton');
             submitButton.addEventListener('click',async () => {
-                debugger;
                 const response = await fetch('upload',{
                     method : 'POST',
                     headers : {
@@ -93,7 +106,26 @@ html,body{
                     },
                     body : JSON.stringify(modules)
                 });
-                debugger;
+                const data = await response.json();
+                if(data.error){
+                    const error = [];
+                    error.push('<h3>Module Registration rejected due missing dependency</h3>');
+                    error.push('<table><thead><tr>');
+                    error.push('<th style="text-align:left;border-bottom:1px solid rgba(0,0,0,0.1)">Name</th>');
+                    error.push('<th style="text-align:left;border-bottom:1px solid rgba(0,0,0,0.1)">Dependencies that does not exist</th>');
+                    error.push('</tr></thead><tbody>');
+                    data.error.forEach(err => {
+                        error.push('<td style="border-bottom:1px solid rgba(0,0,0,0.1)">'+err.module+'</td>')
+                        error.push('<td style="border-bottom:1px solid rgba(0,0,0,0.1)">'+err.missingDependencies.join(\',\')+'</td>')    
+                    });
+                    
+                    error.push('</tbody></table>');
+                    serverResponse.innerHTML = error.join('')
+                    
+                }else{
+                    serverResponse.innerHTML = '<h3>Modules have been uploaded without any problems.</h3>'
+                }
+                
             })
         })
     }

@@ -1,5 +1,5 @@
 import {Handler} from "./Handler";
-import {Module, saveRegistry} from "./moduleHandler";
+import {getAllModules, Module, saveRegistry} from "./moduleHandler";
 
 interface ClientModule extends Module {
     path: string// = "fault"
@@ -11,8 +11,35 @@ interface ClientModule extends Module {
 }
 
 export const uploadPostHandler: Handler = async (params, resolve) => {
-    // here we need to save the file !!
     const modules: ClientModule[] = params;
+    const allInstalledModules = await getAllModules();
+    const missingDependencies = findAndUpdateMissingDependencies({modules, allInstalledModules});
+    if (missingDependencies.length > 0) {
+        resolve({error: missingDependencies});
+        return;
+    }
     await saveRegistry(modules);
     resolve({message: 'OK'});
+}
+
+function findAndUpdateMissingDependencies(props: { modules: Module[], allInstalledModules: Module[] }): { module: string, missingDependencies: string[] }[] {
+    const {modules, allInstalledModules} = props;
+    const allModules = allInstalledModules.concat(modules);
+    return modules.reduce<{ module: string, missingDependencies: string[] }[]>((totalMissingDependencies: { module: string, missingDependencies: string[] }[], m) => {
+        const missingDependencies: string[] = m.dependencies.reduce((missingDependencies: string[], dependency) => {
+            const indexOfDependency = allModules.findIndex(m => {
+                const [path, version] = dependency.split('@');
+                const [modulePath] = m.name.split('@');
+                return modulePath === path && m.version >= version;
+            });
+            if (indexOfDependency < 0) {
+                missingDependencies.push(dependency);
+            }
+            return missingDependencies;
+        }, []);
+        if (missingDependencies.length > 0) {
+            totalMissingDependencies.push({module: m.name, missingDependencies})
+        }
+        return totalMissingDependencies;
+    }, []);
 }

@@ -108,6 +108,7 @@ function scanText(metaName: string, htmlText: string, startingIndex: number): [s
 
 export async function saveRegistry(modules: (Module & { srcdoc: string })[]) {
     for (const module of modules) {
+        // here we need to validate if all registry is available !
         const [path, version] = module.name.split('@');
         const directory = p.join(REPO_NAME, path);
         await mkdir(directory, {recursive: true})
@@ -116,12 +117,17 @@ export async function saveRegistry(modules: (Module & { srcdoc: string })[]) {
     }
 }
 
-export const moduleHandler: Handler = async (params, resolve) => {
+export async function getAllModules() {
     const registry: Registry = await getRegistry();
     const modules: Module[] = Object.keys(registry).map(registryKey => {
         const latest: Latest = registry[registryKey].latest;
         const module: Module = registry[registryKey].version[latest];
         return module
-    })
+    });
+    return modules;
+}
+
+export const moduleHandler: Handler = async (params, resolve) => {
+    const modules = await getAllModules();
     resolve(modules);
 }
