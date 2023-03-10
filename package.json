@@ -6,8 +6,8 @@
   "scripts": {
     "core": "npm run start -w @microend/core",
     "lib": "npm run start -w @microend/lib",
-    "module-one": "npm run start -w module-one",
-    "build": "npm run build -w @microend/lib && npm run build -w @microend/core"
+    "build": "npm run build -w @microend/lib && npm run build -w @microend/core && mv ./packages/core/dist docs",
+    "docs": ""
   },
   "author": "",
   "license": "ISC",

@@ -16,7 +16,7 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
             const rowStyle = 'display: flex;flex-direction: row;border-bottom: 1px solid rgba(0,0,0,0.05);padding: 10px';
             packageManager.innerHTML = `<div style="display:flex;flex-direction:column ;width:100%;max-width: 800px">
         <div style="display: flex;flex-direction: row;align-items: center">
-            <button style="border: 1px solid rgba(0,0,0,0);padding:5px;background-color: white" data-exit-button="true;">
+            <button style="border: 1px solid rgba(0,0,0,0);padding:5px;background-color: unset" data-exit-button="true;">
      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="ionicon" viewBox="0 0 512 512"><title>Arrow Back</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg>    
 </button>
             <div style="flex-grow: 1;margin-left: 10px">${moduleName}</div>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MicroEnd Application</title>
+    <meta name="description"
+          content="Microend Base Application enables the installation of independent, modular applications that can communicate with one another and were created using any javascript framework."/>
+    <meta name="keywords" content="MicroEnd, Modular, Micro-frontend"/>
+    <meta name="author" content="a.arif.r@gmail.com"/>
+    <meta name="copyright" content="a.arif.r@gmail.com"/>
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='400' zoomAndPan='magnify' viewBox='0 0 300 259.499997' height='346' preserveAspectRatio='xMidYMid meet' version='1.0'%3E%3Cdefs%3E%3CclipPath id='4f4b6372a6'%3E%3Cpath d='M 0.289062 0 L 298.964844 0 L 298.964844 259 L 0.289062 259 Z M 0.289062 0 ' clip-rule='nonzero'/%3E%3C/clipPath%3E%3C/defs%3E%3Cg clip-path='url(%234f4b6372a6)'%3E%3Cpath fill='%23040606' d='M 234.046875 146.78125 L 234.046875 80.015625 L 288.652344 49.394531 L 288.574219 116.3125 Z M 213.96875 134.507812 L 169.488281 109.574219 L 169.585938 49.433594 L 224.117188 80.015625 L 224.117188 146.914062 L 219.148438 144.136719 L 219.148438 143.34375 C 219.148438 139.671875 217.152344 136.273438 213.96875 134.507812 Z M 154.589844 246.203125 L 154.589844 179.441406 L 209.21875 148.835938 L 209.121094 215.734375 Z M 90.132812 148.875 L 144.660156 179.441406 L 144.660156 246.300781 L 90.035156 215.582031 Z M 75.136719 146.835938 L 75.136719 80.015625 L 129.761719 49.394531 L 129.761719 109.574219 L 85.28125 134.507812 C 82.101562 136.273438 80.101562 139.671875 80.101562 143.34375 L 80.101562 144.097656 Z M 10.675781 49.433594 L 65.203125 80.015625 L 65.203125 146.894531 L 10.578125 116.117188 Z M 70.265625 10.441406 L 124.464844 40.964844 L 70.171875 71.394531 L 15.757812 40.90625 Z M 149.742188 109.882812 L 204.039062 140.332031 L 149.625 170.839844 L 95.214844 140.332031 Z M 229.179688 10.441406 L 283.378906 40.964844 L 229.082031 71.394531 L 174.667969 40.90625 Z M 293.445312 35.082031 L 233.949219 1.71875 C 230.886719 0.0898438 227.277344 0.0898438 224.117188 1.757812 L 164.777344 35.042969 C 161.554688 36.808594 159.558594 40.207031 159.558594 43.9375 L 159.558594 104 L 154.574219 101.222656 C 151.488281 99.476562 147.78125 99.476562 144.679688 101.222656 L 139.695312 104 L 139.695312 43.9375 C 139.695312 40.207031 137.695312 36.808594 134.535156 35.082031 L 75.039062 1.71875 C 71.972656 0.0898438 68.347656 0.0898438 65.203125 1.757812 L 5.863281 35.042969 C 2.644531 36.808594 0.644531 40.207031 0.644531 43.9375 L 0.644531 116.117188 C 0.644531 119.84375 2.644531 123.261719 5.824219 124.992188 L 65.300781 158.351562 C 66.8125 159.148438 68.464844 159.558594 70.152344 159.558594 C 71.839844 159.558594 73.546875 159.128906 75.117188 158.292969 L 80.101562 155.519531 L 80.101562 215.582031 C 80.101562 219.25 82.082031 222.628906 85.28125 224.414062 L 144.679688 257.71875 C 146.230469 258.574219 147.917969 259 149.625 259 C 151.332031 259 153.019531 258.574219 154.574219 257.699219 L 213.96875 224.414062 C 217.171875 222.628906 219.148438 219.25 219.148438 215.582031 L 219.148438 155.519531 L 224.210938 158.351562 C 225.726562 159.148438 227.375 159.558594 229.042969 159.558594 C 230.75 159.558594 232.457031 159.128906 234.046875 158.292969 L 293.386719 125.011719 C 296.605469 123.261719 298.605469 119.84375 298.605469 116.117188 L 298.605469 43.9375 C 298.605469 40.207031 296.605469 36.808594 293.445312 35.082031 ' fill-opacity='1' fill-rule='nonzero'/%3E%3C/g%3E%3Cpath fill='%23040606' d='M 120.46875 143.265625 C 121.363281 144.894531 123.070312 145.808594 124.796875 145.808594 C 125.609375 145.808594 126.464844 145.613281 127.21875 145.167969 L 152.050781 131.265625 C 154.4375 129.921875 155.308594 126.894531 153.953125 124.488281 C 152.613281 122.097656 149.585938 121.242188 147.199219 122.582031 L 122.371094 136.507812 C 119.984375 137.847656 119.113281 140.875 120.46875 143.265625 ' fill-opacity='1' fill-rule='nonzero'/%3E%3Cpath fill='%23040606' d='M 104.933594 169.519531 C 102.195312 169.519531 99.964844 171.753906 99.964844 174.488281 L 99.964844 206.9375 C 99.964844 209.695312 102.195312 211.910156 104.933594 211.910156 C 107.667969 211.910156 109.898438 209.695312 109.898438 206.9375 L 109.898438 174.488281 C 109.898438 171.753906 107.667969 169.519531 104.933594 169.519531 ' fill-opacity='1' fill-rule='nonzero'/%3E%3Cpath fill='%23040606' d='M 41.015625 43.839844 C 41.925781 45.472656 43.59375 46.382812 45.339844 46.382812 C 46.175781 46.382812 46.988281 46.171875 47.765625 45.742188 L 72.59375 31.820312 C 74.980469 30.480469 75.855469 27.449219 74.496094 25.0625 C 73.15625 22.671875 70.132812 21.800781 67.746094 23.160156 L 42.914062 37.0625 C 40.53125 38.421875 39.65625 41.453125 41.015625 43.839844 ' fill-opacity='1' fill-rule='nonzero'/%3E%3Cpath fill='%23040606' d='M 25.476562 70.09375 C 22.742188 70.09375 20.511719 72.308594 20.511719 75.066406 L 20.511719 107.515625 C 20.511719 110.253906 22.742188 112.484375 25.476562 112.484375 C 28.210938 112.484375 30.441406 110.253906 30.441406 107.515625 L 30.441406 75.066406 C 30.441406 72.308594 28.210938 70.09375 25.476562 70.09375 ' fill-opacity='1' fill-rule='nonzero'/%3E%3Cpath fill='%23040606' d='M 199.925781 43.839844 C 200.816406 45.472656 202.523438 46.382812 204.25 46.382812 C 205.066406 46.382812 205.917969 46.171875 206.675781 45.742188 L 231.507812 31.820312 C 233.890625 30.480469 234.765625 27.449219 233.40625 25.0625 C 232.070312 22.671875 229.042969 21.800781 226.65625 23.160156 L 201.828125 37.0625 C 199.441406 38.421875 198.566406 41.453125 199.925781 43.839844 ' fill-opacity='1' fill-rule='nonzero'/%3E%3Cpath fill='%23040606' d='M 184.386719 70.09375 C 181.652344 70.09375 179.421875 72.308594 179.421875 75.066406 L 179.421875 107.515625 C 179.421875 110.253906 181.652344 112.484375 184.386719 112.484375 C 187.121094 112.484375 189.355469 110.253906 189.355469 107.515625 L 189.355469 75.066406 C 189.355469 72.308594 187.121094 70.09375 184.386719 70.09375 ' fill-opacity='1' fill-rule='nonzero'/%3E%3C/svg%3E"
+          type="image/svg+xml"/>
+
+    <style>
+        html, body, iframe, div {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            border: none;
+        }
+
+        iframe {
+            min-height: 0;
+            min-width: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: auto;
+            font-family: Arial;
+        }
+
+        body {
+            background: rgb(253, 251, 251);
+            background: radial-gradient(#FFFFFF 50%, #f2f2f2 100%);
+        }
+
+    </style>
+  <script type="module" crossorigin>
+(function(){const t=document.createElement("link").relList;if(t&&t.supports&&t.supports("modulepreload"))return;for(const r of document.querySelectorAll('link[rel="modulepreload"]'))e(r);new MutationObserver(r=>{for(const o of r)if(o.type==="childList")for(const s of o.addedNodes)s.tagName==="LINK"&&s.rel==="modulepreload"&&e(s)}).observe(document,{childList:!0,subtree:!0});function n(r){const o={};return r.integrity&&(o.integrity=r.integrity),r.referrerpolicy&&(o.referrerPolicy=r.referrerpolicy),r.crossorigin==="use-credentials"?o.credentials="include":r.crossorigin==="anonymous"?o.credentials="omit":o.credentials="same-origin",o}function e(r){if(r.ep)return;r.ep=!0;const o=n(r);fetch(r.href,o)}})();function h(i,t,n){return t in i?Object.defineProperty(i,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):i[t]=n,i}function x(i){return new Promise(t=>{const n=indexedDB.open(U,1);n.addEventListener("upgradeneeded",()=>{n.result.createObjectStore(A,{keyPath:"name"})}),n.addEventListener("success",()=>{const e=n.result,r=e.transaction([A],i),o=r.objectStore(A);t({db:e,tx:r,store:o})})})}function T(i,...t){return new Promise(n=>{const e=document.createElement("div");e.style.position="fixed",e.style.top="0px",e.style.left="0px",e.style.width="100%",e.style.height="100%",e.style.background="rgba(0,0,0,0.1)",e.style.display="flex",e.style.flexDirection="column",e.style.alignItems="center",e.style.justifyContent="center",e.style.backdropFilter="blur(3px)",e.style["-webkit-backdrop-filter"]="blur(3px)",e.innerHTML=`<div style="background-color: rgba(255,255,255,0.9);border: 1px solid rgba(0,0,0,0.1);backdrop-filter: blur(3px);-webkit-backdrop-filter: blur(3px);padding: 10px;border-radius: 10px;display: flex;flex-direction: column">
+    <div style="font-size: 14px">${i}</div>
+    <div style="display: flex;flex-direction: row;justify-content: flex-end;margin-top: 10px">
+        ${t.map(r=>`<button style="background-color: #f2f2f2;padding:5px 10px;border: 1px solid rgba(0,0,0,0.1);margin-right: 5px" data-button-select="${r}" >${r}</button>`).join("")}
+        
+    </div>
+</div>`,document.body.appendChild(e),document.querySelectorAll("[data-button-select]").forEach(r=>{r.addEventListener("click",o=>{const s=o.target.getAttribute("data-button-select");n(s),e.remove()})})})}async function O(){const{db:i,tx:t,store:n}=await x("readonly"),e=n.getAll(),r=await E(e);return r===!1?(i.close(),[]):r.filter(o=>!o.deleted)}async function R(i){const{db:t,store:n}=await x("readonly"),e=n.get(i),r=await E(e);return t.close(),r}async function P(i,t){const n=t.concat(i);return i.reduce((e,r)=>{const o=r.dependencies.reduce((s,d)=>(n.findIndex(u=>{const[m,l]=d.split("@");return u.path===m&&u.version>=l})<0&&s.push(d),s),[]);return r.missingDependencies=o,o.length>0&&(r.active=!1),e.concat(o)},[])}async function _(i,t){return i.reduce((n,e)=>{const r=t.filter(o=>o.path===e.path&&e.version>o.version).map(o=>({from:o.name,to:e.name}));return n.concat(r)},[])}const C=(i,t,n)=>(i==null||i==="")&&t.push(n),I=i=>i.split(".").reduce((t,n)=>parseInt(n)>=0&&t,!0),B=(i,t,n)=>(i.split("@").filter(e=>e).length!==2||!I(i.split("@")[1]))&&t.push(n);async function j(i){const t=await Promise.all(Array.from(i).map(e=>W(e))),n=Array.from(i).map((e,r)=>{const o=t[r],s=[],d=[],c=v("module",o)[0],u=v("dependency",o)[0],m=v("description",o)[0],l=v("author",o)[0];C(c,s,"module"),C(m,s,"description"),C(l,s,"author"),B(c??"",d,`${c}(module)`),u&&u.split(",").filter(a=>a).map(a=>a.trim()).forEach(a=>{B(a,d,`${a}`)});const p=[];return s.length>0&&p.push(`Missing ${s.map(f=>`<span style="font-weight: bold;margin:0 5px">"${f}"</span>`).join(", ")}`),d.length>0&&p.push(`Version error ${d.map(f=>`<span style="font-weight: bold;margin:0 5px">"${f}"</span>`).join(", ")}`),p.length>0?`<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${e.name+" : "+p.join(" ")}</div>`:""}).filter(e=>e);return{contents:t,errors:n}}function H(i,t){const n=v("module",i)[0],e=v("dependency",i)[0],r=v("description",i)[0],o=v("author",i)[0],[s,d]=n.split("@");return{name:n,path:s,version:d,dependencies:(e??"").split(",").filter(u=>u).map(u=>u.trim()),missingDependencies:[],srcdoc:i,installedOn:new Date().getTime(),size:t.size,lastModified:t.lastModified,description:r,active:!0,deleted:!1,author:o}}async function z(i){const{contents:t,errors:n}=await j(i);if(n.length>0){await T(`<div style="font-family: Arial">
+<div style="margin-bottom: 10px;font-weight: bold">Errors: </div>
+${n.map(l=>l).join("")}
+</div>`,"Ok");return}const e=Array.from(i).map((l,p)=>{const f=t[p];return H(f,l)}),r=await O(),o=await P(e,r),s=await _(e,r);if(await T(`<div style="font-family: Arial">
+<div>The modules listed below will be installed. :</div>
+<div style="display: flex;flex-direction: row;flex-wrap: wrap">${e.map(l=>`<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color:darkslateblue;margin-right: 5px;margin-bottom: 5px">${l.name}</div>`).join("")}</div>
+${o.length>0?(()=>`
+    <div style="margin-top: 10px;">The dependent modules listed below are unavailable. :</div>
+    <div style="display: flex;flex-direction: row;flex-wrap: wrap">${o.map(l=>`<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: darkred;margin-right: 5px;margin-bottom: 5px">${l}</div>`).join("")}</div>
+    `)():""}
+${s.length>0?(()=>`
+    <div style="margin-top: 10px">The modules listed below will be upgraded. :</div>
+    <div style="display: flex;flex-direction: row;flex-wrap: wrap">${s.map(l=>`<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: green;margin-right: 5px;margin-bottom: 5px">${l.from} ➡ ${l.to}</div>`).join("")}</div>
+    `)():""}
+
+
+<div style="margin-top: 10px">Are you certain that you wish to continue?</div>
+</div>`,"Yes","No")==="No")return;const{db:c,tx:u,store:m}=await x("readwrite");s.forEach(l=>{const p=r.find(f=>f.name===l.from);p.deleted=!0,p.active=!1,m.put(p)}),e.forEach(l=>{m.put(l)}),u.commit(),c.close()}async function D(i){const{db:t,tx:n,store:e}=await x("readwrite"),r=await E(e.get(i));r&&(r.deleted=!0,e.put(r),n.commit()),t.close()}function E(i){return new Promise(t=>{i.addEventListener("success",()=>{const n=i.result;t(n)}),i.addEventListener("error",n=>{t(!1)})})}async function N(i,t){const{db:n,tx:e,store:r}=await x("readwrite"),o=r.get(i),s=await E(o);if(s===!1){n.close();return}s.active=!t,r.put(s),e.commit(),n.close()}function v(i,t){const n=[];let e=0;do{const[r,o]=q(i,t,e);e=o,r&&n.push(r)}while(e>=0);return n}function q(i,t,n){const e=t.indexOf(`name="${i}"`,n);if(e<0)return["",-1];const r=t.substring(n,e).lastIndexOf("<")+n,o=t.substring(e,t.length).indexOf(">")+e;let s="";return r>=0&&o>r&&(s=t.substring(r,o).split('content="')[1].split('"')[0]),[s,o]}function W(i){return new Promise(t=>{const n=new FileReader;n.addEventListener("load",async e=>{var r,o;t((e==null||(r=e.target)===null||r===void 0||(o=r.result)===null||o===void 0?void 0:o.toString())||"")}),n.readAsText(i,"utf-8")})}const U="routing-registry",A="module",M="callerId";class V extends HTMLElement{connectedCallback(){this.log("connected"),window.addEventListener("hashchange",this.renderBasedOnHash),window.addEventListener("message",this.onMessage),(async()=>((await O()).forEach(n=>{this.routingRegistry[`/${n.path}/${n.version}`]=n}),this.renderBasedOnHash()))()}disconnectedCallback(){this.log("disconnected"),window.removeEventListener("hashchange",this.renderBasedOnHash),window.removeEventListener("message",this.onMessage)}constructor(){if(super(),h(this,"log",(...t)=>{this.debugMode&&console.log("[MicroEndRouter]",...t)}),h(this,"splitSegment",t=>t.split("/").filter(n=>n)),h(this,"render",(t,n,e)=>{const[r,o]=t.split("?"),s=this.extractParamsFromQuery(o);M in s&&(e=s[M],delete s[M]);const d=this.splitSegment(r);if(d.length===0)return;const{route:c,srcdoc:u,dependencies:m}=this.findMostMatchingRoute(d);if(u===""||u===void 0){this.log("Rendering ",t,n),this.log("were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name");return}this.log("Handler match ",t,c);const l=this.extractParamsFromPath(c,d),p={...s,...l},f=m.reduce((y,g)=>{const[$,k]=g.split("@");return y[$]=k,y},{});if(this.shadowRoot===null){console.error("[MicroEndRouter]","ShadowRoot is null we cant renderPackageList this");return}let a=this.getFrame({route:c,type:n,caller:e});if(a===null){a=document.createElement("iframe"),a.setAttribute("data-route",c),a.setAttribute("data-type",n),a.setAttribute("data-caller",e),a.style.display=n==="service"?"none":"flex",a.style.border="none",a.style.flexDirection="column",a.style.height="100%",a.style.width="100%",a.style.backgroundColor="#FFF",this.debugMode||(a.style.position="absolute"),a.style.overflow="auto",a.style.zIndex="0";const y=J({params:p,isFocused:!0,dependencies:f,route:c,caller:e,type:n});let g=u.indexOf("<head>");g>0&&(g=g+6);const $=g>0?u.substring(0,g)+y+u.substring(g+1,u.length):y+u,k=this.getContainer();if(k&&(this.debugMode||(a.srcdoc=$),k.append(a),this.debugMode&&a.contentWindow)){const L=a.contentWindow.document;L.open(),L.write($),L.close()}}else a.contentWindow!==null&&(a.setAttribute("data-route",c),a.setAttribute("data-type",n),a.setAttribute("data-caller",e),a.style.zIndex="0",a.contentWindow.postMessage({intent:"paramschange",params:p,route:c,type:n,caller:e},"*"),a.contentWindow.postMessage({intent:"focuschange",value:!0},"*"));if(n==="service")return;let w=this.currentActiveFrame;w&&w.contentWindow&&(w.style.zIndex="-1",w.contentWindow.postMessage({intent:"focuschange",value:!1},"*")),this.currentActiveFrame=a}),h(this,"getContainer",()=>this.shadowRoot?this.shadowRoot.getElementById("container"):null),h(this,"getFrame",t=>{const n=this.getContainer();return n?t.type==="default"?n.querySelector(`[data-route="${t.route}"][data-type="${t.type}"]`):n.querySelector(`[data-route="${t.route}"][data-type="${t.type}"][data-caller="${t.caller}"]`):null}),h(this,"extractParamsFromPath",(t,n)=>{const e={};return this.splitSegment(t).forEach((r,o)=>{r.startsWith("$")&&(e[r.substring(1)]=n[o])}),e}),h(this,"findMostMatchingRoute",t=>{const[n,e]=t,r=Object.keys(this.routingRegistry).find(s=>{const[d,c]=s.split("/").filter(u=>u);return d===n&&c>=e});if(!r)throw new Error(`No available modules supporting ${n}/${e}`);const o=this.routingRegistry[r]||{srcdoc:"",dependencies:[]};return{route:r,srcdoc:o.srcdoc,dependencies:o.dependencies}}),h(this,"extractParamsFromQuery",t=>{const n={};return(t||"").split("&").filter(e=>e).forEach(e=>{const[r,o]=e.split("=");n[r]=o}),n}),h(this,"renderBasedOnHash",()=>{if(this.suppressRenderBasedOnHash){this.suppressRenderBasedOnHash=!1;return}this.render(window.location.hash.substring(1),"default","hashchange")}),h(this,"onMessage",t=>{if(t.data.intent==="navigateTo"){const n=t.data.params,e=t.data.originRoute,r=t.data.originCaller,o=t.data.originType,s=this.getFrame({route:e,caller:r,type:o});if(s===null){console.warn("WE COULDNT GET THE FRAME !!! this is wrong !!");return}const d=t.data.type,c=t.data.caller,u=Object.keys(n).reduce((p,f)=>(p.push(`${f}=${n[f]}`),p),[]).join("&"),m="/"+t.data.route.split("/").filter(p=>p).join("/");this.callerIdOrigin[c]=s;const l=m+(m.indexOf("?")>=0?"&":"?")+u;if(d==="default"){const p=l+(l.indexOf("?")>0?"&":"?")+`${M}=${c}`;window.location.hash=p}else(d==="modal"||d==="service")&&this.render(l,d,c)}if(t.data.intent==="navigateBack"){const{caller:n,type:e,route:r}=t.data,o=this.callerIdOrigin[n];if(o&&o.contentWindow&&(delete this.callerIdOrigin[n],o.contentWindow.postMessage(t.data)),e==="service"){const d=this.getFrame({route:r,type:e,caller:n});d&&d.contentWindow&&(d.contentWindow.postMessage({intent:"focuschange",value:!1},"*"),d.remove());return}o.contentWindow!==null&&(o.style.zIndex="0",o.contentWindow.postMessage({intent:"focuschange",value:!0},"*"));const s=this.getFrame({route:r,type:e,caller:n});s&&s.contentWindow&&(s.style.zIndex="-1",s.contentWindow.postMessage({intent:"focuschange",value:!1},"*"),e==="modal"&&s.remove()),this.currentActiveFrame=o,e==="default"&&(this.suppressRenderBasedOnHash=!0,window.history.back())}}),this.routingRegistry={},this.callerIdOrigin={},this.currentActiveFrame=null,this.style.height="100%",this.style.display="flex",this.style.flexDirection="column",this.style.boxSizing="border-box",this.suppressRenderBasedOnHash=!1,this.debugMode=this.getAttribute("debug")==="true",this.attachShadow({mode:"open"}),this.shadowRoot){const t={height:"100%","box-sizing":"border-box",overflow:"auto",display:"flex","flex-direction":"column",position:"relative"},n=Object.keys(t).map(e=>`${e}:${t[e]}`).join(";");this.shadowRoot.innerHTML='<div id="container" style="'+n+'"></div>'}}}function J(i){return Y.replace('"@context@"',JSON.stringify(i))}const Y=`
+<script>
+    const me = "@context@";
+    const paramsChangeListener = [];
+    const onFocusListeners = [];
+    const onMountListeners = [];
+    let onBlurListeners = [];
+    let onUnMountListeners = [];
+
+    window.microend = me;
+    window.me = me;
+
+    const log = (...args) => {
+        console.log('[' + me.route + ']', ...args);
+    }
+
+    /**
+     * @param event:MessageEvent
+     */
+    const messageListener = (event) => {
+        if (event.data.intent === 'paramschange') {
+            const old = me.params;
+            const newValue = event.data.params;
+
+            me.route = event.data.route;
+            me.type = event.data.type;
+            me.caller = event.data.caller;
+
+            if (JSON.stringify(old) !== JSON.stringify(newValue)) {
+                me.params = event.data.params;
+                paramsChangeListener.forEach(callback => {
+                    callback(newValue, old);
+                })
+            }
+        }
+        if (event.data.intent === 'focuschange') {
+            const value = event.data.value;
+            me.isFocused = value;
+            if (value) {
+                onBlurListeners = onFocusListeners.map(callback => callback());
+            } else {
+                onBlurListeners.forEach(callback => {
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                });
+                onBlurListeners = [];
+            }
+        }
+    };
+
+    window.addEventListener("load", () => {
+        onUnMountListeners = onMountListeners.map(callback => callback());
+    }, {once: true});
+
+    window.addEventListener('unload', () => {
+        onUnMountListeners.forEach(callback => {
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
+        })
+    }, {once: true})
+
+    window.addEventListener('message', messageListener);
+    /**
+     *
+     * @param callback
+     * @returns {(function(): void)|*}
+     */
+    me.onMount = (callback) => {
+        onMountListeners.push(callback);
+        return () => {
+            const index = onMountListeners.indexOf(callback);
+            onMountListeners.splice(index, 1);
+        }
+    }
+    /**
+     *
+     * @param callback : function(): function():void | void
+     * @returns {(function(): void)|*}
+     */
+    me.onParamsChange = (callback) => {
+        paramsChangeListener.push(callback);
+        return () => {
+            const index = paramsChangeListener.indexOf(callback);
+            paramsChangeListener.splice(index, 1);
+        }
+    }
+
+    /**
+     * @param callback : function(): function():void
+     * @returns {(function(): void)|*}
+     */
+    me.onFocusChange = (callback) => {
+        onFocusListeners.push(callback);
+        return () => {
+            const index = onFocusListeners.indexOf(callback);
+            onFocusListeners.splice(index, 1);
+        }
+    }
+
+    /**
+     * navigateTo ada beberapa behaviour
+     * <li> navigateTo default
+     *     - buka function baru lewat browser hash
+     *     - ini mengakibatkan window history ke update
+     *     - ini bakalan reuse existing frame yang sudah kebuka
+     *     - ketika frame selesai dipanggil dia ga bakalan di destroy
+     *
+     * <li> navigateTo modal
+     *     * buka function baru tanpa lewat browser hash
+     *     - tidak menyebabkan window history ke update
+     *     - bakalan buka frame yang baru
+     *     - ketika frame selesai di panggil dia bakalan di destroy
+     *
+     * <li> navigateTo service
+     *    - buka function baru tanpa lewat browser hash
+     *    - tidak menampilkan frame baru
+     *    - ketika selesai frame akan di destroy
+     *
+     * @param route : string
+     * @param params : any
+     * @param type : "default"|"modal"|"service"
+     * @returns {Promise<any>}
+     */
+    me.navigateTo = (route, params, type = 'default') => {
+
+        return new Promise((resolve) => {
+            params = params || {};
+            const caller = (Math.random() * 1000000000 + new Date().getTime()).toFixed(0);
+            if (window.top === null) {
+                return;
+            }
+            const dependencyVersion = me.dependencies[route];
+
+            if(dependencyVersion === undefined){
+                const [path,version] = me.route.split('/').filter(s => s);
+                throw new Error('Please contact the author '+path+'@'+version+' to fix this module, as the author forgot to add a dependency. '+route+'@version');
+            }
+            route = '/' + route + '/' + dependencyVersion;
+            const navigateTo = {
+                intent: 'navigateTo',
+                params,
+                originRoute: me.route,
+                originCaller: me.caller,
+                originType: me.type,
+                route,
+                caller,
+                type
+            }
+            window.top.postMessage(navigateTo);
+            const listener = (event) => {
+                if (event.data.intent === 'navigateBack' && event.data.caller === caller) {
+                    const value = event.data.value;
+                    window.removeEventListener('message', listener);
+                    resolve(value);
+                }
+            }
+            window.addEventListener('message', listener);
+        })
+    }
+
+    /**
+     *
+     * @param value
+     */
+    me.navigateBack = (value) => {
+        if (window.top === null) {
+            return;
+        }
+        const navigateBack = {
+            intent: 'navigateBack',
+            value,
+            caller: me.caller,
+            type: me.type,
+            route: me.route
+        }
+        window.top.postMessage(navigateBack);
+    }
+
+    me.createService = (handler) => {
+        const deregister = me.onMount(() => {
+            const __handler = handler;
+            let action = 'action' in me.params ? me.params.action : '';
+            // later on we need to be able to send json for service !!!!
+            let args = 'args' in me.params ? me.params.args : '';
+            if (me.type === 'service' && action && args) {
+                const arrayArgs = JSON.parse(decodeURI(args));
+                if (__handler && typeof __handler === 'object' && action in __handler && typeof __handler[action] === 'function') {
+                    // this is to ensure we are calling this one time
+                    deregister();
+                    const promise = Promise.resolve(__handler[action].apply(null, arrayArgs));
+                    promise.then(result => {
+                        me.navigateBack({
+                            success: true,
+                            result
+                        })
+                    }).catch(err => {
+                        me.navigateBack({
+                            success: false,
+                            message: err.message
+                        });
+                    })
+                }
+            }
+        });
+        return handler;
+    }
+
+    me.connectService = (module) => {
+        const proxy = new Proxy({}, {
+            get(_, action) {
+                return async (...args) => {
+                    const response = await me.navigateTo(module, {
+                        action,
+                        args: encodeURI(JSON.stringify(args))
+                    }, "service");
+                    if(response.success){
+                        return response.result;
+                    }
+                    throw new Error(response.message);
+                }
+            }
+        });
+        return proxy;
+    }
+    me.createNavigation = (handler) => {
+        const navigation = Object.keys(handler).reduce((navigation,key) => {
+            navigation[key] = {
+                params : {},
+                navigateBack : (param) => me.navigateBack({success:true,result:param})
+            }
+            return navigation;
+        },{current:''});
+
+        const paramsChangeHandler = () => {
+            const __handler = handler;
+            
+            let action = 'action' in me.params ? me.params.action : '';
+            // later on we need to be able to send json for service !!!!
+            let args = 'args' in me.params ? me.params.args : '';
+            let callbackBeforeExit = () => {};
+            if (['default','modal'].includes(me.type) && action && args) {
+                const arrayArgs = JSON.parse(decodeURI(args));
+                if (__handler && typeof __handler === 'object' && action in __handler && typeof __handler[action] === 'function') {
+                    // this is to ensure we are calling this one time
+                    try{
+                        navigation.current = action;
+                        navigation[action].params = arrayArgs.length > 0 ? arrayArgs[0] : {};
+                        callbackBeforeExit = __handler[action].apply(null, arrayArgs)
+                    }catch (err){
+                        me.navigateBack({
+                            success: false,
+                            message: err.message
+                        });
+                    }
+                }
+            }
+            // un-mounting
+            return callbackBeforeExit;
+        }
+        me.onMount(paramsChangeHandler);
+        me.onParamsChange(paramsChangeHandler);
+        return navigation;
+    }
+
+    me.connectNavigation = (module) => {
+        const proxy = new Proxy({}, {
+            get(_, action) {
+                return async (...args) => {
+                    const type = args[args.length - 1];
+                    args = args.splice(0,args.length - 1);
+                    
+                    const response = await me.navigateTo(module, {
+                        action,
+                        args: encodeURI(JSON.stringify(args))
+                    }, type);
+                    if(response.success){
+                        return response.result;
+                    }
+                    throw new Error(response.message);
+                }
+            }
+        });
+        return proxy;
+    }
+<\/script>
+`;class K extends HTMLElement{constructor(){if(super(),h(this,"onChange",async n=>{if(n===null||n.target==null){console.warn("[MicroEndModuleLoader]","Event on onChange parameter is null, exiting function");return}const e=n.target;if(e.files===null){console.warn("[MicroEndModuleLoader]","Files from HTMLInputElement is null, exiting function");return}const r=e.files;await z(r),this.dispatchEvent(new CustomEvent("change"))}),this.attachShadow({mode:"open"}),this.shadowRoot===null){console.warn("[MicroEndModuleLoader]","shadowRoot is null, exiting function");return}this.style.display="flex",this.style.flexDirection="column",this.style.fontFamily="arial",this.shadowRoot.innerHTML=`<label style="display: flex;flex-direction: column;padding:7px 10px">
+<div style="display: flex;flex-direction: row;align-items: center">
+<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" width="26" height="26" viewBox="0 0 512 512"><title>Add</title><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
+</div>
+<input type="file" multiple accept="text/html" style="display: none">
+</label>`;const t=this.shadowRoot.querySelector("input");if(t===null){console.warn("[MicroEndModuleLoader]","Could not find input type file, exiting function");return}t.addEventListener("change",this.onChange)}}async function G(i,t){return new Promise(n=>{(async()=>{const e=await R(t);if(e===!1){alert("Module does not exit "+t);return}i.setFullScreen(!0);const r="width: 150px;font-size: 12px;font-weight: bold;flex-shrink:0",o="display: flex;flex-direction: row;border-bottom: 1px solid rgba(0,0,0,0.05);padding: 10px";i.innerHTML=`<div style="display:flex;flex-direction:column ;width:100%;max-width: 800px">
+        <div style="display: flex;flex-direction: row;align-items: center">
+            <button style="border: 1px solid rgba(0,0,0,0);padding:5px;background-color: unset" data-exit-button="true;">
+     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="ionicon" viewBox="0 0 512 512"><title>Arrow Back</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg>    
+</button>
+            <div style="flex-grow: 1;margin-left: 10px">${t}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Description</div>
+            <div >${e.description}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Path</div>
+            <div>${e.path}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Version</div>
+            <div>${e.version}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Is Active</div>
+            <div>${e.active}</div>
+        </div>
+        <div style="${o};align-items: center">
+            <div style="${r}">Dependency</div>
+            <div style="display: flex;flex-direction: row;flex-wrap: wrap">${e.dependencies.map(s=>`<div style="border: 1px solid rgba(0,0,0,0.1);padding:5px;font-weight: bold;font-size: 12px;border-radius: 3px;background-color: white;margin-right: 5px">${s}</div>`).join("")}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Installed On</div>
+            <div style="font-size: 13px">${S(e.installedOn)}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Last modified on</div>
+            <div style="font-size: 13px">${S(e.lastModified)}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Size</div>
+            <div>${Q(e.size)}</div>
+        </div>
+        <div style="${o}">
+            <div style="${r}">Navigate</div>
+            <a href="#/${e.path}/${e.version}" data-link="true">/${e.path}/${e.version}</a>
+        </div>
+    </div>`,i.querySelector("[data-exit-button]").addEventListener("click",()=>{n(!0)}),i.querySelectorAll("[data-link]").forEach(s=>s.addEventListener("click",()=>{F(i)}))})()})}function S(i){const t=new Date(i),n=e=>e<10?"0"+e:e.toString();return`${n(t.getDate())}-${X[t.getMonth()]}-${t.getFullYear()} ${n(t.getHours())}:${n(t.getMinutes())}`}function Q(i){const t=Math.ceil(i/1e3);return t<500?`${t}Kb`:`${(t/1e3).toFixed(1)}Mb`}const X=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];async function b(i){i.setFullScreen(!0);const n=(await O()).map(e=>`<div style="display: flex;flex-direction:column;font-family: Arial;border:1px solid rgba(0,0,0,0.1);padding:10px;box-sizing: border-box;width: 300px;height:130px;border-radius: 3px;background-color: white;margin:5px">
+    <div style="display: flex;flex-direction: row;margin-bottom: 10px;height: 100%">
+        <div style="font-size: 18px;margin-right: 5px;box-sizing: border-box">
+        </div>
+        <div style="display: flex;flex-direction: column;box-sizing: border-box;">
+            <div style="display: flex;flex-direction: row;align-items: flex-end;box-sizing: border-box;margin-bottom: 5px">
+                <div style="font-size: 16px;margin-right: 5px;font-weight: bold">${e.path}</div>
+                <div style="font-size: 12px;margin-bottom: 1px">${e.version}</div>
+            </div>
+            <div style="height:100%;font-size: 13px">
+                ${e.description}
+            </div>
+        </div>
+    </div>
+    <div style="display: flex;flex-direction: row">
+        <button data-button-details="true" data-module-name="${e.name}" style="margin-right: 10px;background-color: white;border:1px solid rgba(0,0,0,0);border-radius: 3px">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" width="16" height="16" viewBox="0 0 512 512"><title>Folder Open</title><path d="M64 192v-72a40 40 0 0140-40h75.89a40 40 0 0122.19 6.72l27.84 18.56a40 40 0 0022.19 6.72H408a40 40 0 0140 40v40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path d="M479.9 226.55L463.68 392a40 40 0 01-39.93 40H88.25a40 40 0 01-39.93-40L32.1 226.55A32 32 0 0164 192h384.1a32 32 0 0131.8 34.55z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>
+            <div>Details</div>
+        </button>
+        <button data-button-remove="true" data-module-name="${e.name}" style="background-color: white;border:1px solid rgba(0,0,0,0);border-radius: 3px">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" width="16" height="16" viewBox="0 0 512 512"><title>Trash</title><path d="M112 112l20 320c.95 18.49 14.4 32 32 32h184c17.67 0 30.87-13.51 32-32l20-320" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M80 112h352"/><path d="M192 112V72h0a23.93 23.93 0 0124-24h80a23.93 23.93 0 0124 24h0v40M256 176v224M184 176l8 224M328 176l-8 224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>
+            <div>Remove</div>
+        </button>
+        <div style="flex-grow: 1"></div>
+        <label style="display: flex;flex-direction: row;align-items: center">
+            <div>Active</div>
+            <input type="checkbox" ${e.active?"checked":""} data-module-name="${e.name}"/>
+        </label>
+    </div>
+</div>`);i.innerHTML=`<div style="display:flex;flex-direction:column ;max-width: 1300px;width:100%">
+<div style="display: flex;flex-direction: row;align-items: center">
+  
+    <button style="border: 1px solid rgba(0,0,0,0);border-radius: 2px;background-color: unset" data-exit-button="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="ionicon" viewBox="0 0 512 512"><title>Arrow Back</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg>
+    </button>
+    <div style="flex-grow: 1;align-items: center;font-size: 14px">Installed Modules</div>
+    <microend-moduleloader style="background-color: white;border-radius: 5px"></microend-moduleloader>
+</div>
+
+<div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;">${n.join("")}</div></div>`,i.querySelectorAll("[data-button-details]").forEach(e=>{e.addEventListener("click",async r=>{if(r.currentTarget&&r.currentTarget instanceof HTMLButtonElement){const o=r.currentTarget.getAttribute("data-module-name");o&&(await G(i,o),await b(i))}})}),i.querySelectorAll("[data-button-remove]").forEach(e=>{e.addEventListener("click",r=>{if(r.currentTarget&&r.currentTarget instanceof HTMLButtonElement){const o=r.currentTarget.getAttribute("data-module-name"),s=prompt(`Please type "${o}" to remove the module`);o&&s===o&&D(o).then(()=>{b(i)})}})}),i.querySelector("microend-moduleloader").addEventListener("change",e=>{b(i)}),i.querySelectorAll('[type="checkbox"]').forEach(e=>{e.addEventListener("change",async r=>{const o=r.target.getAttribute("data-module-name");await N(o,!r.target.checked),b(i).then()})}),i.querySelector("[data-exit-button]").addEventListener("click",()=>{F(i)})}function F(i){i.setFullScreen(!1),i.innerHTML=`<div data-button-package="true" >
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" class="ionicon" viewBox="0 0 512 512"><title>Apps</title><rect x="64" y="64" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="216" y="64" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="368" y="64" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="64" y="216" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="216" y="216" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="368" y="216" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="64" y="368" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="216" y="368" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><rect x="368" y="368" width="80" height="80" rx="40" ry="40" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/></svg>
+</div>`,i.querySelector("[data-button-package]").addEventListener("click",()=>{b(i).then()})}class Z extends HTMLElement{connectedCallback(){}disconnectedCallback(){}constructor(){super(),h(this,"log",(...t)=>{this.debugMode&&console.log("[MicroEndPackageManager]",...t)}),h(this,"setFullScreen",t=>{this.style.right=t?"unset":"30px",this.style.top=t?"0px":"unset",this.style.bottom=t?"unset":"30px",this.style.left=t?"0px":"unset",this.style.width=t?"100%":"unset",this.style.padding=t?"10px":"unset",this.style.minHeight=t?"100%":"unset",this.style.overflow="unset",this.style.backdropFilter=t?"blur(30px)":"unset"}),this.style.boxSizing="border-box",this.style.display="flex",this.style.flexDirection="column",this.style.alignItems="center",this.style.fontFamily="arial",this.style.position="absolute",this.debugMode=this.getAttribute("debug")==="true",F(this)}}customElements.define("microend-moduleloader",K);customElements.define("microend-router",V);customElements.define("microend-packagemanager",Z);
+
+</script>
+</head>
+<body>
+<article style="max-width: 600px;margin: auto;font-weight: lighter;width: 100%;padding: 20px">
+    <h1>Microend Web Application</h1>
+    <section style="line-height: 1.8">This is a Microend WebApp. Microend WebApp is a web application that can function
+        even when it is not connected to the internet/server, and it can have modules added to it in either an online or an
+        offline installation. The module consists of nothing more than an HTML page, within which all the resource assets
+        are embedded inline. The Microend Web App facilitates lifecycle management as well as communication between
+        modules. Modules may be constructed using any JavaScript framework of the developer's choosing. Microend WebApp
+        gives you the ability to construct large applications using the JavaScript frameworks of your team's
+        choosing,combined in a variety of different ways.
+    </section>
+</article>
+<microend-router debug="false" style="position: absolute;top: 0;left: 0;width: 100%;height: 100%"></microend-router>
+<microend-packagemanager></microend-packagemanager>
+
+</body>
+</html>
