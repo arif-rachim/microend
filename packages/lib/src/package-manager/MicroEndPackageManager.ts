@@ -32,6 +32,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.minHeight = fullScreen ? '100%' : 'unset';
         this.style.overflow = fullScreen ? 'unset' : 'unset';
         this.style.backdropFilter = fullScreen ? 'blur(30px)' : 'unset';
+        (this.style as any).webkitBackdropFilter = fullScreen ? 'blur(30px)' : 'unset';
 
     }
 
