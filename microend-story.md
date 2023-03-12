@@ -1,4 +1,4 @@
-    To protect my current employment, I'm posting this anonymously:
+To protect my current employment, I'm posting this anonymously:
 
 After graduating from college in 2004, I immediately began a career as a software developer. Since programming knowledge doesn't tend to last very long, I'm constantly learning new things and updating what I know.
 

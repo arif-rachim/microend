@@ -11,7 +11,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.flexDirection = 'column';
         this.style.alignItems = 'center';
         this.style.fontFamily = 'arial';
-        this.style.position = 'absolute';
+        this.style.position = 'fixed';
         this.debugMode = this.getAttribute('debug') === 'true';
         renderIcon(this);
     }
@@ -32,6 +32,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.minHeight = fullScreen ? '100%' : 'unset';
         this.style.overflow = fullScreen ? 'unset' : 'unset';
         this.style.backdropFilter = fullScreen ? 'blur(30px)' : 'unset';
+
         (this.style as any).webkitBackdropFilter = fullScreen ? 'blur(30px)' : 'unset';
 
     }

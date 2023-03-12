@@ -30,7 +30,6 @@ export class MicroEndRouter extends HTMLElement {
         this.routingRegistry = {};
         this.callerIdOrigin = {};
         this.currentActiveFrame = null;
-        //height:100%;overflow: auto;display: flex;flex-direction: column;margin:10px
         this.style.height = '100%';
         this.style.display = 'flex';
         this.style.flexDirection = 'column';

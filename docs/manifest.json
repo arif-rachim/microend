@@ -1,7 +1,7 @@
 {
   "name": "Microend WebApp",
   "short_name": "Microend",
-  "start_url": "/",
+  "start_url": "https://microend.org",
   "display": "fullscreen",
   "background_color": "#f8f8f8",
   "theme_color": "#f8f8f8",
