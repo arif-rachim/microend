@@ -8,7 +8,7 @@ export async function renderPackageList(packageManager: MicroEndPackageManager) 
 
     const allModules = await getAllModules();
     const modules = allModules.map(module => {
-        return `<div style="display: flex;flex-direction:column;font-family: Arial;border:1px solid rgba(0,0,0,0.1);padding:10px;box-sizing: border-box;width: 300px;height:130px;border-radius: 3px;background-color: white;margin:5px">
+        return `<div style="display: flex;flex-direction:column;font-family: Arial;border:1px solid rgba(0,0,0,0.1);padding:10px;box-sizing: border-box;width: 300px;height:130px;border-radius: 10px;background-color: white;margin:5px">
     <div style="display: flex;flex-direction: row;margin-bottom: 10px;height: 100%">
         <div style="font-size: 18px;margin-right: 5px;box-sizing: border-box">
         </div>
@@ -39,18 +39,17 @@ export async function renderPackageList(packageManager: MicroEndPackageManager) 
     </div>
 </div>`
     });
-
+    const noModule = '<div style="padding: 30px">No modules are currently installed.</div>'
     packageManager.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px;width:100%">
 <div style="display: flex;flex-direction: row;align-items: center">
-  
     <button style="border: 1px solid rgba(0,0,0,0);border-radius: 2px;background-color: unset" data-exit-button="true">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="ionicon" viewBox="0 0 512 512"><title>Arrow Back</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg>
     </button>
-    <div style="flex-grow: 1;align-items: center;font-size: 14px">Installed Modules</div>
-    <microend-moduleloader style="background-color: white;border-radius: 5px"></microend-moduleloader>
+    <div style="flex-grow: 1;align-items: center;font-size: 18px">Modules</div>
+    <microend-moduleloader ></microend-moduleloader>
 </div>
 
-<div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;">${modules.join('')}</div></div>`;
+<div style="display: flex;box-sizing: border-box;flex-direction: row;flex-wrap: wrap;justify-content: center;">${modules.length > 0 ? modules.join('') : noModule}</div></div>`;
 
     packageManager.querySelectorAll('[data-button-details]').forEach(element => {
 
