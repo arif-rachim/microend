@@ -3,7 +3,7 @@ import {useStore} from "./useStore";
 import {motion} from "framer-motion";
 import {useEffect, useRef, useState} from "react";
 import {nanoid} from "nanoid";
-import {db, User} from "./Database";
+import {AccessList, db, User} from "./Database";
 import {Branch, DataTree, DataTreeRef, rootRole, TreeItem} from "./tree/DataTree";
 import {Visible} from "./utils/Visible";
 import {DataGrid} from "./grid/DataGrid";
@@ -18,8 +18,25 @@ import {RoleRenderer} from "./grid/component/RoleRenderer";
 const me = getMicroEnd();
 
 const border = '1px solid rgba(0,0,0,0.1)';
-
-
+export type AccessParam = Pick<AccessList, 'name' | 'id' | 'description'>;
+me.createService({
+    registerAccessList: async (params: { moduleId: string, accessList: AccessParam[] }) => {
+        const {accessList, moduleId} = params;
+        for (const access of accessList) {
+            const list: AccessList = {
+                name: access.name,
+                description: access.description,
+                id: access.id,
+                moduleName: moduleId
+            }
+            const count = await db.accessList.where('id').equals(access.id).count()
+            if (count === 0) {
+                await db.accessList.put(list);
+            }
+        }
+        return true
+    },
+})
 
 function App() {
     const [selectedTab, setSelectedTab] = useState<'Roles' | 'Users'>('Roles')
