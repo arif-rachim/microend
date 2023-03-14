@@ -19,13 +19,15 @@
   "dependencies": {
     "@swc/helpers": "^0.4.14",
     "dexie": "^3.2.3",
-    "framer-motion": "^9.0.3",
-    "immer": "^9.0.19",
     "nanoid": "^3.3.1",
     "parcel": "^2.8.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.7.1"
+    "react-icons": "^4.7.1",
+    "framer-motion": "^10.2.3",
+    "html5-qrcode": "^2.3.7",
+    "immer": "^9.0.19",
+    "qrcode.react": "^3.1.0"
   },
   "devDependencies": {
     "ts-node": "^10.9.1",
@@ -36,5 +38,6 @@
     "@vitejs/plugin-react": "^3.1.0",
     "typescript": "^4.9.5",
     "vite": "^4.1.0"
+
   }
 }

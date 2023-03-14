@@ -1,8 +1,6 @@
-import {CSSProperties, useEffect, useId, useState} from "react";
-import {QRCodeSVG} from "qrcode.react";
-import {ConnectionState, debug, debugChannel} from "./debug";
-import {Html5QrcodeScanner} from "html5-qrcode";
-import {Store, useStore, useStoreListener} from "./useStore";
+import {useState} from "react";
+import {ConnectionState} from "./debug";
+import {useStore, useStoreListener} from "./useStore";
 import {SendReceiveFile} from "./SendReceiveFile";
 import {SignalMonitor} from "./SignalMonitor";
 import {RequesterConnectionSetupDialog} from "./RequesterConnectionSetupDialog";

@@ -3,10 +3,12 @@ import {TreeItem} from "./tree/DataTree";
 
 export interface User {
     id: string,
+    userId: string,
     name: string,
     email: string,
     phoneNumber: string,
     active: boolean,
+    roles: string // this is comma separated role !
 }
 
 class Database extends Dexie {
@@ -16,10 +18,10 @@ class Database extends Dexie {
 
     constructor() {
         super('iam');
-        this.version(1).stores({
+        this.version(5).stores({
             roles: 'id,name,parentId',
-            users: 'id,name'
-        })
+            users: 'id,userId,name,phoneNumber,email,roles'
+        });
     }
 }
 

@@ -14,9 +14,9 @@ const cellStyle: CSSProperties = {
 const cellTitleStyle: CSSProperties = {
     fontSize: 10, fontWeight: 'bold',
     display: 'flex', alignItems: 'flex-end',
-    height:30
+    height: 30
 };
-const cellValueStyle:CSSProperties = {
+const cellValueStyle: CSSProperties = {
     fontSize: 12,
     display: 'flex', alignItems: 'flex-end',
 }

@@ -1,6 +1,6 @@
 import {Store, StoreValueRenderer, useStore, useStoreListener} from "../useStore";
 import {TreeRow} from "./TreeRow";
-import {ForwardedRef, forwardRef, useImperativeHandle} from "react";
+import {ForwardedRef, forwardRef, ReactElement, useImperativeHandle} from "react";
 
 export type BranchWithLevel = Branch & { level: number };
 export const border = '1px solid rgba(0,0,0,0.1)';
@@ -28,7 +28,8 @@ export const DataTree = forwardRef(function DataTree(props: {
     $treeData: Store<TreeItem[]>,
     onItemChange: (id: string, value: Partial<TreeItem>) => void,
     onItemDelete: (row: Branch) => void,
-    onItemMove: (source: Branch, target: Branch) => void
+    onItemMove: (source: Branch, target: Branch) => void,
+    rowRenderer: (row: BranchWithLevel) => ReactElement
 }, ref: ForwardedRef<DataTreeRef>) {
     const $focusedItem = useStore<TreeItem | undefined>(undefined);
     const {$treeData} = props;
@@ -65,18 +66,12 @@ export const DataTree = forwardRef(function DataTree(props: {
             <div style={{flexGrow: 1}}>
                 Role Name
             </div>
-            <div>
-                Assigned Users
-            </div>
-            <div style={{width: 30}}>
 
-            </div>
         </div>
         <StoreValueRenderer store={$rows} selector={s => s} render={(rows: BranchWithLevel[]) => {
             return <div style={{height: '100%', backgroundColor: '#FEFEFE'}}>
                 {rows.filter(r => r.id !== rootRole.id).map((row) => {
                     return <TreeRow row={row}
-
                                     $toggleRows={$toggleRows}
                                     key={row.id}
                                     onChange={(value) => {
@@ -104,6 +99,7 @@ export const DataTree = forwardRef(function DataTree(props: {
                                     $focusedItem={$focusedItem}
                                     $itemBeingHovered={$rowBeingDragHover}
                                     $itemBeingDragged={$rowBeingDrag}
+                                    rowRenderer={props.rowRenderer}
 
                     />
                 })}

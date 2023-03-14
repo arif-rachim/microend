@@ -15,7 +15,7 @@ import {GiHammerBreak} from "react-icons/gi";
 import {nanoid} from "nanoid";
 import {noNull} from "../noNull";
 
-type FactoryFunctionConfig = {
+export type FactoryFunctionConfig = {
     position?: 'top' | 'left' | 'right' | 'bottom';
     isPopup?: boolean; // is popup meaning that the previous panel should not hide
 }
@@ -98,7 +98,7 @@ function OverlayPanel(props: { blurBackground: boolean }) {
                        exit={{opacity: 0}}/>
 }
 
-type FactoryFunction<T> = (closePanel: (val: T) => void) => ReactElement;
+export type FactoryFunction<T> = (closePanel: (val: T) => void) => ReactElement;
 
 interface SlidePanelRef {
     showPanel: <T>(factory: FactoryFunction<T>, config?: FactoryFunctionConfig | undefined) => Promise<T>

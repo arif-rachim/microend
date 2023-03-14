@@ -138,13 +138,13 @@ export async function getModule(name: string) {
     let moduleName = name;
     let moduleVersion = '';
     if (name.indexOf('@') > 0) {
-        const [modName,modVersion] = name.split('@');
+        const [modName, modVersion] = name.split('@');
         moduleName = modName;
         moduleVersion = modVersion;
     }
     const registry: Registry = await getRegistry();
     const moduleInfo = registry[moduleName];
-    if(moduleVersion){
+    if (moduleVersion) {
         return moduleInfo.version[moduleVersion];
     }
     return moduleInfo;
@@ -164,6 +164,6 @@ export const moduleHandler: Handler = async (params, resolve) => {
 export const moduleContentHandler: Handler = async (params, resolve) => {
     const moduleName = params.moduleName;
     const module = moduleName.split('@')[0];
-    const content = await readFile(p.join(REPO_NAME,module,`${moduleName}.html`),{encoding:"utf-8"});
+    const content = await readFile(p.join(REPO_NAME, module, `${moduleName}.html`), {encoding: "utf-8"});
     resolve(content);
 }

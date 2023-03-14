@@ -23,3 +23,23 @@ html, body, #root {
 * {
     box-sizing: border-box;
 }
+
+input {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 3px 5px;
+    font-size: 14px;
+    min-width: 0px;
+}
+
+input:focus {
+    outline: none;
+    background-color: antiquewhite;
+
+}
+
+button {
+    padding: 5px 5px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+}

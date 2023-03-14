@@ -14,7 +14,7 @@ export const post: Middleware = (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     try {
-        const {handler,parameters} = getParamsAndHandler(req,MAPPER);
+        const {handler, parameters} = getParamsAndHandler(req, MAPPER);
         if (handler === undefined) {
             res.writeHead(404);
             res.end(JSON.stringify({error: 'Resource Not Found'}));
@@ -25,7 +25,7 @@ export const post: Middleware = (req, res, next) => {
         req.on('end', async () => {
             const json: any = JSON.parse(body);
             const result = await (() => new Promise((resolve) => {
-                handler(({...parameters,body:json}), resolve)
+                handler(({...parameters, body: json}), resolve)
             }))();
             res.writeHead(200);
             res.end(JSON.stringify(result));

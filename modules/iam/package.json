@@ -9,14 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@swc/helpers": "^0.4.14",
-    "framer-motion": "^9.0.3",
-    "immer": "^9.0.19",
-    "nanoid": "^3.3.1",
+    "@swc/helpers": "*",
+    "framer-motion": "*",
+    "immer": "*",
+    "nanoid": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.7.1",
-    "vite-plugin-singlefile": "^0.13.3"
+    "react-icons": "*",
+    "vite-plugin-singlefile": "*"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",

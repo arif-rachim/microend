@@ -9,20 +9,17 @@ import {Visible} from "./utils/Visible";
 import {DataGrid} from "./grid/DataGrid";
 import {useSlidePanel} from "./slide/SlidePanel";
 
+import {AiOutlineUser, AiOutlineUsergroupAdd} from "react-icons/ai";
+import {UserPanel} from "./panel/UserPanel";
+import {Toggle} from "./toggle/Toggle";
+import {TreeRowItem} from "./tree/component/TreeRowItem";
+import {RoleRenderer} from "./grid/component/RoleRenderer";
+
 const me = getMicroEnd();
 
 const border = '1px solid rgba(0,0,0,0.1)';
 
-function Toggle(props: { value: string, dataProvider: string[], onChange: (param: string) => void }) {
-    const {dataProvider, value, onChange} = props;
-    return <div style={{display: 'flex', flexDirection: 'row'}}>
-        {dataProvider.map(s => {
-            return <motion.div key={s} style={{border, padding: '3px 10px', cursor: 'pointer'}}
-                               animate={{backgroundColor: value === s ? '#CCC' : '#FFF'}}
-                               onClick={() => onChange(s)}>{s}</motion.div>
-        })}
-    </div>;
-}
+
 
 function App() {
     const [selectedTab, setSelectedTab] = useState<'Roles' | 'Users'>('Roles')
@@ -30,14 +27,25 @@ function App() {
     const $roles = useStore<TreeItem[]>([]);
     const $users = useStore<User[]>([])
 
-    async function refreshTable() {
+    async function refreshRoles() {
         const roles = await db.roles.toArray();
         $roles.set(roles);
     }
 
+    async function refreshUsers() {
+        const users = await db.users.toArray();
+        $users.set(users);
+    }
+
     useEffect(() => {
-        refreshTable().then()
-    }, []);
+        if (selectedTab === 'Roles') {
+            refreshRoles().then()
+        }
+        if (selectedTab === 'Users') {
+            refreshUsers().then()
+        }
+
+    }, [selectedTab]);
 
     async function addNewRole() {
         const focusedRole = dataTreeRef.current?.$focusedItem.get();
@@ -48,21 +56,18 @@ function App() {
             name: '',
             order: 1
         });
-        await refreshTable();
+        await refreshRoles();
     }
 
     const [showPanel, SlidePanel] = useSlidePanel();
 
     async function addNewUser() {
-
-        const result = await showPanel<string>(closePanel => {
-            return <button onClick={() => {
-                closePanel('hello')
-            }}>SEDAP GAN
-            </button>
+        await showPanel<User | false>(closePanel => {
+            return <UserPanel closePanel={closePanel}/>
         });
-
+        await refreshUsers();
     }
+
 
     return (<div
         style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative'}}>
@@ -71,7 +76,8 @@ function App() {
                 setSelectedTab(value as any);
             }}/>
             <div style={{flexGrow: 1}}></div>
-            <motion.div style={{border, padding: '3px 10px', cursor: 'pointer'}} whileTap={{scale: 0.95}}
+            <motion.div style={{border, padding: '3px 10px', cursor: 'pointer', display: 'flex'}}
+                        whileTap={{scale: 0.95}}
                         onClick={async () => {
                             if (selectedTab === 'Roles') {
                                 await addNewRole();
@@ -81,9 +87,11 @@ function App() {
                             }
                         }}>
                 <Visible if={selectedTab === 'Roles'}>
+                    <div style={{display: 'flex', marginRight: 5}}><AiOutlineUsergroupAdd style={{fontSize: 18}}/></div>
                     <div>Add Roles</div>
                 </Visible>
                 <Visible if={selectedTab === 'Users'}>
+                    <div style={{display: 'flex', marginRight: 5}}><AiOutlineUser style={{fontSize: 18}}/></div>
                     <div>Add Users</div>
                 </Visible>
             </motion.div>
@@ -93,15 +101,18 @@ function App() {
                       ref={dataTreeRef}
                       onItemChange={async (id, value) => {
                           await renameRole(id, value.name ?? '');
-                          await refreshTable();
+                          await refreshRoles();
                       }}
                       onItemDelete={async role => {
                           await deleteRoles([role]);
-                          await refreshTable();
+                          await refreshRoles();
                       }}
                       onItemMove={async (source, target) => {
                           await moveRoleTo(source, target);
-                          await refreshTable();
+                          await refreshRoles();
+                      }}
+                      rowRenderer={(role) => {
+                          return <TreeRowItem role={role} showPanel={showPanel}/>
                       }}
             />
         </Visible>
@@ -111,22 +122,29 @@ function App() {
                     title: 'Name',
                     headerStyle: {},
                     cellStyle: {},
-                    width: '50%',
+                    width: '30%',
                     renderer: ({value}) => <label>{value}</label>
                 },
                 email: {
                     title: 'E-Mail',
                     headerStyle: {},
                     cellStyle: {},
-                    width: '25%',
+                    width: '15%',
                     renderer: ({value}) => <label>{value}</label>
                 },
                 phoneNumber: {
                     title: 'Phone Number',
                     headerStyle: {},
                     cellStyle: {},
-                    width: '25%',
+                    width: '15%',
                     renderer: ({value}) => <label>{value}</label>
+                },
+                roles: {
+                    title: 'Role(s)',
+                    headerStyle: {},
+                    cellStyle: {},
+                    width: '40%',
+                    renderer: ({value}) => <RoleRenderer roles={value}/>
                 }
             }} columnKey={'id'}/>
         </Visible>

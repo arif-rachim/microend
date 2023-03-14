@@ -76,8 +76,7 @@ export function App() {
                 top: 0,
                 width: '100%'
             }}
-                        initial={{x: '100%'}} animate={{x: isRequesterActive ? '100%' : 0}}><Peer
-                isFocused={!isRequesterActive}/></motion.div>
+                        initial={{x: '100%'}} animate={{x: isRequesterActive ? '100%' : 0}}><Peer/></motion.div>
 
         </div>
     </div>

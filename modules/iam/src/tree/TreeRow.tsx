@@ -1,5 +1,5 @@
 import {Store, useStoreValue} from "../useStore";
-import {useEffect, useId, useState} from "react";
+import {ReactElement, useEffect, useId, useState} from "react";
 import {motion} from "framer-motion";
 import {AiOutlineDelete} from "react-icons/ai";
 import {border, BranchWithLevel, TreeItem} from "./DataTree";
@@ -16,7 +16,8 @@ export function TreeRow(props: {
     $focusedItem: Store<TreeItem | undefined>,
     $itemBeingHovered: Store<BranchWithLevel | undefined>,
     $itemBeingDragged: Store<BranchWithLevel | undefined>,
-    $toggleRows: Store<BranchWithLevel[]>
+    $toggleRows: Store<BranchWithLevel[]>,
+    rowRenderer: (row: BranchWithLevel) => ReactElement
 }) {
 
     const {
@@ -28,7 +29,8 @@ export function TreeRow(props: {
         onDelete,
         onDrop,
         onToggleFolder,
-        $toggleRows
+        $toggleRows,
+        rowRenderer
     } = props;
     const [edit, setEdit] = useState<boolean>(false);
     const id = useId();
@@ -63,13 +65,12 @@ export function TreeRow(props: {
     const isClosed = $toggleRows.get().findIndex(s => s.id === row.id) >= 0
     return <motion.div style={{
         opacity: isBeingDrag ? 0.2 : 1,
-        minHeight: 22,
         display: 'flex',
         flexDirection: 'column',
         paddingLeft: 20 * (row.level - 1),
         backgroundColor: isDragHover ? 'yellow' : isFocused ? '#EEEEEE' : '#FFFFFF',
         borderBottom: border
-    }}
+    }} initial={{height: 0}} animate={{height: 22}}
                        onDoubleClick={() => {
                            setEdit(true);
                        }}
@@ -102,8 +103,7 @@ export function TreeRow(props: {
                        }}
     >
         <Visible if={edit}>
-            <input id={id} type="text" defaultValue={row.name} autoFocus={true}
-                   style={{border: "none", padding: '3px 5px'}}/>
+            <input id={id} type="text" defaultValue={row.name} autoFocus={true}/>
         </Visible>
         <Visible if={!edit}>
             <div style={{display: 'flex', alignItems: 'center'}}>
@@ -118,8 +118,7 @@ export function TreeRow(props: {
                         <IoFolderOutline style={{fontSize: 18}}/>
                     </Visible>
                 </div>
-                <div style={{flexGrow: 1}}>{row.name}</div>
-
+                <div style={{flexGrow: 1}}>{rowRenderer(row)}</div>
                 <div style={{
                     cursor: "pointer",
                     display: 'flex',
