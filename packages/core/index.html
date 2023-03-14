@@ -110,7 +110,7 @@
     </style>
 </head>
 <body>
-<section class="banner">
+<section id="banner" class="banner">
     <article>
         <div class="banner-title">
             <svg height="32" preserveAspectRatio="xMidYMid meet" version="1.0" viewBox="0 0 375 374.999991"
@@ -219,7 +219,9 @@
     function showArticle() {
         const routerActive = (window.location.hash || '').length > 3;
         const article = document.getElementById('article');
+        const banner = document.getElementById('banner');
         article.style.display = routerActive ? 'none' : 'flex';
+        banner.style.display = routerActive ? 'none' : 'block';
     }
 
     showArticle();

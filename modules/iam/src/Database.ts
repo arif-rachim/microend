@@ -26,7 +26,7 @@ class Database extends Dexie {
 
     constructor() {
         super('iam');
-        this.version(5).stores({
+        this.version(6).stores({
             roles: 'id,name,parentId',
             users: 'id,userId,name,phoneNumber,email,roles',
             accessList : 'id,name'

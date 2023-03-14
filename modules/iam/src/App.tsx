@@ -18,8 +18,10 @@ import {RoleRenderer} from "./grid/component/RoleRenderer";
 const me = getMicroEnd();
 
 const border = '1px solid rgba(0,0,0,0.1)';
+
 export type AccessParam = Pick<AccessList, 'name' | 'id' | 'description'>;
-me.createService({
+
+const service = me.createService({
     registerAccessList: async (params: { moduleId: string, accessList: AccessParam[] }) => {
         const {accessList, moduleId} = params;
         for (const access of accessList) {
@@ -29,14 +31,17 @@ me.createService({
                 id: access.id,
                 moduleName: moduleId
             }
-            const count = await db.accessList.where('id').equals(access.id).count()
+            const count = await db.accessList.where('id').equals(access.id).count();
             if (count === 0) {
                 await db.accessList.put(list);
             }
         }
         return true
     },
-})
+});
+
+export type IamService = typeof service;
+
 
 function App() {
     const [selectedTab, setSelectedTab] = useState<'Roles' | 'Users'>('Roles')

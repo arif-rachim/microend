@@ -185,6 +185,7 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
     })
     tx.commit();
     db.close();
+    window.location.reload();
 }
 
 export async function removeModule(moduleName: string) {
