@@ -1,4 +1,4 @@
-import {Store, StoreValueRenderer, useStore, useStoreListener} from "../useStore";
+import {Store, StoreValueRenderer, useStore, useStoreListener} from "@microend/utils";
 import {TreeRow} from "./TreeRow";
 import {ForwardedRef, forwardRef, ReactElement, useImperativeHandle} from "react";
 

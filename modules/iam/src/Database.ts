@@ -29,7 +29,7 @@ class Database extends Dexie {
         this.version(6).stores({
             roles: 'id,name,parentId',
             users: 'id,userId,name,phoneNumber,email,roles',
-            accessList : 'id,name'
+            accessList: 'id,name'
         });
     }
 }

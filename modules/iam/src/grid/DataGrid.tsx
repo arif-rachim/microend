@@ -1,4 +1,4 @@
-import {Store, StoreValueRenderer, useStore, useStoreValue} from "../useStore";
+import {Store, StoreValueRenderer, useStore, useStoreValue} from "@microend/utils";
 import {border} from "../tree/DataTree";
 import {CSSProperties, ReactElement} from "react";
 import {AnimatePresence, motion} from "framer-motion";

@@ -1,5 +1,5 @@
 import {db, User} from "../Database";
-import {Store, StoreValueRenderer, useStore, useStoreValue} from "../useStore";
+import {Store, StoreValueRenderer, useStore, useStoreValue} from "@microend/utils";
 import {useEffect, useState} from "react";
 import {DataGrid} from "../grid/DataGrid";
 import produce from "immer";

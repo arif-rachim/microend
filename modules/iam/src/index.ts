@@ -1,4 +1,3 @@
-import type {IamService} from "./App";
-import type {AccessParam} from "./App";
+import type {AccessParam, IamService} from "./App";
 
 export {IamService, AccessParam};

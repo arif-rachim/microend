@@ -1,5 +1,5 @@
 import {db, User} from "../Database";
-import {StoreValue, useStore} from "../useStore";
+import {StoreValue, useStore} from "@microend/utils";
 import {nanoid} from "nanoid";
 import produce from "immer";
 
