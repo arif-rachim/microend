@@ -83,13 +83,13 @@ interface NavigateBackMessage extends Intent {
  */
 interface RoutingRegistryValue {
     /**
-     * srcdoc html code yang akan ditampilkan di layar
-     */
-    srcdoc: string,
-    /**
      * dependency yang digunakan oleh module
      */
-    dependencies: string[]
+    dependencies: string[],
+    /**
+     * ID dari module source yang memiliki content dari module
+     */
+    moduleSourceId: string
 }
 
 /**
@@ -170,20 +170,27 @@ type Navigator<Handler, HandlerKey extends keyof Handler> = {
 export type MessageData = NavigateToMessage | NavigateBackMessage;
 
 export interface Module {
+    title: string;
     name: string;
     description: string;
     path: string;
     version: string;
     dependencies: string[];
     missingDependencies: string[];
-    srcdoc: string,
     installedOn: number,
     size: number,
     lastModified: number;
     active: boolean;
     deleted: boolean;
-    author: string
+    author: string;
+    moduleSourceId: string;
 }
+
+export interface ModuleSource {
+    id: string;
+    srcdoc: string
+}
+
 
 
 

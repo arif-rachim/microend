@@ -10,7 +10,10 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.display = 'flex';
         this.style.flexDirection = 'column';
         this.style.alignItems = 'center';
-        this.style.fontFamily = 'arial';
+        this.style.fontFamily = 'Helvetica, Arial, sans-serif, Inter, system-ui, Avenir';
+        this.style.fontSize = '14px';
+        this.style.lineHeight = '1.5';
+        this.style.fontWeight = '400';
         this.style.position = 'fixed';
         this.debugMode = this.getAttribute('debug') === 'true';
         renderIcon(this);

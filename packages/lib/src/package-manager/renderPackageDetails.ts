@@ -22,8 +22,16 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
             <div style="flex-grow: 1;margin-left: 10px">${moduleName}</div>
         </div>
         <div style="${rowStyle}">
+            <div style="${labelStyle}">Title</div>
+            <div >${module.title}</div>
+        </div>
+        <div style="${rowStyle}">
             <div style="${labelStyle}">Description</div>
             <div >${module.description}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Author</div>
+            <div >${module.author}</div>
         </div>
         <div style="${rowStyle}">
             <div style="${labelStyle}">Path</div>

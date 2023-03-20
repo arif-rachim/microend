@@ -1,20 +1,35 @@
-import {Module} from "./Types";
+import {Module, ModuleSource} from "./Types";
 import {openTransaction} from "./openTransaction";
 import {showModal} from "./showModal";
+import {nanoid} from "nanoid";
 
 export async function getAllModules(): Promise<Module[]> {
-    const {db, tx, store} = await openTransaction('readonly');
+    const [db, tx, store] = await openTransaction('readonly', 'module');
     const request = store.getAll();
     const result = await forRequest<Module[]>(request);
     if (result === false) {
         db.close();
         return [];
     }
-    return result.filter(m => !m.deleted);
+    const response = result.filter(m => !m.deleted);
+    db.close();
+    return response;
+}
+
+export async function getModuleSource(moduleSourceId: string): Promise<ModuleSource> {
+    const [db, tx, store] = await openTransaction('readonly', 'module-source');
+    const request = store.get(moduleSourceId);
+    const result = await forRequest<ModuleSource>(request);
+    if (result === false) {
+        db.close();
+        throw new Error('Unable to find module-source ' + moduleSourceId);
+    }
+    db.close();
+    return result;
 }
 
 export async function getModule(moduleName: string): Promise<Module | false> {
-    const {db, store} = await openTransaction("readonly");
+    const [db, tx, store] = await openTransaction("readonly", 'module');
     const request = store.get(moduleName);
     const data = await forRequest<Module>(request)
     db.close();
@@ -69,9 +84,13 @@ async function validateModules(files: FileList) {
         const dependency = getMetaData('dependency', content)[0];
         const description = getMetaData('description', content)[0];
         const author = getMetaData('author', content)[0];
+        const title = getTagContent('title', content);
+
+        //const icon = getMetaData('icon', content)[0];
         validate(moduleName, missingRequiredMeta, 'module');
         validate(description, missingRequiredMeta, 'description');
         validate(author, missingRequiredMeta, 'author');
+        validate(title, missingRequiredMeta, 'title');
         validateVersioning(moduleName ?? '', versioningIssue, `${moduleName}(module)`);
         if (dependency) {
             const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
@@ -99,7 +118,9 @@ export function contentMeta(content: string, file: { size: number, lastModified:
     const dependency = getMetaData('dependency', content)[0];
     const description = getMetaData('description', content)[0];
     const author = getMetaData('author', content)[0];
+    const title = getTagContent('title', content);
     const [path, version] = moduleName.split('@');
+    const id = nanoid();
     // maybe we need to have the available queryParams and available service
     const module: Module = {
         name: moduleName,
@@ -107,16 +128,23 @@ export function contentMeta(content: string, file: { size: number, lastModified:
         version,
         dependencies: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
         missingDependencies: [],
-        srcdoc: content,
         installedOn: new Date().getTime(),
         size: file.size,
         lastModified: file.lastModified,
         description,
         active: true,
         deleted: false,
-        author
+        author,
+        moduleSourceId: id,
+        title
     }
-    return module;
+
+    const moduleSource: ModuleSource = {
+        id,
+        srcdoc: content
+    }
+
+    return {module, moduleSource};
 }
 
 export async function saveAllModules(files: FileList) {
@@ -128,12 +156,12 @@ ${errors.map(error => error).join('')}
 </div>`, 'Ok');
         return;
     }
-    const modules: Module[] = Array.from(files).map((file, index) => {
+    const modulesSource: { module: Module, moduleSource: ModuleSource }[] = Array.from(files).map((file, index) => {
         const content = contents[index];
-        const module = contentMeta(content, file);
-        return module;
+        const {module, moduleSource} = contentMeta(content, file);
+        return {module, moduleSource};
     });
-
+    const modules = modulesSource.map(m => m.module);
     // here we need to perform some validation
     const allInstalledModules = await getAllModules();
     const missingDependencies: string[] = await findAndUpdateMissingDependencies(modules, allInstalledModules);
@@ -173,15 +201,21 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
         return;
     }
 
-    const {db, tx, store} = await openTransaction("readwrite");
+    const [db, tx, moduleStore, sourceStore] = await openTransaction("readwrite", ["module", "module-source"]);
+
     modulesToBeUpgrade.forEach(toBeUpgraded => {
         const module = allInstalledModules.find(s => s.name === toBeUpgraded.from)!;
         module.deleted = true;
         module.active = false;
-        store.put(module);
+        moduleStore.put(module);
     })
     modules.forEach(module => {
-        store.put(module);
+        moduleStore.put(module);
+        const source = modulesSource.find(s => s.module.moduleSourceId === module.moduleSourceId);
+
+        if (source !== undefined) {
+            sourceStore.put(source.moduleSource)
+        }
     })
     tx.commit();
     db.close();
@@ -189,7 +223,7 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
 }
 
 export async function removeModule(moduleName: string) {
-    const {db, tx, store} = await openTransaction("readwrite");
+    const [db, tx, store] = await openTransaction("readwrite", "module");
     const module = await forRequest<Module>(store.get(moduleName));
     if (module) {
         module.deleted = true;
@@ -212,7 +246,7 @@ function forRequest<T>(request: IDBRequest): Promise<T | false> {
 }
 
 export async function deactivateModule(moduleName: string, deactivate: boolean) {
-    const {db, tx, store} = await openTransaction("readwrite");
+    const [db, tx, store] = await openTransaction("readwrite", "module");
     const request = store.get(moduleName);
     const data = await forRequest<Module>(request)
     if (data === false) {
@@ -223,7 +257,6 @@ export async function deactivateModule(moduleName: string, deactivate: boolean) 
     store.put(data);
     tx.commit();
     db.close();
-
 }
 
 function getMetaData(metaName: string, htmlText: string): string[] {
@@ -237,6 +270,17 @@ function getMetaData(metaName: string, htmlText: string): string[] {
         }
     } while (index >= 0);
     return result;
+}
+
+function getTagContent(tagName: string, htmlText: string) {
+    const startTag = `<${tagName}>`;
+    const endTag = `</${tagName}>`;
+    if (htmlText.indexOf(startTag) < 0) {
+        return '';
+    }
+    const startIndex = htmlText.indexOf(startTag) + startTag.length;
+    const endIndex = htmlText.indexOf(endTag, startIndex);
+    return htmlText.substring(startIndex, endIndex);
 }
 
 function scanText(metaName: string, htmlText: string, startingIndex: number): [string, number] {

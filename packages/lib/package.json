@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit src/index.ts"
   },
   "dependencies": {
-    "@swc/helpers": "^0.4.14"
+    "@swc/helpers": "^0.4.14",
+    "nanoid": "*"
   },
   "browserslist": {
     "production": [

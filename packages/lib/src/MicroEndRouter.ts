@@ -1,8 +1,8 @@
 import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
-import {getAllModules} from "./moduleQuery";
+import {getAllModules, getModuleSource} from "./moduleQuery";
 
 export const DATABASE_NAME = 'routing-registry';
-export const TABLE_MODULE_NAME = 'module';
+export type Table = 'module' | 'module-source';
 
 // warning use document write is slow, but the code is cleaner when displayed in the screen.
 // const useDocumentWrite = true;
@@ -60,7 +60,7 @@ export class MicroEndRouter extends HTMLElement {
         return text.split('/').filter(s => s)
     };
 
-    render = (pathAndQuery: string, type: NavigateToType, caller: string) => {
+    render = async (pathAndQuery: string, type: NavigateToType, caller: string) => {
 
         const [path, query] = pathAndQuery.split('?');
         const queryParams = this.extractParamsFromQuery(query);
@@ -73,8 +73,8 @@ export class MicroEndRouter extends HTMLElement {
         if (pathSegments.length === 0) {
             return;
         }
-        const {route, srcdoc, dependencies: dependency} = this.findMostMatchingRoute(pathSegments);
-        if (srcdoc === '' || srcdoc === undefined) {
+        const {route, moduleSourceId, dependencies: dependency} = this.findMostMatchingRoute(pathSegments);
+        if (moduleSourceId === '' || moduleSourceId === undefined) {
             this.log('Rendering ', pathAndQuery, type);
             this.log('were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
             return;
@@ -91,6 +91,12 @@ export class MicroEndRouter extends HTMLElement {
             console.error('[MicroEndRouter]', 'ShadowRoot is null we cant renderPackageList this');
             return;
         }
+        const moduleSource = await getModuleSource(moduleSourceId);
+        this.renderSourceHtml({route, type, caller, params, dependencies, srcdoc: moduleSource.srcdoc});
+    }
+
+    renderSourceHtml = (props: { route: string, type: "default" | "modal" | "service", caller: string, params: { [p: string]: string }, dependencies: StringKeyValue, srcdoc: string }) => {
+        const {srcdoc, dependencies, caller, type, params, route} = props;
         let nextFrame: HTMLIFrameElement | null = this.getFrame({route, type, caller});
         if (nextFrame === null) {
             nextFrame = document.createElement('iframe');
@@ -202,8 +208,12 @@ export class MicroEndRouter extends HTMLElement {
         if (!mostMatchingPath) {
             throw new Error(`No available modules supporting ${path}/${version}`);
         }
-        const routingRegistry = this.routingRegistry[mostMatchingPath] || {srcdoc: '', dependencies: []};
-        return {route: mostMatchingPath, srcdoc: routingRegistry.srcdoc, dependencies: routingRegistry.dependencies};
+        const routingRegistry = this.routingRegistry[mostMatchingPath] || {moduleSourceId: '', dependencies: []};
+        return {
+            route: mostMatchingPath,
+            moduleSourceId: routingRegistry.moduleSourceId,
+            dependencies: routingRegistry.dependencies
+        };
     }
 
     extractParamsFromQuery = (query: string) => {
