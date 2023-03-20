@@ -1,0 +1,46 @@
+{
+  "name": "@microend/vite-plugin-microend",
+  "version": "1.0.0",
+  "description": "Micro End vite Library",
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
+  "scripts": {
+    "start": "parcel watch",
+    "build": "parcel build",
+    "typecheck": "tsc --noEmit src/index.ts"
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.4.14",
+    "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.1.1",
+    "micromatch": "^4.0.2",
+    "nanoid": "*",
+    "mime-types": "^2.1.1",
+    "request" : "^2.48.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1",
+    "@types/micromatch": "^4.0.2",
+    "@types/mime-types": "^2.1.1",
+    "@types/request": "^2.48.8",
+    "mime-types": "^2.1.35",
+    "request": "^2.88.2"
+  }
+}
