@@ -106,12 +106,6 @@ export function viteMicroEnd(config: Config): Plugin {
     }
 }
 
-// Optionally remove the Vite module loader since it's no longer needed because this plugin has inlined all code.
-// This assumes that the Module Loader is (1) the FIRST function declared in the module, (2) an IIFE, (3) is minified,
-// (4) is within a script with no unexpected attribute values, and (5) that the containing script is the first script
-// tag that matches the above criteria. Changes to the SCRIPT tag especially could break this again in the future.
-// Update example:
-// https://github.com/richardtallent/vite-plugin-singlefile/issues/57#issuecomment-1263950209
 const _removeViteModuleLoader = (html: string) => html.replace(/(<script type="module" crossorigin>\s*)\(function\(\)\{[\s\S]*?\}\)\(\);/, '<script type="module">\n')
 
 // Modifies the Vite build config to make this plugin work well.
@@ -121,7 +115,7 @@ const _useRecommendedBuildConfig = (config: UserConfig) => {
     config.build.assetsInlineLimit = 100000000
     // Avoid warnings about large chunks.
     config.build.chunkSizeWarningLimit = 100000000
-    // Emit all CSS as a single file, which `vite-plugin-singlefile` can then inline.
+    // Emit all CSS as a single file
     config.build.cssCodeSplit = false
     // Avoids the extra step of testing Brotli compression, which isn't really pertinent to a file served locally.
     config.build.reportCompressedSize = false
