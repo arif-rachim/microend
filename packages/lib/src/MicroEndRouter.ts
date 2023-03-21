@@ -1,5 +1,6 @@
 import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
 import {getAllModules, getModuleSource} from "./moduleQuery";
+import {satisfies} from "compare-versions";
 
 export const DATABASE_NAME = 'routing-registry';
 export type Table = 'module' | 'module-source';
@@ -83,7 +84,7 @@ export class MicroEndRouter extends HTMLElement {
         const pathParams = this.extractParamsFromPath(route, pathSegments);
         const params = ({...queryParams, ...pathParams});
         const dependencies = dependency.reduce((result: StringKeyValue, dep) => {
-            const [path, version] = dep.split('@');
+            const [path, version] = dep.split('@').filter(s => s);
             result[path] = version;
             return result;
         }, {});
@@ -203,7 +204,10 @@ export class MicroEndRouter extends HTMLElement {
         const [path, version] = pathSegments;
         const mostMatchingPath = Object.keys(this.routingRegistry).find(key => {
             const [routingPath, routingVersion] = key.split('/').filter(s => s);
-            return routingPath === path && routingVersion >= version;
+            if(version === '*'){
+                return routingPath === path;
+            }
+            return routingPath === path && satisfies(routingVersion,version);
         });
         if (!mostMatchingPath) {
             throw new Error(`No available modules supporting ${path}/${version}`);
@@ -235,7 +239,6 @@ export class MicroEndRouter extends HTMLElement {
 
     onMessage = (event: MessageEvent<MessageData>) => {
         if (event.data.intent === 'navigateTo') {
-
             const params = event.data.params;
 
             const originRoute = event.data.originRoute;
@@ -244,7 +247,7 @@ export class MicroEndRouter extends HTMLElement {
 
             const originalFrame = this.getFrame({route: originRoute, caller: originCaller, type: originType});
             if (originalFrame === null) {
-                console.warn('WE COULDNT GET THE FRAME !!! this is wrong !!');
+                console.warn('WE COULD NOT GET THE FRAME !!! this is wrong !!');
                 return;
             }
             const type = event.data.type;
@@ -307,7 +310,7 @@ export class MicroEndRouter extends HTMLElement {
         window.addEventListener('message', this.onMessage);
         (async () => {
             const modules = await getAllModules();
-            modules.forEach(d => {
+            modules.filter(m => m.active).forEach(d => {
                 this.routingRegistry[`/${d.path}/${d.version}`] = d;
             });
             this.renderBasedOnHash();
@@ -515,12 +518,18 @@ const clientTemplate = `
     me.navigateTo = (route, params, type = 'default') => {
 
         return new Promise((resolve) => {
+            
             params = params || {};
             const caller = (Math.random() * 1000000000 + new Date().getTime()).toFixed(0);
             if (window.top === null) {
                 return;
             }
-            const dependencyVersion = me.dependencies[route];
+            
+            let dependencyVersion = me.dependencies[route];
+            
+            if(dependencyVersion === undefined && '*' in me.dependencies){
+                dependencyVersion = me.dependencies['*'];
+            }
 
             if(dependencyVersion === undefined){
                 const [path,version] = me.route.split('/').filter(s => s);

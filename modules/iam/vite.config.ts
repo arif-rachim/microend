@@ -8,9 +8,9 @@ export default defineConfig({
     author:'arif.rachim@gmail.com',
     dependencies : {},
     version : '1.0.0',
-    title : 'Identity Access Management',
+    title : 'IAM',
     name : 'iam',
     description:'Identity Access Management allows user to add roles and user into the application',
-    iconFile : './src/iam-logo.svg'
+    iconFile : './src/identity-access-management.svg'
   })],
 })

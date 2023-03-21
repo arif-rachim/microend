@@ -2,6 +2,7 @@ import {Module, ModuleSource} from "./Types";
 import {openTransaction} from "./openTransaction";
 import {showModal} from "./showModal";
 import {nanoid} from "nanoid";
+import {satisfies, validate as validVersion} from "compare-versions";
 
 export async function getAllModules(): Promise<Module[]> {
     const [db, tx, store] = await openTransaction('readonly', 'module');
@@ -41,8 +42,11 @@ async function findAndUpdateMissingDependencies(modules: Module[], allInstalledM
     return modules.reduce((totalMissingDependencies: string[], m) => {
         const missingDependencies: string[] = m.dependencies.reduce((missingDependencies: string[], dependency) => {
             const indexOfDependency = allModules.findIndex(m => {
-                const [path, version] = dependency.split('@');
-                return m.path === path && m.version >= version;
+                const [path, version] = dependency.split('@').filter(s => s);
+                if (version === '*' && path === '*') {
+                    return true;
+                }
+                return m.path === path && satisfies(m.version, version);
             });
             if (indexOfDependency < 0) {
                 missingDependencies.push(dependency);
@@ -71,8 +75,19 @@ async function findModulesToBeUpgrade(modules: Module[], allInstalledModules: Mo
 }
 
 const validate = (value: any, errors: string[], message: string) => (value === undefined || value === null || value === '') && errors.push(message)
-const versionIsValid = (version: string) => version.split('.').reduce((isNumber, number) => parseInt(number) >= 0 && isNumber, true)
-const validateVersioning = (value: string, errors: string[], message: string) => ((value.split('@').filter(s => s).length !== 2) || (!versionIsValid(value.split('@')[1]))) && errors.push(message);
+
+const validateVersioning = (value: string, errors: string[], message: string) => {
+    const versioning = value.split('@').filter(s => s);
+    if (versioning.length !== 2) {
+        errors.push(message);
+        return;
+    }
+    const semver = versioning[1];
+    if (semver !== '*' && !validVersion(semver)) {
+        errors.push(message);
+        return;
+    }
+}
 
 async function validateModules(files: FileList) {
     const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
@@ -86,7 +101,6 @@ async function validateModules(files: FileList) {
         const author = getMetaData('author', content)[0];
         const icon = getMetaData('icon', content)[0];
         const title = getTagContent('title', content);
-
 
         validate(moduleName, missingRequiredMeta, 'module');
         validate(description, missingRequiredMeta, 'description');
@@ -122,7 +136,7 @@ export function contentMeta(content: string, file: { size: number, lastModified:
     const author = getMetaData('author', content)[0];
     const iconDataURI = getMetaData('icon', content)[0];
     const title = getTagContent('title', content);
-    const [path, version] = moduleName.split('@');
+    const [path, version] = moduleName.split('@').filter(s => s);
     const id = nanoid();
     // maybe we need to have the available queryParams and available service
     const module: Module = {
