@@ -1,7 +1,7 @@
 {
   "name": "@microend/iam",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0-rc.1",
   "type": "module",
   "source": "src/index.ts",
   "main": "dist/index.js",

@@ -84,13 +84,15 @@ async function validateModules(files: FileList) {
         const dependency = getMetaData('dependency', content)[0];
         const description = getMetaData('description', content)[0];
         const author = getMetaData('author', content)[0];
+        const icon = getMetaData('icon', content)[0];
         const title = getTagContent('title', content);
 
-        //const icon = getMetaData('icon', content)[0];
+
         validate(moduleName, missingRequiredMeta, 'module');
         validate(description, missingRequiredMeta, 'description');
         validate(author, missingRequiredMeta, 'author');
         validate(title, missingRequiredMeta, 'title');
+        validate(icon, missingRequiredMeta, 'icon');
         validateVersioning(moduleName ?? '', versioningIssue, `${moduleName}(module)`);
         if (dependency) {
             const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
@@ -118,6 +120,7 @@ export function contentMeta(content: string, file: { size: number, lastModified:
     const dependency = getMetaData('dependency', content)[0];
     const description = getMetaData('description', content)[0];
     const author = getMetaData('author', content)[0];
+    const iconDataURI = getMetaData('icon', content)[0];
     const title = getTagContent('title', content);
     const [path, version] = moduleName.split('@');
     const id = nanoid();
@@ -136,7 +139,8 @@ export function contentMeta(content: string, file: { size: number, lastModified:
         deleted: false,
         author,
         moduleSourceId: id,
-        title
+        title,
+        iconDataURI
     }
 
     const moduleSource: ModuleSource = {

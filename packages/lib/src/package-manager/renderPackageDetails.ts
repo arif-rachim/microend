@@ -22,6 +22,9 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
             <div style="flex-grow: 1;margin-left: 10px">${moduleName}</div>
         </div>
         <div style="${rowStyle}">
+            <img src="${module.iconDataURI}" alt="${module.title}" width="32" height="32">
+        </div>
+        <div style="${rowStyle}">
             <div style="${labelStyle}">Title</div>
             <div >${module.title}</div>
         </div>
@@ -46,7 +49,7 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
             <div>${module.active}</div>
         </div>
         <div style="${rowStyle};align-items: center">
-            <div style="${labelStyle}">Dependency</div>
+            <div style="${labelStyle}">Dependencies</div>
             <div style="display: flex;flex-direction: row;flex-wrap: wrap">${module.dependencies.map(dep => {
                 return `<div style="border: 1px solid rgba(0,0,0,0.1);padding:5px;font-weight: bold;font-size: 12px;border-radius: 3px;background-color: white;margin-right: 5px">${dep}</div>`
             }).join('')}</div>

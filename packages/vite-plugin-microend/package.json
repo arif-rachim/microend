@@ -1,6 +1,6 @@
 {
   "name": "@microend/vite-plugin-microend",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "Micro End vite Library",
   "author": "",
   "type": "module",

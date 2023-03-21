@@ -6,14 +6,11 @@ import {viteMicroEnd} from "@microend/vite-plugin-microend";
 export default defineConfig({
   plugins: [react(),viteMicroEnd({
     author:'arif.rachim@gmail.com',
-    dependencies : {
-      'shit' : '1.0.0',
-      'kotak' : '1.0.0'
-    },
+    dependencies : {},
     version : '1.0.0',
-    title : 'Iam App',
+    title : 'Identity Access Management',
     name : 'iam',
-    description:'Iam application',
-    iconFile : './public/vite.svg'
+    description:'Identity Access Management allows user to add roles and user into the application',
+    iconFile : './src/iam-logo.svg'
   })],
 })

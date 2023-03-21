@@ -34,9 +34,9 @@ export async function renderPackageList(packageManager: MicroEndPackageManager) 
     </label>
 </div>`
     });
-    const noModule = '<div style="padding: 30px">No modules are currently installed.</div>'
+    const noModule = '<div style="padding: 30px;text-align: center;font-style: italic">No modules are currently installed.</div>'
     packageManager.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px;width:100%">
-<div style="display: flex;flex-direction: row;align-items: center">
+<div style="display: flex;flex-direction: row;align-items: center;border-bottom: 1px solid rgba(0,0,0,0.1);padding-bottom: 10px">
     <button style="border: 1px solid rgba(0,0,0,0);border-radius: 2px;background-color: unset" data-exit-button="true">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="ionicon" viewBox="0 0 512 512"><title>Arrow Back</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/></svg>
     </button>

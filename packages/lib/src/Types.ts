@@ -184,6 +184,7 @@ export interface Module {
     deleted: boolean;
     author: string;
     moduleSourceId: string;
+    iconDataURI:string;
 }
 
 export interface ModuleSource {
