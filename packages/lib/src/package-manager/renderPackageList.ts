@@ -5,17 +5,18 @@ import {renderIcon} from "./renderIcon";
 
 export async function renderPackageList(packageManager: MicroEndPackageManager) {
     packageManager.setFullScreen(true);
-
+    const maxWidth = window.innerWidth;
+    const isMobile = maxWidth < 600;
     const allModules = await getAllModules();
     const modules = allModules.map(module => {
         return `<div style="display: flex;box-sizing: border-box;align-items: center;border-bottom:1px solid rgba(0,0,0,0.1);">
-    <div style="flex-shrink:0;width: 150px">
+    <div style="flex-shrink:0;width: 150px;flex-grow: ${isMobile?'1':'0'}">
         ${module.title}
     </div>
     <div style="flex-shrink:0;width:40px;font-size: small;font-weight: bold">
         ${module.version}
     </div>
-    <div style="flex-grow: 1;">
+    <div style="flex-grow: 1;display: ${isMobile ? 'none':'flex'}">
         ${module.description}
     </div>
     <div data-button-details="true" data-module-name="${module.name}" style="flex-shrink:0;width:30px;display: flex;align-items: center;justify-content: center">
