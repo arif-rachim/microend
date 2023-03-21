@@ -15,6 +15,7 @@ export class MicroEndPackageManager extends HTMLElement {
         this.style.lineHeight = '1.5';
         this.style.fontWeight = '400';
         this.style.position = 'fixed';
+        this.style.transition = 'all 300ms ease-in-out';
         this.debugMode = this.getAttribute('debug') === 'true';
         renderIcon(this);
     }

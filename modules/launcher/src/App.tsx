@@ -8,7 +8,8 @@ export function App() {
     useEffect(() => {
         (async () => {
             const modules = await getAllModules();
-            setModules(modules);
+            const mods = modules.filter(m => (m.active && m.visibleInHomeScreen && !m.deleted));
+            setModules(mods);
         })();
     }, []);
 

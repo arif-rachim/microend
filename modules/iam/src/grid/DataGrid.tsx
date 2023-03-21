@@ -38,11 +38,11 @@ export function DataGrid<T, Columns extends Partial<{ [k in keyof T]: ColumnType
         </div>
         <StoreValueRenderer store={$gridData} selector={s => s} render={(rows: T[]) => {
             return <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                <AnimatePresence>
+
                     {rows.map((row: T, rowIndex) => {
                         const k: string = row[columnKey] as any;
                         const isFocused = focusedRow === row;
-                        return <motion.div key={k} initial={{height: 0}} animate={{height: 26}} exit={{height: 0}}
+                        return <div key={k}
                                            style={{
                                                display: 'flex',
                                                backgroundColor: isFocused ? '#F2F2F2' : '#FFFFFF',
@@ -70,9 +70,9 @@ export function DataGrid<T, Columns extends Partial<{ [k in keyof T]: ColumnType
                                     rowIndex
                                 })}</div>
                             })}
-                        </motion.div>
+                        </div>
                     })}
-                </AnimatePresence>
+
             </div>
         }}/>
     </div>

@@ -4,10 +4,11 @@ import {renderPackageDetails} from "./renderPackageDetails";
 import {renderIcon} from "./renderIcon";
 
 export async function renderPackageList(packageManager: MicroEndPackageManager) {
-    packageManager.setFullScreen(true);
+
     const maxWidth = window.innerWidth;
     const isMobile = maxWidth < 600;
-    const allModules = await getAllModules();
+    const installedModules = await getAllModules();
+    const allModules = installedModules.filter(m => !m.deleted);
     const modules = allModules.map(module => {
         return `<div style="display: flex;box-sizing: border-box;align-items: center;border-bottom:1px solid rgba(0,0,0,0.1);">
     <div style="flex-shrink:0;width: 150px;flex-grow: ${isMobile?'1':'0'}">
@@ -35,7 +36,8 @@ export async function renderPackageList(packageManager: MicroEndPackageManager) 
     </label>
 </div>`
     });
-    const noModule = '<div style="padding: 30px;text-align: center;font-style: italic">No modules are currently installed.</div>'
+    const noModule = '<div style="padding: 30px;text-align: center;font-style: italic">No modules are currently installed.</div>';
+
     packageManager.innerHTML = `<div style="display:flex;flex-direction:column ;max-width: 1300px;width:100%">
 <div style="display: flex;flex-direction: row;align-items: center;border-bottom: 1px solid rgba(0,0,0,0.1);padding-bottom: 10px">
     <button style="border: 1px solid rgba(0,0,0,0);border-radius: 2px;background-color: unset" data-exit-button="true">
@@ -46,7 +48,7 @@ export async function renderPackageList(packageManager: MicroEndPackageManager) 
 </div>
 
 <div style="display: table;box-sizing: border-box;flex-direction: column;">${modules.length > 0 ? modules.join('') : noModule}</div></div>`;
-
+    packageManager.setFullScreen(true);
     packageManager.querySelectorAll('[data-button-details]').forEach(element => {
         element.addEventListener('click', async (event) => {
             if (event.currentTarget && event.currentTarget instanceof HTMLElement) {

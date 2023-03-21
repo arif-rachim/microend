@@ -100,6 +100,7 @@ async function validateModules(files: FileList) {
         const description = getMetaData('description', content)[0];
         const author = getMetaData('author', content)[0];
         const icon = getMetaData('icon', content)[0];
+        const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
         const title = getTagContent('title', content);
 
         validate(moduleName, missingRequiredMeta, 'module');
@@ -107,6 +108,8 @@ async function validateModules(files: FileList) {
         validate(author, missingRequiredMeta, 'author');
         validate(title, missingRequiredMeta, 'title');
         validate(icon, missingRequiredMeta, 'icon');
+        validate(visibleInHomeScreen, missingRequiredMeta, 'visibleInHomeScreen');
+
         validateVersioning(moduleName ?? '', versioningIssue, `${moduleName}(module)`);
         if (dependency) {
             const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
@@ -135,6 +138,7 @@ export function contentMeta(content: string, file: { size: number, lastModified:
     const description = getMetaData('description', content)[0];
     const author = getMetaData('author', content)[0];
     const iconDataURI = getMetaData('icon', content)[0];
+    const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
     const title = getTagContent('title', content);
     const [path, version] = moduleName.split('@').filter(s => s);
     const id = nanoid();
@@ -154,7 +158,8 @@ export function contentMeta(content: string, file: { size: number, lastModified:
         author,
         moduleSourceId: id,
         title,
-        iconDataURI
+        iconDataURI,
+        visibleInHomeScreen: visibleInHomeScreen === "true"
     }
 
     const moduleSource: ModuleSource = {
@@ -181,7 +186,8 @@ ${errors.map(error => error).join('')}
     });
     const modules = modulesSource.map(m => m.module);
     // here we need to perform some validation
-    const allInstalledModules = await getAllModules();
+    const allModules = await getAllModules();
+    const allInstalledModules = allModules.filter(m => m.active && !m.deleted);
     const missingDependencies: string[] = await findAndUpdateMissingDependencies(modules, allInstalledModules);
     const modulesToBeUpgrade: { from: string, to: string }[] = await findModulesToBeUpgrade(modules, allInstalledModules);
 

@@ -185,6 +185,7 @@ export interface Module {
     author: string;
     moduleSourceId: string;
     iconDataURI:string;
+    visibleInHomeScreen:boolean;
 }
 
 export interface ModuleSource {

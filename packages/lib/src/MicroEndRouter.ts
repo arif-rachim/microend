@@ -310,7 +310,7 @@ export class MicroEndRouter extends HTMLElement {
         window.addEventListener('message', this.onMessage);
         (async () => {
             const modules = await getAllModules();
-            modules.filter(m => m.active).forEach(d => {
+            modules.filter(m => m.active && !m.deleted).forEach(d => {
                 this.routingRegistry[`/${d.path}/${d.version}`] = d;
             });
             this.renderBasedOnHash();

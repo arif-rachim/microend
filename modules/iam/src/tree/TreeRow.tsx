@@ -63,14 +63,14 @@ export function TreeRow(props: {
     }, [edit]);
     const hasChildren = row.children && row.children.length > 0;
     const isClosed = $toggleRows.get().findIndex(s => s.id === row.id) >= 0
-    return <motion.div style={{
+    return <div style={{
         opacity: isBeingDrag ? 0.2 : 1,
         display: 'flex',
         flexDirection: 'column',
         paddingLeft: 20 * (row.level - 1),
         backgroundColor: isDragHover ? 'yellow' : isFocused ? '#EEEEEE' : '#FFFFFF',
         borderBottom: border
-    }} initial={{height: 0}} animate={{height: 22}}
+    }}
                        onDoubleClick={() => {
                            setEdit(true);
                        }}
@@ -132,5 +132,5 @@ export function TreeRow(props: {
                 }}><AiOutlineDelete style={{fontSize: 18}}/></div>
             </div>
         </Visible>
-    </motion.div>;
+    </div>;
 }

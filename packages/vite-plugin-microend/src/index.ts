@@ -17,6 +17,7 @@ export type Config = {
     author: string,
     dependencies: { [k: string]: string },
     iconFile: string;
+    visibleInHomeScreen: boolean;
 }
 
 const defaultConfig = {useRecommendedBuildConfig: true, removeViteModuleLoader: false, deleteInlinedFiles: true}
@@ -47,6 +48,7 @@ async function replaceMicroEndConfig(replacedHtml: string, config: Config) {
     $('meta[name="description"]').remove();
     $('meta[name="author"]').remove();
     $('meta[name="icon"]').remove();
+    $('meta[name="visibleInHomeScreen"]').remove();
     const dependencies = Object.keys(config.dependencies).map(key => {
         return `${key}@${config.dependencies[key]}`
     }).join(',')
@@ -58,6 +60,7 @@ async function replaceMicroEndConfig(replacedHtml: string, config: Config) {
         <meta content="${config.description}" name="description">
         <meta content="${config.author}" name="author">
         <meta content="${iconDataUri}" name="icon">
+        <meta content="${config.visibleInHomeScreen}" name="visibleInHomeScreen">
     `)
     return $.html();
 }

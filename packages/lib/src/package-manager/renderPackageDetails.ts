@@ -11,9 +11,10 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
                 alert('Module does not exit ' + moduleName);
                 return;
             }
-            packageManager.setFullScreen(true);
+
             const labelStyle = 'width: 150px;font-size: 12px;font-weight: bold;flex-shrink:0';
             const rowStyle = 'display: flex;flex-direction: row;border-bottom: 1px solid rgba(0,0,0,0.05);padding: 10px';
+            packageManager.setFullScreen(true);
             packageManager.innerHTML = `<div style="display:flex;flex-direction:column ;width:100%;max-width: 800px">
         <div style="display: flex;flex-direction: row;align-items: center">
             <button style="border: 1px solid rgba(0,0,0,0);padding:5px;background-color: unset" data-exit-button="true;">
@@ -35,6 +36,10 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
         <div style="${rowStyle}">
             <div style="${labelStyle}">Author</div>
             <div >${module.author}</div>
+        </div>
+        <div style="${rowStyle}">
+            <div style="${labelStyle}">Visible in home screen</div>
+            <div>${module.visibleInHomeScreen}</div>
         </div>
         <div style="${rowStyle}">
             <div style="${labelStyle}">Path</div>
@@ -66,6 +71,7 @@ export async function renderPackageDetails(packageManager: MicroEndPackageManage
             <div style="${labelStyle}">Size</div>
             <div>${formatSize(module.size)}</div>
         </div>
+        
         <div style="${rowStyle}">
             <div style="${labelStyle}">Navigate</div>
             <a href="#/${module.path}/${module.version}" data-link="true">/${module.path}/${module.version}</a>

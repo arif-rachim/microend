@@ -10,6 +10,7 @@ export default defineConfig({
         title: 'Launcher',
         name: 'launcher',
         dependencies: {'*': '*'},
-        description: 'Application Launcher'
+        description: 'Application Launcher',
+        visibleInHomeScreen:false
     })],
 })
