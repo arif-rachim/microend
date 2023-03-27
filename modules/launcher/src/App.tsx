@@ -32,7 +32,6 @@ export function App() {
                 alignItems: 'center'
             }} whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}>
                 <div style={{width:60,height:60,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',backgroundColor:'#f2f2f2',border:'1px solid rgba(0,0,0,0.05)',borderRadius:50,overflow:'hidden',boxShadow:'0 5px 5px -3px rgba(0,0,0,0.1)'}} onClick={() => {
-
                     me.navigateTo(m.path,{},'default').then();
                 }}>
                     <img src={m.iconDataURI} width={50} height={50}/>

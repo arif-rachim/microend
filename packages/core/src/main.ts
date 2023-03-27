@@ -1,8 +1,9 @@
-import {MicroEndModuleLoader, MicroEndPackageManager, MicroEndRouter} from "@microend/lib";
+import {MicroEndModuleLoader, MicroEndPackageManager, MicroEndRouter, MicroEndHomeButton} from "@microend/lib";
 
 customElements.define('microend-moduleloader', MicroEndModuleLoader);
 customElements.define('microend-router', MicroEndRouter);
 customElements.define('microend-packagemanager', MicroEndPackageManager);
+customElements.define('microend-home',MicroEndHomeButton);
 
 window.addEventListener('beforeinstallprompt', async (e: any) => {
     // Prevents the default mini-infobar or install dialog from appearing on mobile

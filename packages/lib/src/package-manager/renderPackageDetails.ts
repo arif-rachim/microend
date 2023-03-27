@@ -1,5 +1,5 @@
 import {Module} from "../Types";
-import {getModule} from "../moduleQuery";
+import {getModule} from "../dataStore";
 import {MicroEndPackageManager} from "./MicroEndPackageManager";
 import {renderIcon} from "./renderIcon";
 

@@ -1,14 +1,14 @@
-import {deactivateModule, getAllModules, removeModule} from "../moduleQuery";
+import {deactivateModule, getAllModules, removeModule} from "../dataStore";
 import {MicroEndPackageManager} from "./MicroEndPackageManager";
 import {renderPackageDetails} from "./renderPackageDetails";
 import {renderIcon} from "./renderIcon";
 
 export async function renderPackageList(packageManager: MicroEndPackageManager) {
-
     const maxWidth = window.innerWidth;
     const isMobile = maxWidth < 600;
     const installedModules = await getAllModules();
     const allModules = installedModules.filter(m => !m.deleted);
+
     const modules = allModules.map(module => {
         return `<div style="display: flex;box-sizing: border-box;align-items: center;border-bottom:1px solid rgba(0,0,0,0.1);">
     <div style="flex-shrink:0;width: 150px;flex-grow: ${isMobile?'1':'0'}">

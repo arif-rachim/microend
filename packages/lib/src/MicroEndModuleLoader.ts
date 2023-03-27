@@ -1,4 +1,4 @@
-import {saveAllModules} from "./moduleQuery";
+import {saveAllModules} from "./dataStore";
 
 export class MicroEndModuleLoader extends HTMLElement {
 

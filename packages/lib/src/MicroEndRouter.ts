@@ -1,9 +1,9 @@
 import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
-import {getAllModules, getModuleSource} from "./moduleQuery";
+import {getAllModules, getModuleSource} from "./dataStore";
 import {satisfies} from "compare-versions";
 
 export const DATABASE_NAME = 'routing-registry';
-export type Table = 'module' | 'module-source';
+export type Table = 'module' | 'module-source' | 'app-context';
 
 // warning use document write is slow, but the code is cleaner when displayed in the screen.
 // const useDocumentWrite = true;
@@ -70,7 +70,7 @@ export class MicroEndRouter extends HTMLElement {
             caller = queryParams[CALLER_ID_KEY];
             delete queryParams[CALLER_ID_KEY];
         }
-        const pathSegments = this.splitSegment(path);
+        const pathSegments = this.splitSegment(path).map(p => decodeURIComponent(p));
         if (pathSegments.length === 0) {
             return;
         }

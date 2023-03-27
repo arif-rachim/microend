@@ -1,4 +1,4 @@
-import {Module, ModuleSource} from "./Types";
+import {AppContext, Module, ModuleSource} from "./Types";
 import {openTransaction} from "./openTransaction";
 import {showModal} from "./showModal";
 import {nanoid} from "nanoid";
@@ -35,6 +35,30 @@ export async function getModule(moduleName: string): Promise<Module | false> {
     const data = await forRequest<Module>(request)
     db.close();
     return data;
+}
+const APP_CONTEXT_ID = 'app-context-id';
+
+export async function getAppContext():Promise<AppContext | false>{
+    const [db, tx, store] = await openTransaction("readonly", 'app-context');
+    const request = store.get(APP_CONTEXT_ID);
+    const data = await forRequest<AppContext>(request)
+    db.close();
+    return data;
+}
+
+export async function saveAppContext(context:Partial<AppContext>):Promise<AppContext>{
+    const [db, tx, store] = await openTransaction("readwrite", 'app-context');
+    const request = store.get(APP_CONTEXT_ID);
+    let appContext = await forRequest<AppContext>(request)
+    if(!appContext || !('id' in appContext)){
+        const initial = {id : APP_CONTEXT_ID,homeModule : ''};
+        appContext = initial;
+    }
+    appContext = ({...appContext,...context});
+    await store.put(appContext)
+    tx.commit();
+    db.close();
+    return appContext;
 }
 
 async function findAndUpdateMissingDependencies(modules: Module[], allInstalledModules: Module[]): Promise<string[]> {
@@ -224,9 +248,7 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
     if (result === 'No') {
         return;
     }
-
     const [db, tx, moduleStore, sourceStore] = await openTransaction("readwrite", ["module", "module-source"]);
-
     modulesToBeUpgrade.forEach(toBeUpgraded => {
         const module = allInstalledModules.find(s => s.name === toBeUpgraded.from)!;
         module.deleted = true;
@@ -236,14 +258,15 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
     modules.forEach(module => {
         moduleStore.put(module);
         const source = modulesSource.find(s => s.module.moduleSourceId === module.moduleSourceId);
-
         if (source !== undefined) {
             sourceStore.put(source.moduleSource)
         }
     })
     tx.commit();
     db.close();
-    window.location.reload();
+    setTimeout(() => {
+        window.location.reload();
+    },100);
 }
 
 export async function removeModule(moduleName: string) {

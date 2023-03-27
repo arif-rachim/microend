@@ -193,6 +193,12 @@ export interface ModuleSource {
     srcdoc: string
 }
 
+export interface AppContext{
+    id? : string;
+    // home module berisikan informasi mengenai module yang dipakai sebagai home address
+    homeModule : string;
+}
+
 
 
 
