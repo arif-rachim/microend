@@ -11,4 +11,7 @@ export default defineConfig({
         dependencies: {},
         iconFile: './public/microend-logo.svg'
     })],
+    build: {
+        target: 'es2015'
+    }
 })

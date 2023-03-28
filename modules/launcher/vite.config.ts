@@ -13,4 +13,7 @@ export default defineConfig({
         description: 'Application Launcher',
         visibleInHomeScreen:false
     })],
+    build: {
+        target: 'es2015'
+    }
 })

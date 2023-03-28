@@ -10,6 +10,25 @@ export type Table = 'module' | 'module-source' | 'app-context';
 
 const CALLER_ID_KEY = 'callerId';
 
+const animationStyle = `<style>
+iframe[data-focused="true"]{
+    animation-name: animateFocus;
+    animation-duration: 300ms;
+}
+iframe[data-focused="false"]{
+    animation-name: animateBlur;
+    animation-duration: 300ms;
+}
+@keyframes animateFocus {
+    from {scale: 0.98; opacity: 0}
+    to {scale: 1;opacity: 1}
+}
+@keyframes animateBlur {
+    from {scale: 1;opacity: 1}
+    to {scale: 0.98; opacity: 0}
+}
+</style>`;
+
 /**
  * Attribute
  * @param debug : boolean flag to display debug logging
@@ -47,9 +66,10 @@ export class MicroEndRouter extends HTMLElement {
                 'flex-direction': 'column',
                 position: 'relative'
             }
-            const styleString = Object.keys(style).map(key => `${key}:${style[key]}`).join(';')
-            this.shadowRoot.innerHTML = '<div id="container" style="' + styleString + '"></div>';
+            const styleString = Object.keys(style).map(key => `${key}:${style[key]}`).join(';');
+            this.shadowRoot.innerHTML = '<div id="container" style="' + styleString + '"></div>'+animationStyle;
         }
+
     }
 
     log = (...messages: string[]) => {
@@ -104,6 +124,7 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.setAttribute('data-route', route);
             nextFrame.setAttribute('data-type', type);
             nextFrame.setAttribute('data-caller', caller);
+            nextFrame.setAttribute('data-focused','true');
             nextFrame.style.display = type === 'service' ? 'none' : 'flex';
             nextFrame.style.border = 'none';
             nextFrame.style.flexDirection = 'column';
@@ -129,15 +150,7 @@ export class MicroEndRouter extends HTMLElement {
             }
 
             const sourceHtml = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
-            // THIS IS NOT REQUIRED BECAUSE THIS WILL CONFUSE THE ORIGINAL BEHAVIOUR
-            // nextFrame.addEventListener('load',(evt) => {
-            //     const nextFrame:any = evt.target;
-            //     if(nextFrame){
-            //         nextFrame.style.zIndex = '0';
-            //         nextFrame.contentWindow.postMessage({intent: 'paramschange', params: result.params}, '*');
-            //         nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
-            //     }
-            // });
+
             const container = this.getContainer();
             if (container) {
                 if (!this.debugMode) {
@@ -155,6 +168,7 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.setAttribute('data-route', route);
             nextFrame.setAttribute('data-type', type);
             nextFrame.setAttribute('data-caller', caller);
+            nextFrame.setAttribute('data-focused','true');
             nextFrame.style.zIndex = '0';
             nextFrame.contentWindow.postMessage({intent: 'paramschange', params, route, type, caller}, '*');
             nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
@@ -166,7 +180,9 @@ export class MicroEndRouter extends HTMLElement {
         let previousFrame: HTMLIFrameElement | null = this.currentActiveFrame;
         if (previousFrame && previousFrame.contentWindow) {
             // we cant do this, this is dangerous if we make it empty
+            previousFrame.setAttribute('data-focused','false');
             previousFrame.style.zIndex = '-1';
+
             previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
         }
         this.currentActiveFrame = nextFrame;
@@ -492,23 +508,23 @@ const clientTemplate = `
     }
 
     /**
-     * navigateTo ada beberapa behaviour
-     * <li> navigateTo default
-     *     - buka function baru lewat browser hash
-     *     - ini mengakibatkan window history ke update
-     *     - ini bakalan reuse existing frame yang sudah kebuka
-     *     - ketika frame selesai dipanggil dia ga bakalan di destroy
+     * navigateTo there is some behavior
+     * <li>navigateTo default
+     *      - open a new function via browser hash
+     *      - this causes window history to update
+     *      - This will reuse existing frames that have been opened
+     *      - when the frame finishes summoning it won't be destroyed
      *
-     * <li> navigateTo modal
-     *     * buka function baru tanpa lewat browser hash
-     *     - tidak menyebabkan window history ke update
-     *     - bakalan buka frame yang baru
-     *     - ketika frame selesai di panggil dia bakalan di destroy
+     * <li>navigateTo modal
+     *      - open a new function without passing the browser hash
+     *      - does not cause window history to update
+     *      - will open a new frame
+     *      - when the frame finishes being summoned it will be destroyed
      *
-     * <li> navigateTo service
-     *    - buka function baru tanpa lewat browser hash
-     *    - tidak menampilkan frame baru
-     *    - ketika selesai frame akan di destroy
+     * <li>navigateTo service
+     *     - open a new function without passing the browser hash
+     *     - does not display new frames
+     *     - when finished the frame will be destroyed
      *
      * @param route : string
      * @param params : any
@@ -518,15 +534,15 @@ const clientTemplate = `
     me.navigateTo = (route, params, type = 'default') => {
 
         return new Promise((resolve) => {
-            
+
             params = params || {};
             const caller = (Math.random() * 1000000000 + new Date().getTime()).toFixed(0);
             if (window.top === null) {
                 return;
             }
-            
+
             let dependencyVersion = me.dependencies[route];
-            
+
             if(dependencyVersion === undefined && '*' in me.dependencies){
                 dependencyVersion = me.dependencies['*'];
             }
@@ -633,7 +649,7 @@ const clientTemplate = `
 
         const paramsChangeHandler = () => {
             const __handler = handler;
-            
+
             let action = 'action' in me.params ? me.params.action : '';
             // later on we need to be able to send json for service !!!!
             let args = 'args' in me.params ? me.params.args : '';
@@ -668,7 +684,7 @@ const clientTemplate = `
                 return async (...args) => {
                     const type = args[args.length - 1];
                     args = args.splice(0,args.length - 1);
-                    
+
                     const response = await me.navigateTo(module, {
                         action,
                         args: encodeURI(JSON.stringify(args))

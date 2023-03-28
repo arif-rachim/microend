@@ -13,4 +13,7 @@ export default defineConfig({
         description: 'App Store',
         visibleInHomeScreen:true
     })],
+    build: {
+        target: 'es2015'
+    }
 })
