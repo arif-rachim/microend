@@ -2,7 +2,7 @@ import {AppContext, Module, ModuleSource} from "./Types";
 import {openTransaction} from "./openTransaction";
 import {showModal} from "./showModal";
 import {nanoid} from "nanoid";
-import {satisfies, validate as validVersion} from "compare-versions";
+import {satisfies, validate as validVersion,} from "compare-versions";
 
 export async function getAllModules(): Promise<Module[]> {
     const [db, tx, store] = await openTransaction('readonly', 'module');
@@ -76,6 +76,10 @@ async function findAndUpdateMissingDependencies(modules: Module[], allInstalledM
                 if (version === '*' && path === '*') {
                     return true;
                 }
+                if(m.path === path){
+                    console.log('satisfies',m.version,version,satisfies(m.version, version));
+                }
+
                 return m.path === path && satisfies(m.version, version);
             });
             if (indexOfDependency < 0) {
@@ -146,12 +150,12 @@ async function validateModules(contents: string[]) {
         validate(visibleInHomeScreen, missingRequiredMeta, 'visibleInHomeScreen');
 
         validateVersioning(moduleName ?? '', versioningIssue, `${moduleName}(module)`);
-        if (dependency) {
-            const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
-            dependencies.forEach(dep => {
-                validateVersioning(dep, versioningIssue, `${dep}`)
-            })
-        }
+        // if (dependency) {
+        //     const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
+        //     dependencies.forEach(dep => {
+        //         validateVersioning(dep, versioningIssue, `${dep}`)
+        //     })
+        // }
         const errors = [];
         if (missingRequiredMeta.length > 0) {
             errors.push(`Missing ${missingRequiredMeta.map(meta => `<span style="font-weight: bold;margin:0 5px">"${meta}"</span>`).join(', ')}`);

@@ -4,11 +4,29 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "core": "npm run start -w @microend/core",
-    "lib": "npm run start -w @microend/lib",
-    "build": "npm run build -w @microend/lib && npm run build -w @microend/core && mv ./packages/core/dist docs"
+    "clean:plugin": "npm run clean -w @microend/vite-plugin-microend",
+    "clean:utils": "npm run clean -w @microend/utils",
+    "clean:lib": "npm run clean -w @microend/lib",
+    "clean:core": "npm run clean -w @microend/core",
+    "clean:iam": "npm run clean -w @microend/iam",
+    "clean:launcher": "npm run clean -w @microend/launcher",
+    "clean:store": "npm run clean -w @microend/store",
+    "clean:module-one": "npm run clean -w module-one",
+    "clean:module-two": "npm run clean -w module-two",
+    "clean": "npm run clean:plugin && npm run clean:utils && npm run clean:lib && npm run clean:iam && npm run clean:launcher && npm run clean:store && npm run clean:core && npm run clean:module-one && npm run clean:module-two",
+
+    "build:plugin": "npm run build -w @microend/vite-plugin-microend",
+    "build:utils": "npm run build -w @microend/utils",
+    "build:lib": "npm run build -w @microend/lib",
+    "build:core": "npm run build -w @microend/core",
+    "build:iam": "npm run build -w @microend/iam",
+    "build:launcher": "npm run build -w @microend/launcher",
+    "build:store": "npm run build -w @microend/store",
+    "build:module-one": "npm run build -w module-one",
+    "build:module-two": "npm run build -w module-two",
+    "build": "npm run build:plugin && npm run build:utils && npm run build:lib  && npm run build:iam && npm run build:launcher && npm run build:store && npm run build:core && npm run build:module-two && npm run build:module-one"
   },
-  "author": "",
+  "author": "a.arif.r@gmail.com",
   "license": "ISC",
   "workspaces": [
     "packages/*",
@@ -16,35 +34,36 @@
     "modules/*"
   ],
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
-    "fs-extra": "^11.1.1",
-    "micromatch": "^4.0.2",
-    "mime-types": "^2.1.1",
     "@swc/helpers": "^0.4.14",
+    "cheerio": "^1.0.0-rc.12",
     "compare-versions": "^6.0.0-rc.1",
     "dexie": "^3.2.3",
     "framer-motion": "^10.2.3",
+    "fs-extra": "^11.1.1",
     "html5-qrcode": "^2.3.7",
     "immer": "^9.0.19",
+    "micromatch": "^4.0.2",
+    "mime-types": "^2.1.1",
     "nanoid": "^3.3.1",
     "parcel": "^2.8.3",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.7.1"
+    "react-icons": "^4.7.1",
+    "rimraf": "^4.4.1"
   },
   "devDependencies": {
     "@parcel/packager-ts": "^2.8.3",
     "@parcel/transformer-typescript-types": "^2.8.3",
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.10",
-    "@vitejs/plugin-react": "^3.1.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.5",
-    "vite": "^4.2.0",
     "@types/fs-extra": "^11.0.1",
     "@types/micromatch": "^4.0.2",
     "@types/mime-types": "^2.1.1",
-    "@types/request": "^2.48.8"
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.10",
+    "@types/request": "^2.48.8",
+    "@vitejs/plugin-react": "^3.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.0"
   }
 }

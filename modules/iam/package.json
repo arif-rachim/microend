@@ -10,7 +10,8 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build && parcel build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rimraf dist && rimraf node_modules"
   },
   "dependencies": {
     "react": "^18.2.0",

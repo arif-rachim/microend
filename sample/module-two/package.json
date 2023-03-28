@@ -10,7 +10,8 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build && parcel build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rimraf dist && rimraf node_modules"
   },
   "devDependencies": {
     "typescript": "^4.9.3",

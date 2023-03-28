@@ -11,7 +11,8 @@
   "scripts": {
     "start": "parcel watch",
     "build": "parcel build",
-    "typecheck": "tsc --noEmit src/index.ts"
+    "typecheck": "tsc --noEmit src/index.ts",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@swc/helpers": "^0.4.14",

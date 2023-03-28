@@ -12,6 +12,7 @@
   "scripts": {
     "start": "parcel watch",
     "build": "parcel build",
+    "clean": "rimraf dist",
     "typecheck": "tsc --noEmit src/index.ts"
   },
   "dependencies": {
