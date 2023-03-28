@@ -9,6 +9,7 @@ export default defineConfig({
         version: '0.0.1',
         author: 'a.arif.r@gmail.com',
         dependencies: {},
-        iconFile: ''
+        iconFile: '',
+        visibleInHomeScreen : true
     })]
 })

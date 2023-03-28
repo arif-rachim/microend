@@ -184,8 +184,8 @@ export interface Module {
     deleted: boolean;
     author: string;
     moduleSourceId: string;
-    iconDataURI:string;
-    visibleInHomeScreen:boolean;
+    iconDataURI: string;
+    visibleInHomeScreen: boolean;
 }
 
 export interface ModuleSource {
@@ -193,10 +193,10 @@ export interface ModuleSource {
     srcdoc: string
 }
 
-export interface AppContext{
-    id? : string;
+export interface AppContext {
+    id?: string;
     // home module berisikan informasi mengenai module yang dipakai sebagai home address
-    homeModule : string;
+    homeModule: string;
 }
 
 

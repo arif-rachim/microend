@@ -10,10 +10,11 @@ import {
     useRef
 } from "react";
 import {AnimatePresence, motion} from "framer-motion";
-import {useStore, useStoreValue,noNull} from "@microend/utils";
+
 import {GiHammerBreak} from "react-icons/gi";
 import {nanoid} from "nanoid";
-
+import {useStore, useStoreValue} from "../utils/useStore";
+import {noNull} from "../utils/noNull";
 
 export type FactoryFunctionConfig = {
     position?: 'top' | 'left' | 'right' | 'bottom';

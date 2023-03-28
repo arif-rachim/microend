@@ -1,21 +1,16 @@
 {
-  "name": "@microend/iam",
+  "name": "@microend/store",
   "private": true,
   "version": "1.0.0-rc.1",
   "type": "module",
-  "source": "src/index.ts",
-  "main": "dist/index.js",
-  "module": "dist/module.js",
-  "types": "dist/types.d.ts",
   "scripts": {
-    "start": "vite",
-    "build": "tsc && vite build && parcel build",
+    "start": "vite --host",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^4.7.1"
+    "react-dom": "^18.2.0"
   },
   "browserslist": {
     "production": [

@@ -1,9 +1,7 @@
-import {Store, useStoreValue} from "@microend/utils";
+import {Store, useStoreValue, Visible} from "@microend/utils";
 import {ReactElement, useEffect, useId, useState} from "react";
-import {motion} from "framer-motion";
 import {AiOutlineDelete} from "react-icons/ai";
 import {border, BranchWithLevel, TreeItem} from "./DataTree";
-import {Visible} from "@microend/utils";
 import {IoFolderOpenOutline, IoFolderOutline} from "react-icons/all";
 
 
@@ -71,36 +69,36 @@ export function TreeRow(props: {
         backgroundColor: isDragHover ? 'yellow' : isFocused ? '#EEEEEE' : '#FFFFFF',
         borderBottom: border
     }}
-                       onDoubleClick={() => {
-                           setEdit(true);
-                       }}
-                       onClick={(event) => {
-                           $focusedItem.set(row);
-                           if (edit) {
-                               event.stopPropagation();
-                               event.preventDefault();
-                           }
-                       }}
-                       draggable={true}
-                       onDragOver={(event) => {
-                           event.preventDefault();
-                           $itemBeingHovered.set(row);
-                       }}
-                       onDragLeave={() => {
-                           if ($itemBeingHovered.get() === row) {
-                               $itemBeingHovered.set(undefined);
-                           }
-                       }}
-                       onDrop={() => {
-                           onDrop($itemBeingDragged.get()!)
-                       }}
-                       onDragEnd={() => {
-                           $itemBeingHovered.set(undefined);
-                           $itemBeingDragged.set(undefined);
-                       }}
-                       onDragStart={() => {
-                           $itemBeingDragged.set(row)
-                       }}
+                onDoubleClick={() => {
+                    setEdit(true);
+                }}
+                onClick={(event) => {
+                    $focusedItem.set(row);
+                    if (edit) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
+                }}
+                draggable={true}
+                onDragOver={(event) => {
+                    event.preventDefault();
+                    $itemBeingHovered.set(row);
+                }}
+                onDragLeave={() => {
+                    if ($itemBeingHovered.get() === row) {
+                        $itemBeingHovered.set(undefined);
+                    }
+                }}
+                onDrop={() => {
+                    onDrop($itemBeingDragged.get()!)
+                }}
+                onDragEnd={() => {
+                    $itemBeingHovered.set(undefined);
+                    $itemBeingDragged.set(undefined);
+                }}
+                onDragStart={() => {
+                    $itemBeingDragged.set(row)
+                }}
     >
         <Visible if={edit}>
             <input id={id} type="text" defaultValue={row.name} autoFocus={true}/>

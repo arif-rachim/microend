@@ -1,5 +1,5 @@
 import {Branch} from "../DataTree";
-import {FactoryFunction, FactoryFunctionConfig} from "../../slide/SlidePanel";
+import {FactoryFunction, FactoryFunctionConfig} from "@microend/utils";
 import {useEffect, useState} from "react";
 import {db, User} from "../../Database";
 import {AssignUserRolePanel} from "../../panel/AssignUserRolePanel";

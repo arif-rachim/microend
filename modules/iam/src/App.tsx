@@ -5,14 +5,14 @@ import {nanoid} from "nanoid";
 import {AccessList, db, User} from "./Database";
 import {Branch, DataTree, DataTreeRef, rootRole, TreeItem} from "./tree/DataTree";
 import {DataGrid} from "./grid/DataGrid";
-import {useSlidePanel} from "./slide/SlidePanel";
+
 
 import {AiOutlineUser, AiOutlineUsergroupAdd} from "react-icons/ai";
 import {UserPanel} from "./panel/UserPanel";
 import {Toggle} from "./toggle/Toggle";
 import {TreeRowItem} from "./tree/component/TreeRowItem";
 import {RoleRenderer} from "./grid/component/RoleRenderer";
-import {useStore, Visible} from "@microend/utils";
+import {useSlidePanel, useStore, Visible} from "@microend/utils";
 
 const me = getMicroEnd();
 

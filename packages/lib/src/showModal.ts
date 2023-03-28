@@ -1,4 +1,4 @@
-export function showModal(message: string, ...selects: string[]) {
+export function showModal(message: string, ...selects: string[]): Promise<string> {
     return new Promise((resolve) => {
         const div = document.createElement('div');
         div.style.position = 'fixed';
@@ -26,7 +26,7 @@ export function showModal(message: string, ...selects: string[]) {
         document.body.appendChild(div);
         document.querySelectorAll('[data-button-select]').forEach(element => {
             element.addEventListener('click', (event) => {
-                const value = (event.target! as HTMLButtonElement).getAttribute('data-button-select');
+                const value = (event.target! as HTMLButtonElement).getAttribute('data-button-select')!;
                 resolve(value);
                 div.remove();
             })

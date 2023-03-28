@@ -204,10 +204,10 @@ export class MicroEndRouter extends HTMLElement {
         const [path, version] = pathSegments;
         const mostMatchingPath = Object.keys(this.routingRegistry).find(key => {
             const [routingPath, routingVersion] = key.split('/').filter(s => s);
-            if(version === '*'){
+            if (version === '*') {
                 return routingPath === path;
             }
-            return routingPath === path && satisfies(routingVersion,version);
+            return routingPath === path && satisfies(routingVersion, version);
         });
         if (!mostMatchingPath) {
             throw new Error(`No available modules supporting ${path}/${version}`);

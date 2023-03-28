@@ -9,10 +9,12 @@ export async function getAllModules(): Promise<Module[]> {
     const request = store.getAll();
     const result = await forRequest<Module[]>(request);
     if (result === false) {
+        tx.commit();
         db.close();
         return [];
     }
     const response = result.filter(m => !m.deleted);
+    tx.commit();
     db.close();
     return response;
 }
@@ -22,9 +24,11 @@ export async function getModuleSource(moduleSourceId: string): Promise<ModuleSou
     const request = store.get(moduleSourceId);
     const result = await forRequest<ModuleSource>(request);
     if (result === false) {
+        tx.commit();
         db.close();
         throw new Error('Unable to find module-source ' + moduleSourceId);
     }
+    tx.commit();
     db.close();
     return result;
 }
@@ -33,28 +37,30 @@ export async function getModule(moduleName: string): Promise<Module | false> {
     const [db, tx, store] = await openTransaction("readonly", 'module');
     const request = store.get(moduleName);
     const data = await forRequest<Module>(request)
+    tx.commit();
     db.close();
     return data;
 }
+
 const APP_CONTEXT_ID = 'app-context-id';
 
-export async function getAppContext():Promise<AppContext | false>{
+export async function getAppContext(): Promise<AppContext | false> {
     const [db, tx, store] = await openTransaction("readonly", 'app-context');
     const request = store.get(APP_CONTEXT_ID);
     const data = await forRequest<AppContext>(request)
+    tx.commit();
     db.close();
     return data;
 }
 
-export async function saveAppContext(context:Partial<AppContext>):Promise<AppContext>{
+export async function saveAppContext(context: Partial<AppContext>): Promise<AppContext> {
     const [db, tx, store] = await openTransaction("readwrite", 'app-context');
     const request = store.get(APP_CONTEXT_ID);
     let appContext = await forRequest<AppContext>(request)
-    if(!appContext || !('id' in appContext)){
-        const initial = {id : APP_CONTEXT_ID,homeModule : ''};
-        appContext = initial;
+    if (!appContext || !('id' in appContext)) {
+        appContext = {id: APP_CONTEXT_ID, homeModule: ''};
     }
-    appContext = ({...appContext,...context});
+    appContext = ({...appContext, ...context});
     await store.put(appContext)
     tx.commit();
     db.close();
@@ -113,19 +119,24 @@ const validateVersioning = (value: string, errors: string[], message: string) =>
     }
 }
 
-async function validateModules(files: FileList) {
-    const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
-    const errors: string[] = Array.from(files).map((file, index) => {
-        const content = contents[index];
+function getContentInfo(content: string) {
+    const moduleName = getMetaData('module', content)[0];
+    const dependency = getMetaData('dependency', content)[0];
+    const description = getMetaData('description', content)[0];
+    const author = getMetaData('author', content)[0];
+    const icon = getMetaData('icon', content)[0];
+    const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
+    const title = getTagContent('title', content);
+    return {moduleName, dependency, description, author, icon, visibleInHomeScreen, title};
+}
+
+async function validateModules(contents: string[]) {
+
+    const errors: string[] = contents.map((content) => {
+
         const missingRequiredMeta: string[] = [];
         const versioningIssue: string[] = [];
-        const moduleName = getMetaData('module', content)[0];
-        const dependency = getMetaData('dependency', content)[0];
-        const description = getMetaData('description', content)[0];
-        const author = getMetaData('author', content)[0];
-        const icon = getMetaData('icon', content)[0];
-        const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
-        const title = getTagContent('title', content);
+        const {moduleName, dependency, description, author, icon, visibleInHomeScreen, title} = getContentInfo(content);
 
         validate(moduleName, missingRequiredMeta, 'module');
         validate(description, missingRequiredMeta, 'description');
@@ -149,21 +160,15 @@ async function validateModules(files: FileList) {
             errors.push(`Version error ${versioningIssue.map(version => `<span style="font-weight: bold;margin:0 5px">"${version}"</span>`).join(', ')}`)
         }
         if (errors.length > 0) {
-            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${file.name + ' : ' + errors.join(' ')}</div>`
+            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${moduleName + ' : ' + errors.join(' ')}</div>`
         }
         return ''
     }).filter(s => s);
-    return {contents, errors};
+    return {errors};
 }
 
-export function contentMeta(content: string, file: { size: number, lastModified: number }) {
-    const moduleName = getMetaData('module', content)[0];
-    const dependency = getMetaData('dependency', content)[0];
-    const description = getMetaData('description', content)[0];
-    const author = getMetaData('author', content)[0];
-    const iconDataURI = getMetaData('icon', content)[0];
-    const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
-    const title = getTagContent('title', content);
+export function contentMeta(content: string) {
+    const {moduleName, dependency, description, author, icon, visibleInHomeScreen, title} = getContentInfo(content);
     const [path, version] = moduleName.split('@').filter(s => s);
     const id = nanoid();
     // maybe we need to have the available queryParams and available service
@@ -174,15 +179,15 @@ export function contentMeta(content: string, file: { size: number, lastModified:
         dependencies: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
         missingDependencies: [],
         installedOn: new Date().getTime(),
-        size: file.size,
-        lastModified: file.lastModified,
+        size: new Blob([content]).size,
+        lastModified: new Date().getTime(),
         description,
         active: true,
         deleted: false,
         author,
         moduleSourceId: id,
         title,
-        iconDataURI,
+        iconDataURI: icon,
         visibleInHomeScreen: visibleInHomeScreen === "true"
     }
 
@@ -195,51 +200,66 @@ export function contentMeta(content: string, file: { size: number, lastModified:
 }
 
 export async function saveAllModules(files: FileList) {
-    const {contents, errors} = await validateModules(files);
+    const contents = await Promise.all(Array.from(files).map(file => readFile(file)));
+    await saveModuleCodes({contents, autoAccept: false, skipIfItsAlreadyInstalled: false});
+}
+
+export async function saveModuleCodes(props: { contents: string[], autoAccept: boolean, skipIfItsAlreadyInstalled: boolean }) {
+    const {contents, autoAccept, skipIfItsAlreadyInstalled} = props;
+    const {errors} = await validateModules(contents);
     if (errors.length > 0) {
-        const result = await showModal(`<div style="font-family: Arial">
-<div style="margin-bottom: 10px;font-weight: bold">Errors: </div>
-${errors.map(error => error).join('')}
-</div>`, 'Ok');
+        await showModal(`<div style="font-family: Arial,serif"><div style="margin-bottom: 10px;font-weight: bold">Errors: </div>${errors.map(error => error).join('')}</div>`, 'Ok');
         return;
     }
-    const modulesSource: { module: Module, moduleSource: ModuleSource }[] = Array.from(files).map((file, index) => {
-        const content = contents[index];
-        const {module, moduleSource} = contentMeta(content, file);
+    let modulesSource: { module: Module, moduleSource: ModuleSource }[] = contents.map((content, index) => {
+        const {module, moduleSource} = contentMeta(content);
         return {module, moduleSource};
     });
-    const modules = modulesSource.map(m => m.module);
+
     // here we need to perform some validation
     const allModules = await getAllModules();
+
+    if (skipIfItsAlreadyInstalled) {
+        modulesSource = modulesSource.filter(m => {
+            return allModules.find(installedModule => installedModule.name === m.module.name) === undefined;
+        });
+    }
+    if (modulesSource.length === 0) {
+        return;
+    }
+    const modules = modulesSource.map(m => m.module);
     const allInstalledModules = allModules.filter(m => m.active && !m.deleted);
     const missingDependencies: string[] = await findAndUpdateMissingDependencies(modules, allInstalledModules);
     const modulesToBeUpgrade: { from: string, to: string }[] = await findModulesToBeUpgrade(modules, allInstalledModules);
-
-    const result = await showModal(`<div style="font-family: Arial">
+    let result = 'Yes';
+    if (!autoAccept) {
+        result = await showModal(`<div style="font-family: Arial,sans-serif">
 <div>The modules listed below will be installed. :</div>
 <div style="display: flex;flex-direction: row;flex-wrap: wrap">${modules.map(dep => {
-        return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color:darkslateblue;margin-right: 5px;margin-bottom: 5px">${dep.name}</div>`
-    }).join('')}</div>
+            return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color:darkslateblue;margin-right: 5px;margin-bottom: 5px">${dep.name}</div>`
+        }).join('')}</div>
 ${missingDependencies.length > 0 ? (() => {
-        return `
+            return `
     <div style="margin-top: 10px;">The dependent modules listed below are unavailable. :</div>
     <div style="display: flex;flex-direction: row;flex-wrap: wrap">${missingDependencies.map(dep => {
-            return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: darkred;margin-right: 5px;margin-bottom: 5px">${dep}</div>`
-        }).join('')}</div>
+                return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: darkred;margin-right: 5px;margin-bottom: 5px">${dep}</div>`
+            }).join('')}</div>
     `
-    })() : ''}
+        })() : ''}
 ${modulesToBeUpgrade.length > 0 ? (() => {
-        return `
+            return `
     <div style="margin-top: 10px">The modules listed below will be upgraded. :</div>
     <div style="display: flex;flex-direction: row;flex-wrap: wrap">${modulesToBeUpgrade.map(dep => {
-            return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: green;margin-right: 5px;margin-bottom: 5px">${dep.from} ➡ ${dep.to}</div>`
-        }).join('')}</div>
+                return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: green;margin-right: 5px;margin-bottom: 5px">${dep.from} ➡ ${dep.to}</div>`
+            }).join('')}</div>
     `
-    })() : ''}
+        })() : ''}
 
 
 <div style="margin-top: 10px">Are you certain that you wish to continue?</div>
 </div>`, 'Yes', 'No');
+    }
+
 
     // 1. are all dependency available in the modules that going to be installed
     // 2. if dependency is not available then the active flag is false [ok]
@@ -249,6 +269,7 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
         return;
     }
     const [db, tx, moduleStore, sourceStore] = await openTransaction("readwrite", ["module", "module-source"]);
+
     modulesToBeUpgrade.forEach(toBeUpgraded => {
         const module = allInstalledModules.find(s => s.name === toBeUpgraded.from)!;
         module.deleted = true;
@@ -264,9 +285,9 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
     })
     tx.commit();
     db.close();
-    setTimeout(() => {
-        window.location.reload();
-    },100);
+    // setTimeout(() => {
+    //     window.location.reload();
+    // }, 100);
 }
 
 export async function removeModule(moduleName: string) {
@@ -286,7 +307,7 @@ function forRequest<T>(request: IDBRequest): Promise<T | false> {
             const data: T = request.result;
             resolve(data);
         });
-        request.addEventListener('error', (error) => {
+        request.addEventListener('error', () => {
             resolve(false);
         })
     })

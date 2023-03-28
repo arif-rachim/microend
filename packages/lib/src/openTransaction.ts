@@ -5,13 +5,13 @@ export function openTransaction(type: IDBTransactionMode, table: Table[] | Table
         const req = indexedDB.open(DATABASE_NAME, 2)
         req.addEventListener('upgradeneeded', () => {
             const db = req.result;
-            if(!db.objectStoreNames.contains('module')){
+            if (!db.objectStoreNames.contains('module')) {
                 db.createObjectStore('module', {keyPath: 'name'});
             }
-            if(!db.objectStoreNames.contains('module-source')){
+            if (!db.objectStoreNames.contains('module-source')) {
                 db.createObjectStore('module-source', {keyPath: 'id'});
             }
-            if(!db.objectStoreNames.contains('app-context')){
+            if (!db.objectStoreNames.contains('app-context')) {
                 db.createObjectStore('app-context', {keyPath: 'id'});
             }
         });
@@ -26,11 +26,11 @@ export function openTransaction(type: IDBTransactionMode, table: Table[] | Table
                 resolve([db, tx, store]);
             }
         });
-        req.addEventListener('error',(evt) => {
-            console.error('Unable to open db ',evt);
+        req.addEventListener('error', (evt) => {
+            console.error('Unable to open db ', evt);
         });
-        req.addEventListener('blocked',(evt) => {
-            console.error('Unable to open request because it was Blocked',evt);
+        req.addEventListener('blocked', (evt) => {
+            console.error('Unable to open request because it was Blocked', evt);
         });
     })
 }

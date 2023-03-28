@@ -1,7 +1,6 @@
 import {Store, StoreValueRenderer, useStore, useStoreValue} from "@microend/utils";
 import {border} from "../tree/DataTree";
 import {CSSProperties, ReactElement} from "react";
-import {AnimatePresence, motion} from "framer-motion";
 
 interface ColumnType<T> {
     title: string,
@@ -39,39 +38,39 @@ export function DataGrid<T, Columns extends Partial<{ [k in keyof T]: ColumnType
         <StoreValueRenderer store={$gridData} selector={s => s} render={(rows: T[]) => {
             return <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
 
-                    {rows.map((row: T, rowIndex) => {
-                        const k: string = row[columnKey] as any;
-                        const isFocused = focusedRow === row;
-                        return <div key={k}
-                                           style={{
-                                               display: 'flex',
-                                               backgroundColor: isFocused ? '#F2F2F2' : '#FFFFFF',
-                                               borderBottom: border,
-                                               padding: '2px 5px'
-                                           }} onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            $focusedRow.set(row);
-                        }}>
-                            {Object.keys(columns).map((key, colIndex) => {
-                                const column: ColumnType<T> = (columns as any)[key];
-                                const value = (row as any)[key];
-                                const style = {
-                                    ...column.cellStyle,
-                                    flexGrow: 0,
-                                    flexShrink: 0,
-                                    width: column.width
-                                }
-                                return <div key={key} style={style}>{column.renderer({
-                                    value,
-                                    row,
-                                    rows,
-                                    colIndex,
-                                    rowIndex
-                                })}</div>
-                            })}
-                        </div>
-                    })}
+                {rows.map((row: T, rowIndex) => {
+                    const k: string = row[columnKey] as any;
+                    const isFocused = focusedRow === row;
+                    return <div key={k}
+                                style={{
+                                    display: 'flex',
+                                    backgroundColor: isFocused ? '#F2F2F2' : '#FFFFFF',
+                                    borderBottom: border,
+                                    padding: '2px 5px'
+                                }} onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $focusedRow.set(row);
+                    }}>
+                        {Object.keys(columns).map((key, colIndex) => {
+                            const column: ColumnType<T> = (columns as any)[key];
+                            const value = (row as any)[key];
+                            const style = {
+                                ...column.cellStyle,
+                                flexGrow: 0,
+                                flexShrink: 0,
+                                width: column.width
+                            }
+                            return <div key={key} style={style}>{column.renderer({
+                                value,
+                                row,
+                                rows,
+                                colIndex,
+                                rowIndex
+                            })}</div>
+                        })}
+                    </div>
+                })}
 
             </div>
         }}/>
