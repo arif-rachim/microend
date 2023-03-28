@@ -33,8 +33,7 @@ function replaceScript(html: string, scriptFilename: string, scriptCode: string,
 
 function replaceCss(html: string, scriptFilename: string, scriptCode: string): string {
     const reCss = new RegExp(`<link[^>]*? href="[./]*${scriptFilename}"[^>]*?>`)
-    const inlined = html.replace(reCss, `<style>\n${scriptCode}\n</style>`)
-    return inlined
+    return html.replace(reCss, `<style>\n${scriptCode}\n</style>`)
 }
 
 const warnNotInlined = (filename: string) => console.warn(`WARNING: asset not inlined: ${filename}`)
@@ -105,7 +104,7 @@ export function viteMicroEnd(config: Config): Plugin {
             for (const name of Object.keys(bundle).filter((i) => !jsExtensionTest.test(i) && !i.endsWith(".css") && !i.endsWith(".html"))) {
                 warnNotInlined(name)
             }
-        },
+        }
     }
 }
 

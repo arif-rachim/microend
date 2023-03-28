@@ -17,7 +17,6 @@
   "dependencies": {
     "cheerio": "*",
     "fs-extra": "*",
-    "request": "*",
     "mime-types": "*"
   },
   "browserslist": {
