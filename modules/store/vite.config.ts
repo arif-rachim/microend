@@ -5,7 +5,7 @@ import {viteMicroEnd} from "@microend/vite-plugin-microend"
 export default defineConfig({
     plugins: [react(), viteMicroEnd({
         author: 'a.arif.r@gmail.com',
-        iconFile: './src/application-launcher.svg',
+        iconFile: './src/icon.svg',
         version: '1.0.0',
         title: 'Store',
         name: 'store',

@@ -11,7 +11,7 @@ export default defineConfig({
     title : 'IAM',
     name : 'iam',
     description:'Identity Access Management allows user to add roles and user into the application',
-    iconFile : './src/identity-access-management.svg',
+    iconFile : './src/icon.svg',
     visibleInHomeScreen : true
   })],
 })
