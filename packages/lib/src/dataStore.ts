@@ -123,7 +123,7 @@ const validateVersioning = (value: string, errors: string[], message: string) =>
     }
 }
 
-function getContentInfo(content: string) {
+export function getContentInfo(content: string) {
     const moduleName = getMetaData('module', content)[0];
     const dependency = getMetaData('dependency', content)[0];
     const description = getMetaData('description', content)[0];
@@ -289,9 +289,6 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
     })
     tx.commit();
     db.close();
-    // setTimeout(() => {
-    //     window.location.reload();
-    // }, 100);
 }
 
 export async function removeModule(moduleName: string) {

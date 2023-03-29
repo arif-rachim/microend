@@ -34,7 +34,7 @@ export function App() {
             <div
                 style={{display: 'flex', flexDirection: 'row', padding: 10, borderBottom: '1px solid rgba(0,0,0,0.1)'}}>
                 <input style={{width: '100%', borderRadius: 10, padding: '5px 10px'}} type={'search'}
-                       placeholder={'Search Apps'}/>
+                       placeholder={'Search Modules'}/>
                 <motion.label style={{
                     display: 'flex',
                     flexDirection: 'column',
