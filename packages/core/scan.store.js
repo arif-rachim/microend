@@ -16,10 +16,14 @@ async function extracted(folderOrFiles, parentDir) {
             const subResult = await extracted(folderOrFiles, fileOrFolderPath)
             result = result.concat(subResult);
         }
-        if (stats.isFile()) {
+        if (stats.isFile() && folderOrFile.endsWith('.html')) {
             const moduleContent = await fs.readFile(fileOrFolderPath, {encoding: 'utf-8'});
             const moduleInfo = getContentInfo(moduleContent);
-            moduleInfo.path = fileOrFolderPath;
+            const iconPath = fileOrFolderPath + '.icon.txt';
+            await fs.writeFile(iconPath, moduleInfo.icon, {encoding: 'utf-8'});
+
+            moduleInfo.source = fileOrFolderPath.split(path.sep).filter((_, i) => i > 0).join('/');
+            moduleInfo.icon = iconPath.split(path.sep).filter((_, i) => i > 0).join('/');
             result.push(moduleInfo)
         }
     }
@@ -27,8 +31,7 @@ async function extracted(folderOrFiles, parentDir) {
 }
 
 const registry = await extracted(folderOrFiles, storesDir);
-console.log(registry);
-
+await fs.writeFile(path.join('public','stores.json'),JSON.stringify(registry,null,4),{encoding:'utf-8'});
 
 export function getContentInfo(content) {
     const moduleName = getMetaData('module', content)[0];
@@ -38,7 +41,8 @@ export function getContentInfo(content) {
     const icon = getMetaData('icon', content)[0];
     const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
     const title = getTagContent('title', content);
-    return {moduleName, dependency, description, author, icon, visibleInHomeScreen, title};
+    const [path, version] = moduleName.split('@').filter(s => s);
+    return {moduleName, dependency, description, author, icon, visibleInHomeScreen, title, path, version};
 }
 
 function getMetaData(metaName, htmlText) {
