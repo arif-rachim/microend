@@ -4,7 +4,7 @@ import {CSSProperties} from "react";
 const LABEL_WIDTH = 100;
 const labelStyle: CSSProperties = {display: 'flex', borderBottom: '1px solid rgba(0,0,0,0.1)', padding: '2px 5px'}
 
-export function AppDetail(props: { module: Module, closePanel: (result: any) => void }) {
+export function ModuleDetailPanel(props: { module: Module, closePanel: (result: any) => void }) {
     const {module, closePanel} = props;
     return <div style={{
         display: 'flex',
