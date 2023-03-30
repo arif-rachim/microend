@@ -20,6 +20,7 @@ export type Config = {
     visibleInHomeScreen: boolean;
 }
 
+
 const defaultConfig = {useRecommendedBuildConfig: true, removeViteModuleLoader: false, deleteInlinedFiles: true}
 
 function replaceScript(html: string, scriptFilename: string, scriptCode: string, removeViteModuleLoader = false): string {
@@ -42,23 +43,23 @@ async function replaceMicroEndConfig(replacedHtml: string, config: Config) {
     const $ = load(replacedHtml);
     const head = $('head');
     $('title').remove();
-    $('meta[name="module"]').remove();
-    $('meta[name="dependency"]').remove();
+    $('meta[name="name"]').remove();
+    $('meta[name="dependencies"]').remove();
     $('meta[name="description"]').remove();
     $('meta[name="author"]').remove();
-    $('meta[name="icon"]').remove();
+    $('meta[name="iconDataURI"]').remove();
     $('meta[name="visibleInHomeScreen"]').remove();
     const dependencies = Object.keys(config.dependencies).map(key => {
         return `${key}@${config.dependencies[key]}`
     }).join(',')
-    const iconDataUri = await encodeFromFile(config.iconFile);
+    const iconDataURI = await encodeFromFile(config.iconFile);
     head.prepend(`
         <title>${config.title}</title>
-        <meta content="${config.name}@${config.version}" name="module">
-        <meta content="${dependencies}" name="dependency">
+        <meta content="${config.name}@${config.version}" name="name">
+        <meta content="${dependencies}" name="dependencies">
         <meta content="${config.description}" name="description">
         <meta content="${config.author}" name="author">
-        <meta content="${iconDataUri}" name="icon">
+        <meta content="${iconDataURI}" name="iconDataURI">
         <meta content="${config.visibleInHomeScreen}" name="visibleInHomeScreen">
     `)
     return $.html();

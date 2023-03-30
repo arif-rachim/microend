@@ -1,6 +1,8 @@
 /**
  * Ini adalah interface generic yang memiliki attribute string intent.
  */
+import {ContentInfo} from "@microend/utils";
+
 interface Intent {
     intent: string
 }
@@ -169,23 +171,13 @@ type Navigator<Handler, HandlerKey extends keyof Handler> = {
  */
 export type MessageData = NavigateToMessage | NavigateBackMessage;
 
-export interface Module {
-    title: string;
-    name: string;
-    description: string;
-    path: string;
-    version: string;
-    dependencies: string[];
+export interface Module extends ContentInfo {
     missingDependencies: string[];
     installedOn: number,
-    size: number,
     lastModified: number;
     active: boolean;
     deleted: boolean;
-    author: string;
     moduleSourceId: string;
-    iconDataURI: string;
-    visibleInHomeScreen: boolean;
 }
 
 export interface ModuleSource {

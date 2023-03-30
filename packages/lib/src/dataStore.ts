@@ -3,6 +3,7 @@ import {openTransaction} from "./openTransaction";
 import {showModal} from "./showModal";
 import {nanoid} from "nanoid";
 import {satisfies, validate as validVersion,} from "compare-versions";
+import {ContentInfo, parseContentInfo} from "@microend/utils";
 
 export async function getAllModules(): Promise<Module[]> {
     const [db, tx, store] = await openTransaction('readonly', 'module');
@@ -76,8 +77,8 @@ async function findAndUpdateMissingDependencies(modules: Module[], allInstalledM
                 if (version === '*' && path === '*') {
                     return true;
                 }
-                if(m.path === path){
-                    console.log('satisfies',m.version,version,satisfies(m.version, version));
+                if (m.path === path) {
+                    console.log('satisfies', m.version, version, satisfies(m.version, version));
                 }
 
                 return m.path === path && satisfies(m.version, version);
@@ -123,16 +124,6 @@ const validateVersioning = (value: string, errors: string[], message: string) =>
     }
 }
 
-export function getContentInfo(content: string) {
-    const moduleName = getMetaData('module', content)[0];
-    const dependency = getMetaData('dependency', content)[0];
-    const description = getMetaData('description', content)[0];
-    const author = getMetaData('author', content)[0];
-    const icon = getMetaData('icon', content)[0];
-    const visibleInHomeScreen = getMetaData('visibleInHomeScreen', content)[0];
-    const title = getTagContent('title', content);
-    return {moduleName, dependency, description, author, icon, visibleInHomeScreen, title};
-}
 
 async function validateModules(contents: string[]) {
 
@@ -140,22 +131,22 @@ async function validateModules(contents: string[]) {
 
         const missingRequiredMeta: string[] = [];
         const versioningIssue: string[] = [];
-        const {moduleName, dependency, description, author, icon, visibleInHomeScreen, title} = getContentInfo(content);
+        const {name, description, author, iconDataURI, visibleInHomeScreen, title,dependencies} = parseContentInfo(content);
 
-        validate(moduleName, missingRequiredMeta, 'module');
+        validate(name, missingRequiredMeta, 'name');
         validate(description, missingRequiredMeta, 'description');
         validate(author, missingRequiredMeta, 'author');
         validate(title, missingRequiredMeta, 'title');
-        validate(icon, missingRequiredMeta, 'icon');
+        validate(iconDataURI, missingRequiredMeta, 'iconDataURI');
         validate(visibleInHomeScreen, missingRequiredMeta, 'visibleInHomeScreen');
 
-        validateVersioning(moduleName ?? '', versioningIssue, `${moduleName}(module)`);
-        // if (dependency) {
-        //     const dependencies = dependency.split(',').filter(s => s).map(s => s.trim());
-        //     dependencies.forEach(dep => {
-        //         validateVersioning(dep, versioningIssue, `${dep}`)
-        //     })
-        // }
+        validateVersioning(name ?? '', versioningIssue, `${name}(module)`);
+        if (dependencies) {
+            dependencies.forEach(dep => {
+                // we can't enable following we must create proper validation against >1.0.0 ^1.0.0 ~1.0.0
+                // validateVersioning(dep, versioningIssue, `${dep}`)
+            })
+        }
         const errors = [];
         if (missingRequiredMeta.length > 0) {
             errors.push(`Missing ${missingRequiredMeta.map(meta => `<span style="font-weight: bold;margin:0 5px">"${meta}"</span>`).join(', ')}`);
@@ -164,35 +155,27 @@ async function validateModules(contents: string[]) {
             errors.push(`Version error ${versioningIssue.map(version => `<span style="font-weight: bold;margin:0 5px">"${version}"</span>`).join(', ')}`)
         }
         if (errors.length > 0) {
-            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${moduleName + ' : ' + errors.join(' ')}</div>`
+            return `<div style="flex-direction: row;flex-wrap: wrap;margin-bottom: 10px">${name + ' : ' + errors.join(' ')}</div>`
         }
         return ''
     }).filter(s => s);
+
     return {errors};
 }
 
 export function contentMeta(content: string) {
-    const {moduleName, dependency, description, author, icon, visibleInHomeScreen, title} = getContentInfo(content);
-    const [path, version] = moduleName.split('@').filter(s => s);
+    const contentInfo: ContentInfo = parseContentInfo(content);
+
     const id = nanoid();
     // maybe we need to have the available queryParams and available service
     const module: Module = {
-        name: moduleName,
-        path,
-        version,
-        dependencies: (dependency ?? '').split(',').filter(s => s).map(s => s.trim()),
+        ...contentInfo,
+        moduleSourceId: id,
         missingDependencies: [],
         installedOn: new Date().getTime(),
-        size: new Blob([content]).size,
         lastModified: new Date().getTime(),
-        description,
         active: true,
         deleted: false,
-        author,
-        moduleSourceId: id,
-        title,
-        iconDataURI: icon,
-        visibleInHomeScreen: visibleInHomeScreen === "true"
     }
 
     const moduleSource: ModuleSource = {
@@ -240,27 +223,27 @@ export async function saveModuleCodes(props: { contents: string[], autoAccept: b
         result = await showModal(`<div style="font-family: Arial,sans-serif">
 <div>The modules listed below will be installed. :</div>
 <div style="display: flex;flex-direction: row;flex-wrap: wrap">${modules.map(dep => {
-            return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color:darkslateblue;margin-right: 5px;margin-bottom: 5px">${dep.name}</div>`
+            return `<div style="padding:0px 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color:darkslateblue;margin-right: 5px;margin-bottom: 5px">${dep.name}</div>`
         }).join('')}</div>
 ${missingDependencies.length > 0 ? (() => {
             return `
-    <div style="margin-top: 10px;">The dependent modules listed below are unavailable. :</div>
+    <div style="margin-top: 5px;">The dependent modules listed below are unavailable. :</div>
     <div style="display: flex;flex-direction: row;flex-wrap: wrap">${missingDependencies.map(dep => {
-                return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: darkred;margin-right: 5px;margin-bottom: 5px">${dep}</div>`
+                return `<div style="padding:0px 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: darkred;margin-right: 5px;margin-bottom: 5px">${dep}</div>`
             }).join('')}</div>
     `
         })() : ''}
 ${modulesToBeUpgrade.length > 0 ? (() => {
             return `
-    <div style="margin-top: 10px">The modules listed below will be upgraded. :</div>
+    <div style="margin-top: 5px">The modules listed below will be upgraded. :</div>
     <div style="display: flex;flex-direction: row;flex-wrap: wrap">${modulesToBeUpgrade.map(dep => {
-                return `<div style="padding: 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: green;margin-right: 5px;margin-bottom: 5px">${dep.from} ➡ ${dep.to}</div>`
+                return `<div style="padding:0px 5px;border: 1px solid rgba(0,0,0,0.1);border-radius: 5px;color: white;background-color: green;margin-right: 5px;margin-bottom: 5px">${dep.from} ➡ ${dep.to}</div>`
             }).join('')}</div>
     `
         })() : ''}
 
 
-<div style="margin-top: 10px">Are you certain that you wish to continue?</div>
+<div style="margin-top: 5px">Are you certain that you wish to continue?</div>
 </div>`, 'Yes', 'No');
     }
 
@@ -289,6 +272,13 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
     })
     tx.commit();
     db.close();
+    if (!autoAccept) {
+        const response = await showModal(`<div style="font-family: Arial,serif">
+<div>Module(s) were succesfully installed</div>
+${errors.map(error => error).join('')}
+</div>`, 'Ok');
+        window.location.reload();
+    }
 }
 
 export async function removeModule(moduleName: string) {
@@ -328,43 +318,6 @@ export async function deactivateModule(moduleName: string, deactivate: boolean) 
     db.close();
 }
 
-function getMetaData(metaName: string, htmlText: string): string[] {
-    const result: string[] = [];
-    let index = 0;
-    do {
-        const [value, endIndex] = scanText(metaName, htmlText, index);
-        index = endIndex;
-        if (value) {
-            result.push(value);
-        }
-    } while (index >= 0);
-    return result;
-}
-
-function getTagContent(tagName: string, htmlText: string) {
-    const startTag = `<${tagName}>`;
-    const endTag = `</${tagName}>`;
-    if (htmlText.indexOf(startTag) < 0) {
-        return '';
-    }
-    const startIndex = htmlText.indexOf(startTag) + startTag.length;
-    const endIndex = htmlText.indexOf(endTag, startIndex);
-    return htmlText.substring(startIndex, endIndex);
-}
-
-function scanText(metaName: string, htmlText: string, startingIndex: number): [string, number] {
-    const indexOfContent = htmlText.indexOf(`name="${metaName}"`, startingIndex);
-    if (indexOfContent < 0) {
-        return ['', -1];
-    }
-    const startTagIndex = htmlText.substring(startingIndex, indexOfContent).lastIndexOf('<') + startingIndex;
-    const endTagIndex = htmlText.substring(indexOfContent, htmlText.length).indexOf('>') + indexOfContent
-    let dependency = '';
-    if (startTagIndex >= 0 && endTagIndex > startTagIndex) {
-        dependency = htmlText.substring(startTagIndex, endTagIndex).split('content="')[1].split('"')[0];
-    }
-    return [dependency, endTagIndex];
-}
 
 function readFile(file: File): Promise<string> {
     return new Promise((resolve) => {
