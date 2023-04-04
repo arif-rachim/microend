@@ -5,7 +5,7 @@ import backgroundPattern from "./images/background-pattern.png";
 import "./App.style.css";
 export function App() {
     return <main>
-        <section style={{backgroundImage:`url(${backgroundPattern})`,color:'white',padding:10}}>
+        <section style={{backgroundImage:`url(${backgroundPattern})`,color:'white'}}>
             <article>
                 <div style={{display:'flex',alignItems:'center'}} >
                     <svg height="32" preserveAspectRatio="xMidYMid meet" version="1.0" viewBox="0 0 375 374.999991"

@@ -4,6 +4,7 @@
 article {
     max-width: 600px;
     font-width: normal;
+    padding:10px;
     width: 100%;
     margin: auto;
     box-sizing: border-box;
