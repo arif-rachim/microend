@@ -171,7 +171,7 @@ export function App() {
             $installedModules.set(modules);
         })();
         (async () => {
-            const response = await fetch(`${BASE_URL}/stores.json`);
+            const response = await fetch(`${BASE_URL}/stores/index.json`);
             const serverModules: ServerModule[] = await response.json();
             $serverModules.set(serverModules);
         })();

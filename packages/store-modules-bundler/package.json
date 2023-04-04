@@ -1,0 +1,11 @@
+{
+  "name": "@microend/store-modules-bundler",
+  "version": "1.0.0-rc.1",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node ./src/index.ts"
+  },
+  "author": "",
+  "license": "ISC"
+}

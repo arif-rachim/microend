@@ -24,12 +24,13 @@ export class MicroEndHomeButton extends HTMLElement {
         this.style.flexDirection = 'column';
         this.style.alignItems = 'center';
         this.style.margin = 'auto';
-        this.style.backgroundColor = '#fff';
-        this.style.left = 'calc(50vw - 25px)'
+        this.style.backgroundColor = '#FFF';
+        this.style.left = 'calc(50vw - 25px)';
         this.style.boxShadow = BOX_SHADOW;
         this.style.borderRadius = '20px';
         this.style.transition = 'box-shadow 300ms ease';
     }
+
 
     initAppContext = async () => {
         const appContext = await getAppContext();
@@ -90,13 +91,16 @@ export class MicroEndHomeButton extends HTMLElement {
             this.style.left = `${newLeft}px`;
             this.style.bottom = 'unset';
             this.isDragged = true;
+
             x = position.clientX;
             y = position.clientY;
         }
 
         const onMouseUp = () => {
             this.isDragged = false;
-            console.log('drag',this.isDragged);
+            Array.from(document.querySelectorAll('[data-drag-layer="true"]')).forEach(e => {
+                e.remove();
+            })
             document.removeEventListener('mousemove',onMouseMove);
             document.removeEventListener('mouseup',onMouseUp);
             document.removeEventListener('touchmove',onMouseMove);
@@ -112,6 +116,16 @@ export class MicroEndHomeButton extends HTMLElement {
             }
             x = position.clientX;
             y = position.clientY;
+            // we need to attach the element
+            const div = document.createElement('div');
+            div.setAttribute('data-drag-layer','true');
+            div.style.width = window.innerWidth+'px';
+            div.style.height = window.innerHeight+'px';
+            div.style.background = 'rgba(0,0,0,0)';
+            div.style.position = 'absolute';
+            div.style.top = '0';
+            div.style.left = '0';
+            this.parentElement!.insertBefore(div,this);
             document.addEventListener('mousemove',onMouseMove);
             document.addEventListener('mouseup',onMouseUp);
             document.addEventListener('touchmove',onMouseMove);

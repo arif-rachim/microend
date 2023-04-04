@@ -61,7 +61,6 @@ export class MicroEndRouter extends HTMLElement {
             const style: any = {
                 height: '100%',
                 'box-sizing': 'border-box',
-                overflow: 'auto',
                 display: 'flex',
                 'flex-direction': 'column',
                 position: 'relative'
@@ -134,7 +133,7 @@ export class MicroEndRouter extends HTMLElement {
             if (!this.debugMode) {
                 nextFrame.style.position = 'absolute';
             }
-            nextFrame.style.overflow = 'auto';
+
             nextFrame.style.zIndex = '0';
             const contextScript = createContext({
                 params,
@@ -178,7 +177,8 @@ export class MicroEndRouter extends HTMLElement {
             return;
         }
         let previousFrame: HTMLIFrameElement | null = this.currentActiveFrame;
-        if (previousFrame && previousFrame.contentWindow) {
+        const previousFrameAndNextIsNotSame = previousFrame !== nextFrame;
+        if (previousFrame && previousFrame.contentWindow && previousFrameAndNextIsNotSame) {
             // we cant do this, this is dangerous if we make it empty
             previousFrame.setAttribute('data-focused','false');
             previousFrame.style.zIndex = '-1';

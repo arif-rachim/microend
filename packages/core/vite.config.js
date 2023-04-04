@@ -9,7 +9,7 @@ export default defineConfig({
         version: '0.0.1',
         author: 'a.arif.r@gmail.com',
         dependencies: {},
-        iconFile: './public/microend-logo.svg'
+        iconFile: './public/images/microend-logo.svg'
     })],
     build: {
         target: 'es2015'

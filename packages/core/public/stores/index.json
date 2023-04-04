@@ -1,0 +1,71 @@
+[
+    {
+        "name": "file-manager@1.0.0",
+        "dependencies": [],
+        "description": "File Manager to store file and retrieve file and to interact with user",
+        "author": "a.arif.r@gmail.com",
+        "iconDataURI": "public/stores/file-manager/1.0.0.html.icon.txt",
+        "visibleInHomeScreen": true,
+        "title": "File Manager",
+        "path": "file-manager",
+        "version": "1.0.0",
+        "size": 337425,
+        "source": "public/stores/file-manager/1.0.0.html"
+    },
+    {
+        "name": "iam@1.0.0",
+        "dependencies": [],
+        "description": "Identity Access Management allows user to add roles and user into the application",
+        "author": "arif.rachim@gmail.com",
+        "iconDataURI": "public/stores/iam/1.0.0.html.icon.txt",
+        "visibleInHomeScreen": true,
+        "title": "IAM",
+        "path": "iam",
+        "version": "1.0.0",
+        "size": 354310,
+        "source": "public/stores/iam/1.0.0.html"
+    },
+    {
+        "name": "launcher@1.0.0",
+        "dependencies": [
+            "*@*"
+        ],
+        "description": "Application Launcher",
+        "author": "a.arif.r@gmail.com",
+        "iconDataURI": "public/stores/launcher/1.0.0.html.icon.txt",
+        "visibleInHomeScreen": false,
+        "title": "Launcher",
+        "path": "launcher",
+        "version": "1.0.0",
+        "size": 248577,
+        "source": "public/stores/launcher/1.0.0.html"
+    },
+    {
+        "name": "microend-docs@1.0.0",
+        "dependencies": [],
+        "description": "MicroEnd documentation and tutorial",
+        "author": "a.arif.r@gmail.com",
+        "iconDataURI": "public/stores/microend-docs/1.0.0.html.icon.txt",
+        "visibleInHomeScreen": true,
+        "title": "Microend",
+        "path": "microend-docs",
+        "version": "1.0.0",
+        "size": 816234,
+        "source": "public/stores/microend-docs/1.0.0.html"
+    },
+    {
+        "name": "store@1.0.0",
+        "dependencies": [
+            "*@*"
+        ],
+        "description": "App Store",
+        "author": "a.arif.r@gmail.com",
+        "iconDataURI": "public/stores/store/1.0.0.html.icon.txt",
+        "visibleInHomeScreen": true,
+        "title": "Store",
+        "path": "store",
+        "version": "1.0.0",
+        "size": 273708,
+        "source": "public/stores/store/1.0.0.html"
+    }
+]
