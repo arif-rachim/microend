@@ -119,7 +119,7 @@ export class MicroEndHomeButton extends HTMLElement {
             // we need to attach the element
             const div = document.createElement('div');
             div.setAttribute('data-drag-layer','true');
-            div.style.width = window.innerWidth+'px';
+            div.style.width = window.innerWidth - 15 +'px';
             div.style.height = window.innerHeight+'px';
             div.style.background = 'rgba(0,0,0,0)';
             div.style.position = 'absolute';
