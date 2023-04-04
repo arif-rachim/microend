@@ -2,7 +2,7 @@ import {db, FileBuffer, FileOrFolder, root} from "./Database";
 import {
     Dispatch,
     ForwardedRef,
-    forwardRef,
+    forwardRef, RefObject,
     SetStateAction,
     useEffect,
     useImperativeHandle,
@@ -19,7 +19,7 @@ import {
 } from "react-icons/io5";
 import {nanoid} from "nanoid";
 import {BiRename} from "react-icons/bi";
-import {useSlidePanel, Visible} from "@microend/utils";
+import {FactoryFunction, FactoryFunctionConfig, useSlidePanel, Visible} from "@microend/utils";
 
 
 async function populateTestData() {
@@ -65,7 +65,7 @@ async function initiateDatabase() {
     if (rootData === undefined) {
         // lets inject root data here
         await db.folderOrFiles.put(root);
-        // note this will removed after development done
+        // note this will be removed after development done
         await populateTestData();
     }
 }
@@ -109,6 +109,170 @@ function DirectoryToPath(props: { value: FileOrFolder, onChange: (value: FileOrF
             </div>
         })}
     </div>
+}
+
+function Toolbar<T>(props: {
+    currentDirectory: FileOrFolder,
+    setCurrentDirectory: Dispatch<SetStateAction<FileOrFolder>>,
+    editMode: boolean,
+    folderFilesRef: RefObject<{ addFolder: () => Promise<FileOrFolder>; refresh: () => Promise<void> }>,
+    setSelectedFileOrFolders: Dispatch<SetStateAction<FileOrFolder[]>>, setEditMode: Dispatch<SetStateAction<boolean>>,
+    onRename: () => Promise<void>, showPanel: <T>(factory: FactoryFunction<T>, config?: (FactoryFunctionConfig | undefined)) => Promise<T>, onDeleteFiles: () => Promise<void>, selectedFileOrFoldersMultiple: boolean
+}) {
+    const {
+        editMode,
+        setEditMode,
+        setSelectedFileOrFolders,
+        folderFilesRef,
+        selectedFileOrFoldersMultiple,
+        onDeleteFiles,
+        setCurrentDirectory,
+        currentDirectory,
+        onRename,
+        showPanel
+    } = props;
+
+    return <div style={{
+        background: '#fff',
+        width: '100%',
+        maxWidth: 800,
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        boxShadow: '0 5px 5px -3px rgba(0,0,0,0.1)',
+    }}>
+        <div style={{fontSize: 16, borderBottom: '1px solid rgba(0,0,0,0.1)', padding: 5}}>
+            <DirectoryToPath value={currentDirectory} onChange={(value) => setCurrentDirectory(value)}/>
+        </div>
+        <div style={{
+            borderBottom: '1px solid rgba(0,0,0,0.1)',
+            padding: 5,
+            display: 'flex',
+            flexDirection: 'row'
+        }}>
+            <Visible if={!editMode}>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    padding: '3px 5px',
+                    borderRadius: 3,
+                    marginRight: 5
+                }} onClick={async (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    const folder = await folderFilesRef?.current?.addFolder()!;
+                    setSelectedFileOrFolders([folder]);
+                    setEditMode(true);
+                    setTimeout(() => {
+                        onRename();
+                    }, 100);
+
+                }}>
+                    <IoFolderOutline style={{fontSize: 28, marginRight: 5}}/>
+                    <div>Create Folder</div>
+                </div>
+                <label style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    padding: '3px 5px',
+                    borderRadius: 3
+                }}>
+                    <IoAddCircleOutline style={{fontSize: 28, marginRight: 5}}/>
+                    <div>Upload File</div>
+                    <input type={"file"} multiple style={{display: 'none'}}
+                           onChange={async (event) => {
+                               const input = event.target as HTMLInputElement;
+                               if (input.files === null) {
+                                   return;
+                               }
+                               const files: FileList = input.files;
+                               for (let i = 0; i < files.length; i++) {
+                                   const file = files[i];
+                                   const {buffer, type} = await blobToArrayBuffer(file);
+                                   const fileData: FileOrFolder = {
+                                       name: file.name,
+                                       id: nanoid(),
+                                       isFile: true,
+                                       type: type,
+                                       parentId: currentDirectory.id
+                                   };
+                                   const bufferData: FileBuffer = {
+                                       id: fileData.id,
+                                       buffer: buffer
+                                   };
+                                   await db.folderOrFiles.put(fileData);
+                                   await db.fileBuffer.put(bufferData);
+                               }
+                               await showPanel(closePanel => {
+                                   return <div
+                                       style={{display: 'flex', flexDirection: 'column', alignItems: "center"}}>
+                                       <div style={{
+                                           display: 'flex',
+                                           flexDirection: 'column',
+                                           width: '100%',
+                                           maxWidth: 800,
+                                           backgroundColor: 'white',
+                                           padding: 10
+                                       }}>
+                                           <div style={{fontSize: 18}}>File(s) were successfully saved</div>
+                                           <div>
+                                               <button onClick={() => {
+                                                   closePanel('Ok');
+                                               }}>Ok
+                                               </button>
+                                           </div>
+                                       </div>
+                                   </div>
+                               });
+                               folderFilesRef?.current?.refresh();
+
+                           }}/>
+                </label>
+            </Visible>
+            <Visible if={editMode}>
+
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    padding: '3px 5px',
+                    borderRadius: 3,
+                    marginRight: 5
+                }} onPointerDown={async (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    await onDeleteFiles();
+                }}>
+                    <IoTrashOutline style={{fontSize: 28, marginRight: 5}}/>
+                    <div>Delete</div>
+                </div>
+
+                <Visible if={!selectedFileOrFoldersMultiple}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        border: '1px solid rgba(0,0,0,0.1)',
+                        padding: '3px 5px',
+                        borderRadius: 3,
+                        marginRight: 5
+                    }} onPointerDown={async (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        await onRename()
+                    }}>
+                        <BiRename style={{fontSize: 28, marginRight: 5}}/>
+                        <div>Rename</div>
+                    </div>
+                </Visible>
+            </Visible>
+        </div>
+    </div>;
 }
 
 export function App() {
@@ -217,173 +381,50 @@ export function App() {
             display: 'flex',
             flexDirection: 'column'
         }}>
-            <div style={{
-                background: '#fff',
-                width: '100%',
-                maxWidth: 800,
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'fixed',
-                boxShadow:'0 5px 5px -3px rgba(0,0,0,0.1)',
-                zIndex:1
-            }}>
-                <div style={{fontSize: 16, borderBottom: '1px solid rgba(0,0,0,0.1)', padding: 5}}>
-                    <DirectoryToPath value={currentDirectory} onChange={setCurrentDirectory}/>
-                </div>
-                <div style={{
-                    borderBottom: '1px solid rgba(0,0,0,0.1)',
-                    padding: 5,
-                    display: 'flex',
-                    flexDirection: 'row'
-                }}>
-                    <Visible if={!editMode}>
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            border: '1px solid rgba(0,0,0,0.1)',
-                            padding: '3px 5px',
-                            borderRadius: 3,
-                            marginRight: 5
-                        }} onClick={async (event) => {
-                            event.stopPropagation();
-                            event.preventDefault();
-                            const folder = await folderFilesRef?.current?.addFolder()!;
-                            setSelectedFileOrFolders([folder]);
-                            setEditMode(true);
-                            setTimeout(() => {
-                                onRename();
-                            }, 100);
-
-                        }}>
-                            <IoFolderOutline style={{fontSize: 28, marginRight: 5}}/>
-                            <div>Create Folder</div>
-                        </div>
-                        <label style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            border: '1px solid rgba(0,0,0,0.1)',
-                            padding: '3px 5px',
-                            borderRadius: 3
-                        }}>
-                            <IoAddCircleOutline style={{fontSize: 28, marginRight: 5}}/>
-                            <div>Upload File</div>
-                            <input type={"file"} multiple style={{display: 'none'}}
-                                   onChange={async (event) => {
-                                       const input = event.target as HTMLInputElement;
-                                       if (input.files === null) {
-                                           return;
-                                       }
-                                       const files: FileList = input.files;
-                                       for (let i = 0; i < files.length; i++) {
-                                           const file = files[i];
-                                           const {buffer, type} = await blobToArrayBuffer(file);
-                                           const fileData: FileOrFolder = {
-                                               name: file.name,
-                                               id: nanoid(),
-                                               isFile: true,
-                                               type: type,
-                                               parentId: currentDirectory.id
-                                           };
-                                           const bufferData: FileBuffer = {
-                                               id: fileData.id,
-                                               buffer: buffer
-                                           };
-                                           await db.folderOrFiles.put(fileData);
-                                           await db.fileBuffer.put(bufferData);
-                                       }
-                                       await showPanel(closePanel => {
-                                           return <div
-                                               style={{display: 'flex', flexDirection: 'column', alignItems: "center"}}>
-                                               <div style={{
-                                                   display: 'flex',
-                                                   flexDirection: 'column',
-                                                   width: '100%',
-                                                   maxWidth: 800,
-                                                   backgroundColor:'white',
-                                                   padding:10
-                                               }}>
-                                                   <div style={{fontSize:18}}>File(s) were successfully saved</div>
-                                                   <div>
-                                                       <button onClick={() => {
-                                                           closePanel('Ok');
-                                                       }}>Ok
-                                                       </button>
-                                                   </div>
-                                               </div>
-                                           </div>
-                                       });
-                                       folderFilesRef?.current?.refresh();
-
-                                   }}/>
-                        </label>
-                    </Visible>
-                    <Visible if={editMode}>
-
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            border: '1px solid rgba(0,0,0,0.1)',
-                            padding: '3px 5px',
-                            borderRadius: 3,
-                            marginRight: 5
-                        }} onPointerDown={async (event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            await onDeleteFiles();
-                        }}>
-                            <IoTrashOutline style={{fontSize: 28, marginRight: 5}}/>
-                            <div>Delete</div>
-                        </div>
-
-                        <Visible if={!selectedFileOrFoldersMultiple}>
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                border: '1px solid rgba(0,0,0,0.1)',
-                                padding: '3px 5px',
-                                borderRadius: 3,
-                                marginRight: 5
-                            }} onPointerDown={async (event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                await onRename()
-                            }}>
-                                <BiRename style={{fontSize: 28, marginRight: 5}}/>
-                                <div>Rename</div>
-                            </div>
-                        </Visible>
-                    </Visible>
-                </div>
-            </div>
+            <Toolbar currentDirectory={currentDirectory} setCurrentDirectory={setCurrentDirectory} editMode={editMode}
+                     folderFilesRef={folderFilesRef}
+                     setSelectedFileOrFolders={setSelectedFileOrFolders} setEditMode={setEditMode} onRename={onRename}
+                     showPanel={showPanel} onDeleteFiles={onDeleteFiles}
+                     selectedFileOrFoldersMultiple={selectedFileOrFoldersMultiple}/>
             <FoldersAndFiles ref={folderFilesRef} value={currentDirectory}
                              editMode={editMode}
                              setEditMode={setEditMode}
                              selectedFileOrFolders={selectedFileOrFolders}
                              setSelectedFileOrFolders={setSelectedFileOrFolders}
-                             onChange={async (value:FileOrFolder) => {
-                                 if(value.isFile === true){
+                             onChange={async (value: FileOrFolder) => {
+                                 if (value.isFile === true) {
                                      // we need to find an opener if this is pdf then we can just render it here
                                      const buffer = await db.fileBuffer.get(value.id);
-                                     if(buffer === undefined){
+                                     if (buffer === undefined) {
                                          return;
                                      }
-                                     const blob = arrayBufferToBlob({buffer:buffer.buffer,type:value.type!});
+                                     const blob = arrayBufferToBlob({buffer: buffer.buffer, type: value.type!});
                                      const objectUrl = URL.createObjectURL(blob);
                                      await showPanel(closePanel => {
-                                         return <div style={{display:'flex',flexDirection:'column',alignItems:'center'}}>
-                                             <div style={{display:'flex',flexDirection:'column',width:'100%',maxWidth:800,padding:10,backgroundColor:'white'}}>
-                                                 <iframe src={objectUrl} style={{display:'flex',flexDirection:'column',height:window.innerHeight - 100,marginBottom:10}}></iframe>
-                                                 <button style={{borderRadius:5}} onClick={() => {
+                                         return <div
+                                             style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                             <div style={{
+                                                 display: 'flex',
+                                                 flexDirection: 'column',
+                                                 width: '100%',
+                                                 maxWidth: 800,
+                                                 padding: 10,
+                                                 backgroundColor: 'white'
+                                             }}>
+                                                 <iframe src={objectUrl} style={{
+                                                     display: 'flex',
+                                                     flexDirection: 'column',
+                                                     height: window.innerHeight - 100,
+                                                     marginBottom: 10
+                                                 }}></iframe>
+                                                 <button style={{borderRadius: 5}} onClick={() => {
                                                      closePanel('ok');
-                                                 }}>Ok</button>
+                                                 }}>Ok
+                                                 </button>
                                              </div>
                                          </div>
                                      });
-                                 }else{
+                                 } else {
                                      setCurrentDirectory(value);
                                  }
                              }}
