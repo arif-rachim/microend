@@ -81,6 +81,52 @@ interface NavigateBackMessage extends Intent {
 }
 
 /**
+ * Intent yang menunjukkan bahwa dimensi dari frame berubah
+ */
+interface FrameDimensionChange extends Intent {
+    /**
+     * Intent
+     */
+    intent: 'frameDimensionChange',
+    /**
+     * Id dari iframe
+     */
+    iframeId: string,
+    /**
+     * height yang baru
+     */
+    height: number
+}
+
+/**
+ * Intent yang bertujuan buat kasih tau scroll change
+ */
+interface FrameScrollChange extends Intent {
+    /**
+     * Nama dari intent
+     */
+    intent: 'frameScrollChange',
+    /**
+     * Frame yang berubah
+     */
+    iframeId: string,
+    /**
+     * ScrollY position
+     */
+    scrollY: number
+}
+
+/**
+ * Intent yang bertujuan buat kasih window untuk reload
+ */
+interface Reload extends Intent {
+    /**
+     * Nama dari intent
+     */
+    intent: 'reload',
+}
+
+/**
  * Type dari RoutingRegistry berisi srcdoc dan dependency
  */
 interface RoutingRegistryValue {
@@ -136,6 +182,10 @@ export interface Context {
      * Tipe dari navigation yang meng-initiate request
      */
     type: NavigateToType
+    /**
+     * Id dari iframe
+     */
+    id: string
 }
 
 export interface MicroEnd extends Context {
@@ -167,9 +217,9 @@ type Navigator<Handler, HandlerKey extends keyof Handler> = {
 
 
 /**
- * Tipe dari message yang bisa berupa NavigateToMessage atau NavigateBackMessage
+ * Tipe dari message yang bisa berupa NavigateToMessage atau NavigateBackMessage atau FrameDimensionChange
  */
-export type MessageData = NavigateToMessage | NavigateBackMessage;
+export type MessageData = NavigateToMessage | NavigateBackMessage | FrameDimensionChange | FrameScrollChange | Reload;
 
 export interface Module extends ContentInfo {
     missingDependencies: string[];

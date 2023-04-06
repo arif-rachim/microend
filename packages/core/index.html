@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport"/>
     <title>MicroEnd</title>
     <meta content="Microend Base Application enables the installation of independent, modular applications that can communicate with one another and were created using any javascript framework."
           name="description"/>
@@ -233,5 +233,13 @@
         showArticle();
     })
 
+    const homeButton = document.querySelector('microend-home');
+    homeButton.addEventListener('launcherselectionvisible', ({detail: visible}) => {
+        const main = document.getElementsByTagName('main').item(0);
+        main.style.display = visible ? 'none' : 'flex';
+    })
+    homeButton.addEventListener('reload', () => {
+        window.location.reload();
+    })
 </script>
 </html>

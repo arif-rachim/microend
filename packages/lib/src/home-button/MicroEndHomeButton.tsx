@@ -2,10 +2,14 @@ import {getAllModules, getAppContext, saveAppContext} from "../dataStore";
 import {AppContext} from "../Types";
 
 const BOX_SHADOW = '0 8px 5px -3px rgba(0,0,0,0.5)';
+/**
+ * This element trigger event
+ * <code>launcherselectionvisible</code> and <code>reload</code>
+ */
 export class MicroEndHomeButton extends HTMLElement {
     timeOnMouseDown = 0;
     appContext: AppContext = {
-        homeModule: '',
+        homeModule: 'launcher',
         id: ''
     }
     isDragged = false;
@@ -119,7 +123,7 @@ export class MicroEndHomeButton extends HTMLElement {
             // we need to attach the element
             const div = document.createElement('div');
             div.setAttribute('data-drag-layer','true');
-            div.style.width = window.innerWidth - 15 +'px';
+            div.style.width = window.innerWidth - 20 +'px';
             div.style.height = window.innerHeight+'px';
             div.style.background = 'rgba(0,0,0,0)';
             div.style.position = 'absolute';
@@ -190,9 +194,17 @@ export class MicroEndHomeButton extends HTMLElement {
                 await saveAppContext({homeModule: name});
                 const el = document.querySelector('[data-home-selection="true"]')!;
                 el.remove();
-                window.location.reload();
+                this.onLauncherSelectionVisible(false);
+                this.onReload();
             })
-        })
+        });
+        this.onLauncherSelectionVisible(true);
+    }
+    onLauncherSelectionVisible = (param:boolean) => {
+        this.dispatchEvent(new CustomEvent('launcherselectionvisible',{detail:param}));
+    }
+    onReload = () => {
+        this.dispatchEvent(new CustomEvent('reload'));
     }
 }
 

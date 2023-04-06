@@ -57,8 +57,8 @@ async function createRegistry(folderOrFiles, parentDir) {
             const moduleInfo:ContentInfo = parseContentInfo(moduleContent);
             const iconPath = fileOrFolderPath + '.icon.txt';
             await fs.writeFile(iconPath, moduleInfo.iconDataURI, {encoding: 'utf-8'});
-            const sourcePathURL = fileOrFolderPath.split(path.sep).filter((_, i) => i > 7).join('/');
-            const iconPathURL = iconPath.split(path.sep).filter((_, i) => i > 7).join('/');
+            const sourcePathURL = fileOrFolderPath.split(path.sep).filter((_, i,array) => i >= array.indexOf('stores')).join('/');
+            const iconPathURL = iconPath.split(path.sep).filter((_, i,array) => i >= array.indexOf('stores')).join('/');
             const contentInfoWithSource:ContentInfoWithSource = {
                 ...moduleInfo,
                 source : sourcePathURL,

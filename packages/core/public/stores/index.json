@@ -9,7 +9,7 @@
         "title": "File Manager",
         "path": "file-manager",
         "version": "1.0.0",
-        "size": 337879,
+        "size": 337898,
         "source": "stores/file-manager/1.0.0.html"
     },
     {
@@ -22,7 +22,7 @@
         "title": "IAM",
         "path": "iam",
         "version": "1.0.0",
-        "size": 353802,
+        "size": 353817,
         "source": "stores/iam/1.0.0.html"
     },
     {
@@ -37,7 +37,7 @@
         "title": "Launcher",
         "path": "launcher",
         "version": "1.0.0",
-        "size": 248577,
+        "size": 248611,
         "source": "stores/launcher/1.0.0.html"
     },
     {
@@ -50,7 +50,7 @@
         "title": "Microend",
         "path": "microend-docs",
         "version": "1.0.0",
-        "size": 816296,
+        "size": 816300,
         "source": "stores/microend-docs/1.0.0.html"
     },
     {
@@ -65,7 +65,7 @@
         "title": "Store",
         "path": "store",
         "version": "1.0.0",
-        "size": 273707,
+        "size": 273761,
         "source": "stores/store/1.0.0.html"
     }
 ]

@@ -277,7 +277,11 @@ ${modulesToBeUpgrade.length > 0 ? (() => {
 <div>Module(s) were succesfully installed</div>
 ${errors.map(error => error).join('')}
 </div>`, 'Ok');
-        window.location.reload();
+        if(window.top){
+            window.top.postMessage({intent:'reload'});
+        }else{
+            window.location.reload();
+        }
     }
 }
 

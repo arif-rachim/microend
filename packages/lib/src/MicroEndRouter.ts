@@ -1,6 +1,7 @@
 import {CallerIdOrigin, Context, MessageData, MicroEnd, NavigateToType, RoutingRegistry, StringKeyValue} from "./Types";
 import {getAllModules, getModuleSource} from "./dataStore";
 import {satisfies} from "compare-versions";
+import {nanoid} from "nanoid";
 
 export const DATABASE_NAME = 'routing-registry';
 export type Table = 'module' | 'module-source' | 'app-context';
@@ -9,25 +10,6 @@ export type Table = 'module' | 'module-source' | 'app-context';
 // const useDocumentWrite = true;
 
 const CALLER_ID_KEY = 'callerId';
-
-const animationStyle = `<style>
-iframe[data-focused="true"]{
-    animation-name: animateFocus;
-    animation-duration: 300ms;
-}
-iframe[data-focused="false"]{
-    animation-name: animateBlur;
-    animation-duration: 300ms;
-}
-@keyframes animateFocus {
-    from {scale: 0.98; opacity: 0}
-    to {scale: 1;opacity: 1}
-}
-@keyframes animateBlur {
-    from {scale: 1;opacity: 1}
-    to {scale: 0.98; opacity: 0}
-}
-</style>`;
 
 /**
  * Attribute
@@ -45,33 +27,27 @@ export class MicroEndRouter extends HTMLElement {
 
     suppressRenderBasedOnHash: boolean;
 
+    placeholder: HTMLElement;
+
     constructor() {
         super();
         this.routingRegistry = {};
         this.callerIdOrigin = {};
         this.currentActiveFrame = null;
-        this.style.height = '100%';
+        this.style.height = '100vh';
         this.style.display = 'flex';
         this.style.flexDirection = 'column';
         this.style.boxSizing = 'border-box';
+        //this.style.position = 'relative';
         this.suppressRenderBasedOnHash = false;
         this.debugMode = this.getAttribute('debug') === 'true';
-        this.attachShadow({mode: "open"});
-        if (this.shadowRoot) {
-            const style: any = {
-                height: '100%',
-                'box-sizing': 'border-box',
-                display: 'flex',
-                'flex-direction': 'column',
-                position: 'relative'
-            }
-            const styleString = Object.keys(style).map(key => `${key}:${style[key]}`).join(';');
-            this.shadowRoot.innerHTML = '<div id="container" style="' + styleString + '"></div>'+animationStyle;
-        }
-
+        const placeholder = document.createElement('div');
+        placeholder.innerText = 'Loading ...';
+        this.append(placeholder);
+        this.placeholder = placeholder;
     }
 
-    log = (...messages: string[]) => {
+    log = (...messages: any[]) => {
         if (this.debugMode) {
             console.log('[MicroEndRouter]', ...messages);
         }
@@ -93,7 +69,7 @@ export class MicroEndRouter extends HTMLElement {
         if (pathSegments.length === 0) {
             return;
         }
-        const {route, moduleSourceId, dependencies: dependency} = this.findMostMatchingRoute(pathSegments);
+        const {route, moduleSourceId, dependencies: dependency} = await this.findMostMatchingRoute(pathSegments);
         if (moduleSourceId === '' || moduleSourceId === undefined) {
             this.log('Rendering ', pathAndQuery, type);
             this.log('were not successful in locating the appropriate module or its version. Please check the module dependencies as well its name');
@@ -107,11 +83,8 @@ export class MicroEndRouter extends HTMLElement {
             result[path] = version;
             return result;
         }, {});
-        if (this.shadowRoot === null) {
-            console.error('[MicroEndRouter]', 'ShadowRoot is null we cant renderPackageList this');
-            return;
-        }
         const moduleSource = await getModuleSource(moduleSourceId);
+        this.log('moduleSource :', moduleSource);
         this.renderSourceHtml({route, type, caller, params, dependencies, srcdoc: moduleSource.srcdoc});
     }
 
@@ -119,56 +92,62 @@ export class MicroEndRouter extends HTMLElement {
         const {srcdoc, dependencies, caller, type, params, route} = props;
         let nextFrame: HTMLIFrameElement | null = this.getFrame({route, type, caller});
         if (nextFrame === null) {
+            const id = nanoid();
             nextFrame = document.createElement('iframe');
+            nextFrame.setAttribute('id', id);
             nextFrame.setAttribute('data-route', route);
             nextFrame.setAttribute('data-type', type);
             nextFrame.setAttribute('data-caller', caller);
-            nextFrame.setAttribute('data-focused','true');
+            nextFrame.setAttribute('data-focused', 'true');
             nextFrame.style.display = type === 'service' ? 'none' : 'flex';
             nextFrame.style.border = 'none';
             nextFrame.style.flexDirection = 'column';
-            nextFrame.style.height = '100%';
-            nextFrame.style.width = '100%';
+            nextFrame.style.width = '100vw';
+            nextFrame.style.height = '100vh'
+            nextFrame.style.top = '0';
+            nextFrame.style.left = '0';
             nextFrame.style.backgroundColor = '#FFF';
-            if (!this.debugMode) {
-                nextFrame.style.position = 'absolute';
-            }
-
+            nextFrame.style.position = 'fixed';
             nextFrame.style.zIndex = '0';
+            this.style.height = '100vh';
+            window.scrollTo({top: 0, behavior: 'auto'});
             const contextScript = createContext({
                 params,
                 isFocused: true,
                 dependencies,
                 route,
                 caller,
-                type
+                type,
+                id
             });
             let headIndex = srcdoc.indexOf('<head>');
             if (headIndex > 0) {
                 headIndex = headIndex + '<head>'.length
             }
-
             const sourceHtml = headIndex > 0 ? srcdoc.substring(0, headIndex) + contextScript + srcdoc.substring(headIndex + 1, srcdoc.length) : contextScript + srcdoc;
-
-            const container = this.getContainer();
-            if (container) {
-                if (!this.debugMode) {
-                    nextFrame.srcdoc = sourceHtml;
-                }
-                container.append(nextFrame);
-                if (this.debugMode && nextFrame.contentWindow) {
-                    const doc = nextFrame.contentWindow.document;
-                    doc.open();
-                    doc.write(sourceHtml);
-                    doc.close();
-                }
+            if (!this.debugMode) {
+                nextFrame.srcdoc = sourceHtml;
+            }
+            this.append(nextFrame);
+            if (this.debugMode && nextFrame.contentWindow) {
+                const doc = nextFrame.contentWindow.document;
+                doc.open();
+                doc.write(sourceHtml);
+                doc.close();
             }
         } else if (nextFrame.contentWindow !== null) {
             nextFrame.setAttribute('data-route', route);
             nextFrame.setAttribute('data-type', type);
             nextFrame.setAttribute('data-caller', caller);
-            nextFrame.setAttribute('data-focused','true');
+            nextFrame.setAttribute('data-focused', 'true');
             nextFrame.style.zIndex = '0';
+            const frameId = nextFrame.getAttribute('id')!;
+            const frameHeight = this.frameContentHeight.get(frameId)!;
+            const scrollY = this.scrollPosition.get(frameId)!;
+            const newHeight = (frameHeight < window.innerHeight ? window.innerHeight : frameHeight) + 'px';
+            this.style.height = newHeight;
+            this.placeholder.style.height = newHeight;
+            window.scrollTo({top: scrollY, behavior: 'auto'})
             nextFrame.contentWindow.postMessage({intent: 'paramschange', params, route, type, caller}, '*');
             nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
         }
@@ -180,30 +159,18 @@ export class MicroEndRouter extends HTMLElement {
         const previousFrameAndNextIsNotSame = previousFrame !== nextFrame;
         if (previousFrame && previousFrame.contentWindow && previousFrameAndNextIsNotSame) {
             // we cant do this, this is dangerous if we make it empty
-            previousFrame.setAttribute('data-focused','false');
+            previousFrame.setAttribute('data-focused', 'false');
             previousFrame.style.zIndex = '-1';
-
             previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
         }
         this.currentActiveFrame = nextFrame;
     }
 
-    getContainer = (): HTMLElement | null => {
-        if (this.shadowRoot) {
-            return this.shadowRoot.getElementById('container')
-        }
-        return null;
-    }
-
     getFrame = (props: { route: string, type: NavigateToType, caller: string }): HTMLIFrameElement | null => {
-        const container = this.getContainer()
-        if (container) {
-            if (props.type === 'default') {
-                return container.querySelector(`[data-route="${props.route}"][data-type="${props.type}"]`);
-            }
-            return container.querySelector(`[data-route="${props.route}"][data-type="${props.type}"][data-caller="${props.caller}"]`)
+        if (props.type === 'default') {
+            return document.querySelector(`[data-route="${props.route}"][data-type="${props.type}"]`);
         }
-        return null;
+        return document.querySelector(`[data-route="${props.route}"][data-type="${props.type}"][data-caller="${props.caller}"]`)
     }
 
     extractParamsFromPath = (route: string, pathSegments: string[]) => {
@@ -216,7 +183,11 @@ export class MicroEndRouter extends HTMLElement {
         return params;
     }
 
-    findMostMatchingRoute = (pathSegments: string[]) => {
+    findMostMatchingRoute = async (pathSegments: string[], retry: boolean = true): Promise<{
+        route: string,
+        moduleSourceId: string,
+        dependencies: string[]
+    }> => {
         const [path, version] = pathSegments;
         const mostMatchingPath = Object.keys(this.routingRegistry).find(key => {
             const [routingPath, routingVersion] = key.split('/').filter(s => s);
@@ -226,6 +197,10 @@ export class MicroEndRouter extends HTMLElement {
             return routingPath === path && satisfies(routingVersion, version);
         });
         if (!mostMatchingPath) {
+            if (retry) {
+                await this.refreshRegistry();
+                return this.findMostMatchingRoute(pathSegments, false);
+            }
             throw new Error(`No available modules supporting ${path}/${version}`);
         }
         const routingRegistry = this.routingRegistry[mostMatchingPath] || {moduleSourceId: '', dependencies: []};
@@ -254,18 +229,22 @@ export class MicroEndRouter extends HTMLElement {
     };
 
     onMessage = (event: MessageEvent<MessageData>) => {
+
         if (event.data.intent === 'navigateTo') {
+            this.log('incoming message', event.data);
             const params = event.data.params;
 
             const originRoute = event.data.originRoute;
             const originCaller = event.data.originCaller;
             const originType = event.data.originType;
-
+            this.log('Finding frame ', {route: originRoute, caller: originCaller, type: originType});
             const originalFrame = this.getFrame({route: originRoute, caller: originCaller, type: originType});
             if (originalFrame === null) {
+                this.log('WE COULD NOT GET THE FRAME !!! this is wrong !!');
                 console.warn('WE COULD NOT GET THE FRAME !!! this is wrong !!');
                 return;
             }
+            this.log('Frame Found');
             const type = event.data.type;
             const callerId = event.data.caller;
             const queryString = Object.keys(params).reduce((result: string[], key) => {
@@ -277,12 +256,15 @@ export class MicroEndRouter extends HTMLElement {
             const pathAndQuery = path + (path.indexOf('?') >= 0 ? '&' : '?') + queryString;
             if (type === 'default') {
                 const pathQueryAndCallerId = pathAndQuery + (pathAndQuery.indexOf('?') > 0 ? '&' : '?') + `${CALLER_ID_KEY}=${callerId}`;
+                this.log(`event type is "${type}" so we are navigating using window.location.hash`, pathQueryAndCallerId);
                 window.location.hash = pathQueryAndCallerId;
             } else if (type === 'modal' || type === 'service') {
+                this.log(`event type is "${type}" so we are calling render directly`, pathAndQuery);
                 this.render(pathAndQuery, type, callerId);
             }
         }
         if (event.data.intent === 'navigateBack') {
+            this.log('incoming message', event.data);
             const {caller, type, route} = event.data;
 
             const nextFrame = this.callerIdOrigin[caller];
@@ -300,6 +282,13 @@ export class MicroEndRouter extends HTMLElement {
             }
             if (nextFrame.contentWindow !== null) {
                 nextFrame.style.zIndex = '0';
+                const frameId = nextFrame.getAttribute('id')!;
+                const frameHeight = this.frameContentHeight.get(frameId)!;
+                const scrollY = this.scrollPosition.get(frameId)!;
+                const newHeight = (frameHeight < window.innerHeight ? window.innerHeight : frameHeight) + 'px';
+                this.style.height = newHeight;
+                this.placeholder.style.height = newHeight;
+                window.scrollTo({top: scrollY, behavior: 'auto'})
                 nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
             }
             const previousFrame = this.getFrame({route, type, caller});
@@ -318,19 +307,40 @@ export class MicroEndRouter extends HTMLElement {
                 window.history.back();
             }
         }
+        if (event.data.intent === 'frameDimensionChange') {
+            const frameHeight = event.data.height;
+            this.frameContentHeight.set(event.data.iframeId, frameHeight);
+            const newHeight = (frameHeight < window.innerHeight ? window.innerHeight : frameHeight) + 'px';
+            this.style.height = newHeight;
+            this.placeholder.style.height = newHeight;
+        }
+        if (event.data.intent === 'frameScrollChange') {
+            const scrollY = event.data.scrollY;
+            this.scrollPosition.set(event.data.iframeId, scrollY);
+            window.scrollTo({top: scrollY, behavior: 'auto'});
+        }
+        if (event.data.intent === 'reload') {
+            debugger;
+            window.location.reload();
+        }
     }
+    scrollPosition: Map<string, number> = new Map<string, number>();
+    frameContentHeight: Map<string, number> = new Map<string, number>();
 
     connectedCallback(): void {
         this.log('connected');
         window.addEventListener('hashchange', this.renderBasedOnHash);
         window.addEventListener('message', this.onMessage);
-        (async () => {
-            const modules = await getAllModules();
-            modules.filter(m => m.active && !m.deleted).forEach(d => {
-                this.routingRegistry[`/${d.path}/${d.version}`] = d;
-            });
+        this.refreshRegistry().then(() => {
             this.renderBasedOnHash();
-        })();
+        });
+    }
+
+    async refreshRegistry(): Promise<void> {
+        const modules = await getAllModules();
+        modules.filter(m => m.active && !m.deleted).sort((a, b) => a.version.localeCompare(b.version)).forEach(d => {
+            this.routingRegistry[`/${d.path}/${d.version}`] = d;
+        });
     }
 
     disconnectedCallback(): void {
@@ -349,6 +359,7 @@ function createContext(context: Context): string {
 
 const message = (message: string) => `${message} was called from within the mock object; in order to test this correctly, please mount this page in the MicroEnd WebApp.`
 const mockObject: MicroEnd = {
+    id: 'anonymous',
     caller: 'anonymous',
     type: "service",
     route: 'unknown',
@@ -422,6 +433,18 @@ const clientTemplate = `
         console.log('[' + me.route + ']', ...args);
     }
 
+    const resize = new ResizeObserver((entries) => {
+        const entry = entries.pop();
+        const height = entry.target.getBoundingClientRect().height;
+        window.top.postMessage({intent: 'frameDimensionChange',height,iframeId:me.id});
+    });
+    
+    window.addEventListener('load',() => {
+        resize.observe(document.body);
+    });
+    window.addEventListener('scroll',() => {
+        window.top.postMessage({intent: 'frameScrollChange',scrollY:window.scrollY,iframeId:me.id});
+    })
     /**
      * @param event:MessageEvent
      */

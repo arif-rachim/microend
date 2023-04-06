@@ -13,6 +13,11 @@
         console.log('[' + me.route + ']', ...args);
     }
 
+    const resize = new ResizeObserver((entries) => {
+        const entry = entries.pop();
+        debugger;
+    })
+    resize.observe(document.body);
     /**
      * @param event:MessageEvent
      */
