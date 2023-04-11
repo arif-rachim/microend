@@ -27,8 +27,6 @@ export class MicroEndRouter extends HTMLElement {
 
     suppressRenderBasedOnHash: boolean;
 
-    placeholder: HTMLElement;
-
     constructor() {
         super();
         this.routingRegistry = {};
@@ -41,10 +39,6 @@ export class MicroEndRouter extends HTMLElement {
         //this.style.position = 'relative';
         this.suppressRenderBasedOnHash = false;
         this.debugMode = this.getAttribute('debug') === 'true';
-        const placeholder = document.createElement('div');
-        placeholder.innerText = 'Loading ...';
-        this.append(placeholder);
-        this.placeholder = placeholder;
     }
 
     log = (...messages: any[]) => {
@@ -109,7 +103,7 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.style.backgroundColor = '#FFF';
             nextFrame.style.position = 'fixed';
             nextFrame.style.zIndex = '0';
-            this.style.height = '100vh';
+
             window.scrollTo({top: 0, behavior: 'auto'});
             const contextScript = createContext({
                 params,
@@ -141,13 +135,6 @@ export class MicroEndRouter extends HTMLElement {
             nextFrame.setAttribute('data-caller', caller);
             nextFrame.setAttribute('data-focused', 'true');
             nextFrame.style.zIndex = '0';
-            const frameId = nextFrame.getAttribute('id')!;
-            const frameHeight = this.frameContentHeight.get(frameId)!;
-            const scrollY = this.scrollPosition.get(frameId)!;
-            const newHeight = (frameHeight < window.innerHeight ? window.innerHeight : frameHeight) + 'px';
-            this.style.height = newHeight;
-            this.placeholder.style.height = newHeight;
-            window.scrollTo({top: scrollY, behavior: 'auto'})
             nextFrame.contentWindow.postMessage({intent: 'paramschange', params, route, type, caller}, '*');
             nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
         }
@@ -282,13 +269,6 @@ export class MicroEndRouter extends HTMLElement {
             }
             if (nextFrame.contentWindow !== null) {
                 nextFrame.style.zIndex = '0';
-                const frameId = nextFrame.getAttribute('id')!;
-                const frameHeight = this.frameContentHeight.get(frameId)!;
-                const scrollY = this.scrollPosition.get(frameId)!;
-                const newHeight = (frameHeight < window.innerHeight ? window.innerHeight : frameHeight) + 'px';
-                this.style.height = newHeight;
-                this.placeholder.style.height = newHeight;
-                window.scrollTo({top: scrollY, behavior: 'auto'})
                 nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
             }
             const previousFrame = this.getFrame({route, type, caller});
@@ -307,25 +287,11 @@ export class MicroEndRouter extends HTMLElement {
                 window.history.back();
             }
         }
-        if (event.data.intent === 'frameDimensionChange') {
-            const frameHeight = event.data.height;
-            this.frameContentHeight.set(event.data.iframeId, frameHeight);
-            const newHeight = (frameHeight < window.innerHeight ? window.innerHeight : frameHeight) + 'px';
-            this.style.height = newHeight;
-            this.placeholder.style.height = newHeight;
-        }
-        if (event.data.intent === 'frameScrollChange') {
-            const scrollY = event.data.scrollY;
-            this.scrollPosition.set(event.data.iframeId, scrollY);
-            window.scrollTo({top: scrollY, behavior: 'auto'});
-        }
         if (event.data.intent === 'reload') {
-            debugger;
             window.location.reload();
         }
     }
-    scrollPosition: Map<string, number> = new Map<string, number>();
-    frameContentHeight: Map<string, number> = new Map<string, number>();
+
 
     connectedCallback(): void {
         this.log('connected');
@@ -433,18 +399,6 @@ const clientTemplate = `
         console.log('[' + me.route + ']', ...args);
     }
 
-    const resize = new ResizeObserver((entries) => {
-        const entry = entries.pop();
-        const height = entry.target.getBoundingClientRect().height;
-        window.top.postMessage({intent: 'frameDimensionChange',height,iframeId:me.id});
-    });
-    
-    window.addEventListener('load',() => {
-        resize.observe(document.body);
-    });
-    window.addEventListener('scroll',() => {
-        window.top.postMessage({intent: 'frameScrollChange',scrollY:window.scrollY,iframeId:me.id});
-    })
     /**
      * @param event:MessageEvent
      */

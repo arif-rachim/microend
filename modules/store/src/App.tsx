@@ -7,8 +7,9 @@ import {ModuleDetailPanel} from "./ModuleDetailPanel";
 import {ServerModuleDetailPanel} from "./ServerModuleDetailPanel";
 import {compareVersions, satisfies} from "compare-versions";
 
-const BASE_URL = 'http://localhost:5173';
+//const BASE_URL = 'http://localhost:5173';
 //const BASE_URL = 'https://microend.org';
+const BASE_URL = "http://192.168.1.144:5173"
 
 export interface ServerModule extends ContentInfo {
     source: string;
@@ -246,35 +247,37 @@ export function App() {
                                         installedModules = installedModules.filter(m => m.title.toLowerCase().indexOf(searchQuery.toLowerCase()) >= 0)
                                         return <div style={{display: 'flex', flexDirection: 'row'}}>
                                             <AnimatePresence>
-                                            {installedModules.map(installedModule => {
-                                                return <motion.div key={installedModule.name}
-                                                                   style={{
-                                                                       display: 'flex',
-                                                                       flexDirection: 'column',
-                                                                       margin: 5
-                                                                   }}
-                                                                   initial={{scale: 0}} animate={{scale: 1}}
-                                                                   exit={{scale:0}}
-                                                                   layout={'position'}
-                                                                   whileHover={{scale: 1.05}}
-                                                                   whileTap={{scale: 0.9}} onClick={async () => {
-                                                    await showPanel(closePanel => {
-                                                        return <ModuleDetailPanel module={installedModule}
-                                                                                  closePanel={closePanel}/>
-                                                    })
-                                                }}>
-                                                    <div style={{
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center'
+                                                {installedModules.map(installedModule => {
+                                                    return <motion.div key={installedModule.name}
+                                                                       style={{
+                                                                           display: 'flex',
+                                                                           flexDirection: 'column',
+                                                                           margin: 5
+                                                                       }}
+                                                                       initial={{scale: 0}} animate={{scale: 1}}
+                                                                       exit={{scale: 0}}
+                                                                       layout={'position'}
+                                                                       whileHover={{scale: 1.05}}
+                                                                       whileTap={{scale: 0.9}} onClick={async () => {
+                                                        await showPanel(closePanel => {
+                                                            return <ModuleDetailPanel module={installedModule}
+                                                                                      closePanel={closePanel}/>
+                                                        })
                                                     }}>
-                                                        <img alt={installedModule.title}
-                                                             src={installedModule.iconDataURI} width={32} height={32}/>
-                                                    </div>
-                                                    <label style={{textAlign: 'center'}}>{installedModule.title}</label>
-                                                </motion.div>
-                                            })}
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}>
+                                                            <img alt={installedModule.title}
+                                                                 src={installedModule.iconDataURI} width={32}
+                                                                 height={32}/>
+                                                        </div>
+                                                        <label
+                                                            style={{textAlign: 'center'}}>{installedModule.title}</label>
+                                                    </motion.div>
+                                                })}
                                             </AnimatePresence>
                                         </div>
                                     }}/>
@@ -291,30 +294,30 @@ export function App() {
                                         serverModules = serverModules.filter(m => m.title.toLowerCase().indexOf(searchQuery.toLowerCase()) >= 0)
                                         return <div style={{display: 'flex', flexDirection: 'row'}}>
                                             <AnimatePresence>
-                                            {serverModules.map(serverModule => {
-                                                return <motion.div key={serverModule.name}
-                                                                   style={{
-                                                                       display: 'flex',
-                                                                       flexDirection: 'column',
-                                                                       margin: 5
-                                                                   }}
-                                                                   layout={'position'}
-                                                                   initial={{scale: 0}} animate={{scale: 1}}
-                                                                   exit={{scale:0}}
-                                                                   whileHover={{scale: 1.05}}
-                                                                   whileTap={{scale: 0.9}} onClick={async () => {
-                                                    await showPanel(closePanel => {
-                                                        return <ServerModuleDetailPanel module={serverModule}
-                                                                                        closePanel={closePanel}
-                                                                                        onInstall={() => onInstall(serverModule, $serverModules.get())}
-                                                                                        onDownload={() => onDownload(serverModule, $serverModules.get())}
-                                                        />
-                                                    })
-                                                }}>
-                                                    <ServerModuleIcon serverModule={serverModule}
-                                                                      $installedModules={$installedModules}/>
-                                                </motion.div>
-                                            })}
+                                                {serverModules.map(serverModule => {
+                                                    return <motion.div key={serverModule.name}
+                                                                       style={{
+                                                                           display: 'flex',
+                                                                           flexDirection: 'column',
+                                                                           margin: 5
+                                                                       }}
+                                                                       layout={'position'}
+                                                                       initial={{scale: 0}} animate={{scale: 1}}
+                                                                       exit={{scale: 0}}
+                                                                       whileHover={{scale: 1.05}}
+                                                                       whileTap={{scale: 0.9}} onClick={async () => {
+                                                        await showPanel(closePanel => {
+                                                            return <ServerModuleDetailPanel module={serverModule}
+                                                                                            closePanel={closePanel}
+                                                                                            onInstall={() => onInstall(serverModule, $serverModules.get())}
+                                                                                            onDownload={() => onDownload(serverModule, $serverModules.get())}
+                                                            />
+                                                        })
+                                                    }}>
+                                                        <ServerModuleIcon serverModule={serverModule}
+                                                                          $installedModules={$installedModules}/>
+                                                    </motion.div>
+                                                })}
                                             </AnimatePresence>
                                         </div>
                                     }}/>
