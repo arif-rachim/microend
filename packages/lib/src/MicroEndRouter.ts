@@ -32,7 +32,6 @@ export class MicroEndRouter extends HTMLElement {
         this.routingRegistry = {};
         this.callerIdOrigin = {};
         this.currentActiveFrame = null;
-        this.style.height = '100vh';
         this.style.display = 'flex';
         this.style.flexDirection = 'column';
         this.style.boxSizing = 'border-box';
@@ -268,12 +267,14 @@ export class MicroEndRouter extends HTMLElement {
                 return;
             }
             if (nextFrame.contentWindow !== null) {
+                nextFrame.setAttribute('data-focused', 'true');
                 nextFrame.style.zIndex = '0';
                 nextFrame.contentWindow.postMessage({intent: 'focuschange', value: true}, '*');
             }
             const previousFrame = this.getFrame({route, type, caller});
             // THIS IS THE PREVIOUS DATA
             if (previousFrame && previousFrame.contentWindow) {
+                previousFrame.setAttribute('data-focused', 'false');
                 previousFrame.style.zIndex = '-1';
                 previousFrame.contentWindow.postMessage({intent: 'focuschange', value: false}, '*');
                 if (type === "modal") {

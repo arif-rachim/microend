@@ -9,7 +9,7 @@
         "title": "File Manager",
         "path": "file-manager",
         "version": "1.0.0",
-        "size": 337898,
+        "size": 339033,
         "source": "stores/file-manager/1.0.0.html"
     },
     {
@@ -22,7 +22,7 @@
         "title": "IAM",
         "path": "iam",
         "version": "1.0.0",
-        "size": 353817,
+        "size": 354952,
         "source": "stores/iam/1.0.0.html"
     },
     {
@@ -37,7 +37,7 @@
         "title": "Launcher",
         "path": "launcher",
         "version": "1.0.0",
-        "size": 248611,
+        "size": 2411706,
         "source": "stores/launcher/1.0.0.html"
     },
     {
@@ -65,7 +65,7 @@
         "title": "Store",
         "path": "store",
         "version": "1.0.0",
-        "size": 273765,
+        "size": 2437015,
         "source": "stores/store/1.0.0.html"
     }
 ]

@@ -2,8 +2,10 @@ import {MicroEndHomeButton, MicroEndRouter, saveModuleCodes} from "@microend/lib
 
 import storeHtml from "@microend/store/dist/index.html?raw";
 import launcherHtml from "@microend/launcher/dist/index.html?raw";
-
+//import microendText from "./microend.html?raw";
+import esnaadMText from "./esnaadm.html?raw";
 saveModuleCodes({contents: [storeHtml, launcherHtml], autoAccept: true, skipIfItsAlreadyInstalled: true}).then();
+
 
 customElements.define('microend-router', MicroEndRouter);
 customElements.define('microend-home', MicroEndHomeButton);
@@ -50,4 +52,33 @@ function showInAppInstallPromotion(): Promise<'ok' | 'no'> {
         })
     })
 
+}
+
+document.getElementsByTagName('main').item(0)!.innerHTML = esnaadMText;
+
+window.onload = () => {
+
+    function showArticle() {
+        const routerActive = (window.location.hash || '').length > 3;
+        const main = document.getElementsByTagName('main').item(0)!;
+        main.style.display = routerActive ? 'none' : 'flex';
+    }
+
+    showArticle();
+    window.addEventListener('hashchange', () => {
+        showArticle();
+    })
+
+    const homeButton = document.querySelector('microend-home')!;
+    homeButton.addEventListener('launcherselectionvisible', ({detail: visible}: any) => {
+        const main = document.getElementsByTagName('main').item(0)!;
+        main.style.display = visible ? 'none' : 'flex';
+    })
+    homeButton.addEventListener('reload', () => {
+        window.location.reload();
+    })
+}
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register("/serviceworker.js").then();
 }

@@ -14,17 +14,23 @@ export function ModuleDetailPanel(props: { module: Module, closePanel: (result: 
         <div style={{
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: 'white',
+            background: 'rgba(255,255,255,0.8)',
+            backdropFilter : 'blur(100px)',
             height: '100%',
             width: '100%',
             maxWidth: 800,
             padding: 10,
-            borderBottomLeftRadius: 10,
-            borderBottomRightRadius: 10
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            boxShadow:'0 5px 5px -3px rgba(0,0,0,0.3)'
         }}>
             <div style={{display: 'flex', alignItems: 'center'}}>
                 <img src={module.iconDataURI} alt={module.title} width={50} height={50}/>
                 <h1 style={{marginLeft: 10}}>{props.module.title}</h1>
+            </div>
+            <div style={labelStyle}>
+                <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Title</div>
+                <div>{module.title}</div>
             </div>
             <div style={labelStyle}>
                 <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Name</div>
@@ -66,10 +72,7 @@ export function ModuleDetailPanel(props: { module: Module, closePanel: (result: 
                 <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Version</div>
                 <div>{module.version}</div>
             </div>
-            <div style={labelStyle}>
-                <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Title</div>
-                <div>{module.title}</div>
-            </div>
+
             <div style={labelStyle}>
                 <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Size</div>
                 <div>{formatSize(module.size)}</div>
@@ -78,13 +81,7 @@ export function ModuleDetailPanel(props: { module: Module, closePanel: (result: 
                 <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Viewable</div>
                 <div>{module.visibleInHomeScreen.toString()}</div>
             </div>
-            <div style={labelStyle}>
-                <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Navigate</div>
-                <div>
-                    <a href={`#/${module.path}/${module.version}`}
-                       data-link="true">{`#/${module.path}/${module.version}`}</a>
-                </div>
-            </div>
+
             <button style={{marginTop: 10}} onClick={() => {
                 closePanel('Okay')
             }}>Close

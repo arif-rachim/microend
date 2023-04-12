@@ -18,13 +18,15 @@ export function ServerModuleDetailPanel(props: { module: ServerModule, closePane
         <div style={{
             display: 'flex',
             flexDirection: 'column',
-            backgroundColor: 'white',
+            background: 'rgba(255,255,255,0.8)',
+            backdropFilter : 'blur(100px)',
             height: '100%',
             width: '100%',
             maxWidth: 800,
             padding: 10,
-            borderBottomLeftRadius: 10,
-            borderBottomRightRadius: 10
+            boxShadow:'0px 5px 5px -3px rgba(0,0,0,0.5)',
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20
         }}>
             <div style={{display: 'flex', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.1)'}}>
                 <IconImage module={module} width={50} height={50}/>
@@ -116,7 +118,7 @@ export function ServerModuleDetailPanel(props: { module: ServerModule, closePane
                 <div style={{width: LABEL_WIDTH, flexShrink: 0}}>Viewable</div>
                 <div>{module.visibleInHomeScreen.toString()}</div>
             </div>
-            <button style={{marginTop: 10, borderRadius: 10, backgroundColor: '#f2f2f2'}} onClick={() => {
+            <button style={{marginTop: 10}} onClick={() => {
                 closePanel('Okay')
             }}>Close
             </button>

@@ -19,7 +19,7 @@
     "build:plugin": "npm run build -w @microend/vite-plugin-microend",
     "build:utils": "npm run build -w @microend/utils",
     "build:lib": "npm run build -w @microend/lib",
-    "build:core": "npm run build -w @microend/core",
+    "build:core": "npm run build:store-modules-bundler && npm run build -w @microend/core",
     "build:iam": "npm run build -w @microend/iam",
     "build:launcher": "npm run build -w @microend/launcher",
     "build:store": "npm run build -w @microend/store",
@@ -30,7 +30,7 @@
     "build:store-modules-bundler": "npm run start -w @microend/store-modules-bundler",
     "build:all-modules": "npm run build:plugin && npm run build:utils && npm run build:lib  && npm run build:iam && npm run build:launcher && npm run build:store && npm run build:file-manager && npm run build:microend-docs",
     "build:all-samples": "npm run build:module-two && npm run build:module-one",
-    "build": "npm run build:all-modules && npm run build:all-samples && npm run build:store-modules-bundler && npm run build:core"
+    "build": "npm run build:all-modules && npm run build:all-samples && npm run build:core"
   },
   "author": "a.arif.r@gmail.com",
   "license": "ISC",

@@ -6,10 +6,10 @@ import {useEffect, useState} from "react";
 import {ModuleDetailPanel} from "./ModuleDetailPanel";
 import {ServerModuleDetailPanel} from "./ServerModuleDetailPanel";
 import {compareVersions, satisfies} from "compare-versions";
-
+import background from "./background/background.jpg";
 //const BASE_URL = 'http://localhost:5173';
 //const BASE_URL = 'https://microend.org';
-const BASE_URL = "http://192.168.1.144:5173"
+const BASE_URL = "http://localhost:5173"
 
 export interface ServerModule extends ContentInfo {
     source: string;
@@ -136,8 +136,9 @@ function ServerModuleIcon(props: { serverModule: ServerModule, $installedModules
             justifyContent: 'center',
             position: 'relative',
             border: '1px solid rgba(0,0,0,0.1)',
-            borderRadius: 5,
-            width: 40, height: 40, backgroundColor: '#fafafa'
+            borderRadius: 10,
+            width: 40, height: 40,
+            backgroundColor: 'rgba(255,255,255,0.5)'
         }}>
             <IconImage module={serverModule} width={32} height={32}/>
             {isInstalled &&
@@ -195,9 +196,9 @@ export function App() {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        alignItems: 'center',
-        backgroundColor: '#f2f2f2'
+        alignItems: 'center'
     }}>
+        <img src={background} style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',minWidth:800,zIndex:-1}}/>
         <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -205,11 +206,13 @@ export function App() {
             overflow: 'auto',
             width: '100%',
             maxWidth: 800,
-            backgroundColor: 'white'
+            padding : 20,
+            backdropFilter:'blur(100px)',
+            background:'rgba(255,255,255,0.1)',
         }}>
             <div
-                style={{display: 'flex', flexDirection: 'row', padding: 10, borderBottom: '1px solid rgba(0,0,0,0.1)'}}>
-                <input style={{width: '100%', borderRadius: 10, padding: '5px 10px'}} type={'search'}
+                style={{display: 'flex', flexDirection: 'row',marginBottom:20}}>
+                <input style={{width: '100%', borderRadius: 20, padding: '10px 15px'}} type={'search'}
                        placeholder={'Search Modules'} value={searchQuery} onChange={(e) => {
                     const value = e.target.value;
                     setSearchQuery(value)
@@ -221,7 +224,7 @@ export function App() {
                     justifyContent: 'center',
                     marginLeft: 10
                 }} whileHover={{scale: 1.03}} whileTap={{scale: 0.98}}>
-                    <IoAddCircleOutline style={{fontSize: 25, color: 'rgba(0,0,0,0.8)'}}/>
+                    <IoAddCircleOutline style={{fontSize: 38, color: 'rgba(255,255,255,0.9)',backgroundColor:'rgba(0,0,0,0.3)',borderRadius:20,boxShadow:'0 5px 5px -3px rgba(0,0,0,0.1)'}}/>
                     <input type={"file"} multiple accept={"text/html"} style={{display: 'none'}}
                            onChange={async (event) => {
                                const input = event.target as HTMLInputElement;
@@ -238,8 +241,7 @@ export function App() {
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                padding: 10,
-                borderBottom: '1px solid rgba(0,0,0,0.1)'
+                marginBottom:20
             }}>
                 <label style={{fontSize: 18, marginBottom: 10}}>Installed Modules</label>
                 <StoreValueRenderer store={$installedModules} selector={s => s}
@@ -252,7 +254,8 @@ export function App() {
                                                                        style={{
                                                                            display: 'flex',
                                                                            flexDirection: 'column',
-                                                                           margin: 5
+                                                                           margin: 5,
+                                                                           alignItems:'center'
                                                                        }}
                                                                        initial={{scale: 0}} animate={{scale: 1}}
                                                                        exit={{scale: 0}}
@@ -268,14 +271,17 @@ export function App() {
                                                             display: 'flex',
                                                             flexDirection: 'column',
                                                             alignItems: 'center',
-                                                            justifyContent: 'center'
+                                                            justifyContent: 'center',
+                                                            borderRadius: 10,
+                                                            width: 40, height: 40,
+                                                            backgroundColor: 'rgba(255,255,255,0.5)'
                                                         }}>
                                                             <img alt={installedModule.title}
                                                                  src={installedModule.iconDataURI} width={32}
                                                                  height={32}/>
                                                         </div>
                                                         <label
-                                                            style={{textAlign: 'center'}}>{installedModule.title}</label>
+                                                            style={{textAlign: 'center',fontSize:12}}>{installedModule.title}</label>
                                                     </motion.div>
                                                 })}
                                             </AnimatePresence>
@@ -284,9 +290,7 @@ export function App() {
             </div>
             <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                padding: 10,
-                borderBottom: '1px solid rgba(0,0,0,0.1)'
+                flexDirection: 'column'
             }}>
                 <label style={{fontSize: 18, marginBottom: 10}}>Modules</label>
                 <StoreValueRenderer store={$serverModules} selector={s => s}

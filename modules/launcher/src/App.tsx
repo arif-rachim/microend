@@ -1,7 +1,7 @@
 import {getAllModules, getMicroEnd, Module} from "@microend/lib";
 import {useEffect, useState} from "react";
 import {AnimatePresence, motion} from "framer-motion";
-
+import background from "./background/background.jpg";
 const me = getMicroEnd();
 
 export function App() {
@@ -14,8 +14,9 @@ export function App() {
         })();
     }, []);
     const [search,setSearch] = useState('');
-    return <div style={{display:'flex',flexDirection:'column',height:'100%',backgroundColor: '#f2f2f2',alignItems:'center'}}>
-        <div style={{display:'flex',flexDirection:'column',width:'100%',maxWidth:800,padding:10,borderBottom:'1px solid rgba(0,0,0,0.05)',backgroundColor:'#fafafa'}}>
+    return <div style={{display:'flex',flexDirection:'column',height:'100%',alignItems:'center'}}>
+        <img src={background} style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',minWidth:800,zIndex:-1}}/>
+        <div style={{display:'flex',flexDirection:'column',width:'100%',maxWidth:800,padding:20}}>
             <input style={{padding:'10px 15px',borderRadius:20}} placeholder={'Search Modules'} type={'search'} value={search} onChange={(event) => {
                 setSearch(event.target.value);
             }}/>
@@ -57,7 +58,7 @@ export function App() {
                         justifyContent: 'center',
                         borderRadius: 50,
                         overflow: 'hidden',
-                        backgroundColor:'#fafafa',
+                        background:'rgba(255,255,255,0.5)',
                         boxShadow: '0 5px 5px -3px rgba(0,0,0,0.1)'
                     }} onClick={() => {
                         me.navigateTo(m.path, {}, 'default').then();
