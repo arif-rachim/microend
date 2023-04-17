@@ -3,13 +3,8 @@ import {OutputAsset, OutputChunk, OutputOptions} from "rollup"
 import {load} from "cheerio";
 import {encodeFromFile} from "./image-data-uri";
 
-/**
- * <meta content="fault@0.0.3" name="module">
- *     <meta content="identity@0.0.2" name="dependency">
- *     <meta content="Fault management component" name="description">
- *     <meta content="a.arif.r@gmail.com" name="author">
- */
-export type Config = {
+
+export interface Config {
     title: string,
     name: string,
     version: string,
@@ -18,6 +13,20 @@ export type Config = {
     dependencies: { [k: string]: string },
     iconFile: string;
     visibleInHomeScreen: boolean;
+}
+
+export interface PwaConfig {
+    title: string,
+    description: string,
+    favIcon: string;
+    favIcon32: string;
+    favIcon16: string;
+    maskIcon: string;
+    socialLogo: string;
+    icon180: string;
+    icon192: string;
+    icon512: string;
+    origin: string;
 }
 
 
@@ -65,11 +74,75 @@ async function replaceMicroEndConfig(replacedHtml: string, config: Config) {
     return $.html();
 }
 
+async function prepareManifest(config: PwaConfig) {
+    const manifest = {
+        "name": config.title,
+        "short_name": config.title,
+        "start_url": config.origin,
+        "display": "fullscreen",
+        "background_color": "#f8f8f8",
+        "lang": "en",
+        "scope": "/",
+        "description": config.description,
+        "theme_color": "#f8f8f8",
+        "orientation": "portrait",
+        "icons": [
+            {
+                "src": await encodeFromFile(config.icon192),
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": await encodeFromFile(config.icon512),
+                "sizes": "512x512",
+                "type": "image/png"
+            },
+            {
+                "src": await encodeFromFile(config.icon512),
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }
+        ]
+    }
+
+    return JSON.stringify(manifest)
+}
+
+async function microEndPWA(replacedHtml: string, config: PwaConfig) {
+    const $ = load(replacedHtml);
+    const head = $('head');
+    $('link[rel="apple-touch-icon"]').remove();
+    $('link[type="image/x-icon"]').remove();
+    $('link[sizes="32x32"]').remove();
+    $('link[sizes="16x16"]').remove();
+    $('link[rel="mask-icon"]').remove();
+    $('meta[property="og:image"]').remove();
+
+    const appleTouchIcon = await encodeFromFile(config.icon180);
+    const favIcon = await encodeFromFile(config.favIcon)
+    const favIcon16 = await encodeFromFile(config.favIcon16)
+    const favIcon32 = await encodeFromFile(config.favIcon32);
+    const maskIcon = await encodeFromFile(config.maskIcon);
+    const socialImage = await encodeFromFile(config.socialLogo);
+    const manifest = new Buffer(await prepareManifest(config));
+    head.prepend(`
+        <link href="${appleTouchIcon}" rel="apple-touch-icon" sizes="180x180">
+        <link href="${favIcon}" rel="icon" type="image/x-icon">
+        <link href="${favIcon16}" rel="icon" sizes="16x16" type="image/png">
+        <link href="${favIcon32}" rel="icon" sizes="32x32" type="image/png">
+        <link href="${maskIcon}" rel="mask-icon" color="#5bbad5" >
+        <meta content="${socialImage}" property="og:image"/>
+        <link rel="manifest" href='data:application/manifest+json;base64,${manifest.toString('base64')}' />
+    `)
+    return $.html();
+}
+
 
 export function viteMicroEnd(config: Config): Plugin {
     const {removeViteModuleLoader, deleteInlinedFiles} = defaultConfig;
     return {
-        name: "vite:singlefile",
+        name: "vite:microend",
         config: _useRecommendedBuildConfig,
         enforce: "post",
         generateBundle: async (_, bundle) => {
@@ -95,6 +168,35 @@ export function viteMicroEnd(config: Config): Plugin {
                     replacedHtml = replaceCss(replacedHtml, cssChunk.fileName, cssChunk.source as string)
                 }
 
+                htmlChunk.source = replacedHtml
+            }
+            if (deleteInlinedFiles) {
+                for (const name of bundlesToDelete) {
+                    delete bundle[name]
+                }
+            }
+            for (const name of Object.keys(bundle).filter((i) => !jsExtensionTest.test(i) && !i.endsWith(".css") && !i.endsWith(".html"))) {
+                warnNotInlined(name)
+            }
+        }
+    }
+}
+
+export function viteMicroEndPWA(config: PwaConfig): Plugin {
+    const {removeViteModuleLoader, deleteInlinedFiles} = defaultConfig;
+
+    return {
+        name: "vite:microend-pwa",
+        config: _useRecommendedBuildConfig,
+        enforce: "post",
+        generateBundle: async (_, bundle) => {
+            const jsExtensionTest = /\.[mc]?js$/
+            const htmlFiles = Object.keys(bundle).filter((i) => i.endsWith(".html"))
+            const bundlesToDelete = [] as string[]
+            for (const name of htmlFiles) {
+                const htmlChunk = bundle[name] as OutputAsset
+                let replacedHtml = htmlChunk.source as string
+                replacedHtml = await microEndPWA(replacedHtml, config);
                 htmlChunk.source = replacedHtml
             }
             if (deleteInlinedFiles) {
