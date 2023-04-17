@@ -4,6 +4,7 @@
   "description": "",
   "main": "packages/desktop/src/index.js",
   "scripts": {
+    "clean:desktop" : "rimraf out",
     "clean:plugin": "npm run clean -w @microend/vite-plugin-microend",
     "clean:utils": "npm run clean -w @microend/utils",
     "clean:lib": "npm run clean -w @microend/lib",
@@ -15,7 +16,7 @@
     "clean:microend-docs": "npm run clean -w @microend/microend-docs",
     "clean:module-one": "npm run clean -w module-one",
     "clean:module-two": "npm run clean -w module-two",
-    "clean": "npm run clean:plugin && npm run clean:utils && npm run clean:lib && npm run clean:iam && npm run clean:launcher && npm run clean:store && npm run clean:core && npm run clean:module-one && npm run clean:module-two && npm run clean:file-manager && npm run clean:microend-docs",
+    "clean": "npm run clean:desktop && npm run clean:plugin && npm run clean:utils && npm run clean:lib && npm run clean:iam && npm run clean:launcher && npm run clean:store && npm run clean:core && npm run clean:module-one && npm run clean:module-two && npm run clean:file-manager && npm run clean:microend-docs",
     "build:plugin": "npm run build -w @microend/vite-plugin-microend",
     "build:utils": "npm run build -w @microend/utils",
     "build:lib": "npm run build -w @microend/lib",
