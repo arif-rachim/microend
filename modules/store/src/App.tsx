@@ -7,9 +7,9 @@ import {ModuleDetailPanel} from "./ModuleDetailPanel";
 import {ServerModuleDetailPanel} from "./ServerModuleDetailPanel";
 import {compareVersions, satisfies} from "compare-versions";
 import background from "./background/background.jpg";
-//const BASE_URL = 'http://localhost:5173';
+const BASE_URL = 'http://localhost:5173';
 //const BASE_URL = 'https://microend.org';
-const BASE_URL = ""
+//const BASE_URL = ""
 
 export interface ServerModule extends ContentInfo {
     source: string;
