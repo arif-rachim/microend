@@ -27,6 +27,8 @@ export class MicroEndRouter extends HTMLElement {
 
     suppressRenderBasedOnHash: boolean;
 
+    origin: string;
+
     constructor() {
         super();
         this.routingRegistry = {};
@@ -38,6 +40,7 @@ export class MicroEndRouter extends HTMLElement {
         //this.style.position = 'relative';
         this.suppressRenderBasedOnHash = false;
         this.debugMode = this.getAttribute('debug') === 'true';
+        this.origin = this.getAttribute('origin') ?? '';
     }
 
     log = (...messages: any[]) => {
@@ -83,6 +86,7 @@ export class MicroEndRouter extends HTMLElement {
 
     renderSourceHtml = (props: { route: string, type: "default" | "modal" | "service", caller: string, params: { [p: string]: string }, dependencies: StringKeyValue, srcdoc: string }) => {
         const {srcdoc, dependencies, caller, type, params, route} = props;
+        const origin = this.origin;
         let nextFrame: HTMLIFrameElement | null = this.getFrame({route, type, caller});
         if (nextFrame === null) {
             const id = nanoid();
@@ -111,7 +115,8 @@ export class MicroEndRouter extends HTMLElement {
                 route,
                 caller,
                 type,
-                id
+                id,
+                origin
             });
             let headIndex = srcdoc.indexOf('<head>');
             if (headIndex > 0) {
@@ -333,6 +338,7 @@ const mockObject: MicroEnd = {
     dependencies: {},
     isFocused: true,
     params: {},
+    origin : '',
     navigateBack: value => {
         console.log(message(`navigateBack(${JSON.stringify(value)})`));
     },

@@ -151,6 +151,10 @@ export interface Context {
      * Id dari iframe
      */
     id: string
+    /**
+     * url origin of this app
+     */
+    origin:string;
 }
 
 export interface MicroEnd extends Context {

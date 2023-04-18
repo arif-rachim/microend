@@ -2,8 +2,8 @@ import {MicroEndHomeButton, MicroEndRouter, saveModuleCodes} from "@microend/lib
 
 import storeHtml from "@microend/store/dist/index.html?raw";
 import launcherHtml from "@microend/launcher/dist/index.html?raw";
-//import microendText from "./microend.html?raw";
-import landingPage from "./landing.html?raw";
+import microendText from "./microend.html?raw";
+
 saveModuleCodes({contents: [storeHtml, launcherHtml], autoAccept: true, skipIfItsAlreadyInstalled: true}).then();
 
 
@@ -54,7 +54,7 @@ function showInAppInstallPromotion(): Promise<'ok' | 'no'> {
 
 }
 
-document.getElementsByTagName('main').item(0)!.innerHTML = landingPage;
+document.getElementsByTagName('main').item(0)!.innerHTML = microendText;
 
 window.onload = () => {
 

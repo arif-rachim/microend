@@ -30,13 +30,11 @@
         flex-direction: column;
         font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
         font-weight: 400;
-        background: radial-gradient(#222222 0%, #000000 100%);
         font-synthesis: none;
         text-rendering: optimizeLegibility;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         -webkit-text-size-adjust: 100%;
-
     }
 
     body {
@@ -66,7 +64,7 @@
     }
 </style>
 <main></main>
-<microend-router debug="true"></microend-router>
+<microend-router debug="true" origin="%VITE_APP_ORIGIN%"></microend-router>
 <microend-home></microend-home>
 <script src="/src/main.ts" type="module"></script>
 </body>

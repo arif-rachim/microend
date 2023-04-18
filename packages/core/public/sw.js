@@ -23,12 +23,23 @@ const putInCache = async (request, response) => {
     await cache.put(request, response);
 };
 
-const cacheFirst = async (request) => {
-    const responseFromCache = await caches.match(request);
-    if (responseFromCache) {
-        return responseFromCache;
-    }
-    const responseFromNetwork = await fetch(request);
-    putInCache(request, responseFromNetwork.clone()).then();
-    return responseFromNetwork;
+const cacheFirst = (request) => {
+    let isResolved = false;
+    return new Promise(resolve => {
+        fetch(request).then(responseFromNetwork => {
+            putInCache(request, responseFromNetwork.clone()).then(() => {
+                if(!isResolved){
+                    resolve(responseFromNetwork);
+                    isResolved = true
+                }
+            });
+        })
+        caches.match(request).then(responseFromCache => {
+            if(responseFromCache && !isResolved){
+                resolve(responseFromCache);
+                isResolved = true;
+            }
+        })
+    })
+
 };

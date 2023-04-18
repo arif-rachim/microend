@@ -22,7 +22,7 @@
         "title": "IAM",
         "path": "iam",
         "version": "1.0.0",
-        "size": 353817,
+        "size": 353827,
         "source": "stores/iam/1.0.0.html"
     },
     {
@@ -37,7 +37,7 @@
         "title": "Launcher",
         "path": "launcher",
         "version": "1.0.0",
-        "size": 2410562,
+        "size": 2410572,
         "source": "stores/launcher/1.0.0.html"
     },
     {
@@ -65,7 +65,7 @@
         "title": "Store",
         "path": "store",
         "version": "1.0.0",
-        "size": 2435846,
+        "size": 2436936,
         "source": "stores/store/1.0.0.html"
     }
 ]

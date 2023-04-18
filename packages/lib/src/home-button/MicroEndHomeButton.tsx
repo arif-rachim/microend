@@ -33,6 +33,7 @@ export class MicroEndHomeButton extends HTMLElement {
         this.style.boxShadow = BOX_SHADOW;
         this.style.borderRadius = '20px';
         this.style.transition = 'box-shadow 300ms ease';
+        this.style.zIndex = '999';
     }
 
 

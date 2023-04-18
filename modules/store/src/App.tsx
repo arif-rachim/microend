@@ -1,15 +1,14 @@
 import {IoAddCircleOutline, IoCheckmarkCircle} from "react-icons/io5";
 import {AnimatePresence, motion} from "framer-motion";
 import {ContentInfo, Store, StoreValueRenderer, useSlidePanel, useStore, useStoreValue} from "@microend/utils";
-import {getAllModules, Module, saveModuleCodes} from "@microend/lib";
+import {getAllModules, Module, saveModuleCodes, getMicroEnd, MicroEnd} from "@microend/lib";
 import {useEffect, useState} from "react";
 import {ModuleDetailPanel} from "./ModuleDetailPanel";
 import {ServerModuleDetailPanel} from "./ServerModuleDetailPanel";
 import {compareVersions, satisfies} from "compare-versions";
 import background from "./background/background.jpg";
-const BASE_URL = 'http://localhost:5173';
-//const BASE_URL = 'https://microend.org';
-//const BASE_URL = ""
+
+const me:MicroEnd = getMicroEnd();
 
 export interface ServerModule extends ContentInfo {
     source: string;
@@ -40,7 +39,7 @@ function downloadedModules() {
 const dm = downloadedModules();
 
 async function initiateDownload(modules: ServerModule[]) {
-    const responses = await Promise.all(modules.map(module => fetch(`${BASE_URL}/${module.source}`)));
+    const responses = await Promise.all(modules.map(module => fetch(`${me.origin}/${module.source}`)));
     const contents = await Promise.all(responses.map((responses, index) => {
         const module = modules[index];
         let loaded = 0;
@@ -174,7 +173,7 @@ export function App() {
             $installedModules.set(modules);
         })();
         (async () => {
-            const response = await fetch(`${BASE_URL}/stores/index.json`);
+            const response = await fetch(`${me.origin}/stores/index.json`);
             const serverModules: ServerModule[] = await response.json();
             $serverModules.set(serverModules);
         })();
@@ -336,7 +335,7 @@ export function IconImage(props: { module: ContentInfo, width: number, height: n
     const [icon, setIcon] = useState('');
     useEffect(() => {
         (async () => {
-            const response = await fetch(`${BASE_URL}/${m.iconDataURI}`);
+            const response = await fetch(`${me.origin}/${m.iconDataURI}`);
             const iconText = await response.text();
             setIcon(iconText);
         })();
