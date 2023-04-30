@@ -8,7 +8,7 @@
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        color : #333;
+        color: #333;
         padding-left: 20px;
         padding-right: 20px;
     }
@@ -41,6 +41,7 @@
         margin: 0;
         font-weight: 300;
     }
+
     h4 {
         font-size: 30px;
         padding: 0;
@@ -48,6 +49,7 @@
         font-weight: 300;
         border-bottom: 1px solid #333;
     }
+
     h5 {
         font-size: 25px;
         margin: 0;
@@ -55,7 +57,8 @@
         border-bottom: 1px solid #333;
         padding-bottom: 10px;
     }
-    #article{
+
+    #article {
         padding-bottom: 50px;
     }
 </style>
@@ -84,70 +87,50 @@
     </article>
 </section>
 <article id="article">
-    <p>The word MicroEnd was derived from the concept of installing a web application feature offline using modules
-        hosted on end-user's device <b>(Micro module at End user)</b>. These micro modules can communicate with one
-        another. A MicroEnd module is an HTML page that
-        can be developed by any javascript framework. All assets and javascript code are then bundled into a single
-        HTML
-        page. This makes it simple to distribute MicroEnd modules offline.</p>
-    <p>MicroEnd WebApp can function even when it is not connected to the internet/server. The MicroEnd router
-        web component facilitates lifecycle management as well as communication between modules. Modules may be
-        constructed
-        using any JavaScript framework of the developer's preference.
-    </p>
-    <h4>Modular</h4>
-    <p>Click on
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 96 960 960" fill="#9F2D2D"
-             opacity="1">
-            <path d="M480 976q-82 0-155-31.5t-127.5-86Q143 804 111.5 731T80 576q0-83 31.5-156t86-127Q252 239 325 207.5T480 176q83 0 156 31.5T763 293q54 54 85.5 127T880 576q0 82-31.5 155T763 858.5q-54 54.5-127 86T480 976Zm0-120q117 0 198.5-82T760 576q0-117-81.5-198.5T480 296q-116 0-198 81.5T200 576q0 116 82 198t198 82Zm0 40q134 0 227-93.5T800 576q0-134-93-227t-227-93q-133 0-226.5 93T160 576q0 133 93.5 226.5T480 896Z"/>
-        </svg>
-        to view the list of available
-        modules for installation. These modules were developed independently using various JavaScript frameworks,
-        including React, Svelte, Vue, and Angular; however, they are still able to communicate with one another.
-        These
-        modules can also be downloaded and installed into MicroEnd WebApp in an offline mode, which is one of
-        the interesting features that the platform offers. Because of this, the WebApp can be updated with
-        greater flexibility, even when there is no internet or network connection.
-    </p>
+    <p>MicroEnd is an innovative software platform that allows web application features to be installed offline using
+        modules hosted on the end-user's device. The name MicroEnd is derived from the concept of micro modules at the
+        end-user, which can communicate with each other seamlessly. A MicroEnd module is essentially an HTML page that
+        can be developed by any JavaScript framework, and all assets and JavaScript code are then bundled into a single
+        HTML page. This simplifies the distribution of MicroEnd modules offline.</p>
+    <p>One of the key advantages of MicroEnd is that it can function even when it is not connected to the internet or
+        server. This is possible thanks to the MicroEnd router web component, which facilitates lifecycle management and
+        communication between modules. MicroEnd modules can be constructed using any JavaScript framework of the
+        developer's preference, and can still communicate with each other regardless of the framework used. In addition,
+        these modules can be downloaded and installed into the MicroEnd WebApp in an offline mode, providing greater
+        flexibility for updates even when there is no internet or network connection.</p>
     <h4>How it works</h4>
-    <p><code>microend-router</code> is a web component that is considered to be the core of a MicroEnd WebApp. The
-        <code>microend-router</code> serves as a routing engine that renders pages based on the routing information
-        user provided in the url address bar or when a module uses the <code>navigateTo</code> function to
-        programmatically call another module. a
-        <code>microend-router</code> web component, serves to navigate between modules, invoke the module's
-        lifecycle, and facilitate communication between modules.
-    </p>
-    <h4>Use cases</h4>
-    <p>MicroEnds are not designed to be used on websites that benefit from having search engines crawl through their
-        content. The MicroEnd platform is primarily designed for the construction of large, modular, and
-        offline-capable
-        software applications. The following is an illustration of a use case that can be implemented with a
-        microend:</p>
-    <h5>ERP Software</h5>
     <p>
-        ERP software typically requires a large number of developers, each of whom brings a unique skill set, as
-        well as a significant amount of time to develop the application. The issue is that the front-end
-        framework technology is constantly evolving to keep up with changing times. This is the source of the
-        problem. Developing applications on a modular basis makes it simpler to incorporate new technologies at
-        a later date without necessitating the redevelopment of previously developed modules.
+        The MicroEnd router is considered to be the core of a MicroEnd WebApp, serving as a routing engine that renders
+             pages based on the routing information provided in the URL address bar or when a module uses the navigateTo
+             function to programmatically call another module. The router also facilitates navigation between modules,
+             invokes the module
+        's lifecycle, and enables communication between modules.
+    </p>
+
+    <h5>ERP Software</h5>
+    <p>MicroEnd is designed primarily for the construction of large, modular, and offline-capable software applications.
+        It is not suitable for websites that require search engines to crawl through their content. The platform is
+        ideal for use cases such as ERP software, which typically requires a large number of developers, each with a
+        unique skill set, as well as a significant amount of time to develop the application. By developing applications
+        on a modular basis, it is simpler to incorporate new technologies at a later date without necessitating the
+        redevelopment of previously developed modules.
     </p>
     <h5>Humanitarian Aid</h5>
-    <p>You are part of a humanitarian organization that provides assistance to people who have been
-        affected by natural disasters. The inability to connect to the internet, which forces you to carry out
-        your work without it, is a common obstacle. Thankfully, your app has the ability to work offline first.
-        You should, however, be able to obtain the most recent features after working for some time, as well as
-        any updates that have not yet been installed in your application. Since microend modules can be
-        installed offline, the logistics team that regularly visits you can assist you at your location and give
-        you modules that you haven't already installed on your device. This is possible because microend modules
-        can be installed offline.
+    <p>MicroEnd is also well-suited for humanitarian aid work, where the inability to connect to the internet can be a
+        significant obstacle. The platform's offline-first capability ensures that aid workers can continue to work even
+        without internet access, and can obtain the most recent features and updates when they become available. The
+        modular design of MicroEnd also makes it possible for logistics teams to provide aid workers with new modules
+        that they have not yet installed on their devices, further simplifying the aid delivery process.
     </p>
 
     <h5>Defence</h5>
-    <p>If you work on the front lines of the defence, it's possible that you won't be able to communicate online
-        with
-        the command center for a variety of reasons, despite the fact that this scenario is extremely unlikely to
-        play
-        out. This will provide a wider variety of options for sending data to your command base by providing an
-        offline
-        encryption feature that is both up to date and modular in its design.</p>
+    <p>Finally, MicroEnd is also suitable for use in defence scenarios where communication with the command center may
+        not be possible due to various reasons. MicroEnd's offline encryption feature, which is both up-to-date and
+        modular in design, provides a wider variety of options for sending data to the command base.</p>
+
+    <p>In summary, MicroEnd is a versatile and innovative platform that enables the development of large, modular, and
+        offline-capable software applications. Its unique features make it suitable for a range of use cases, from ERP
+        software development to humanitarian aid work and defence scenarios. With its ability to function offline and
+        its modular design, MicroEnd provides greater flexibility and ease of use for developers and end-users
+        alike.</p>
 </article>
