@@ -174,7 +174,7 @@ export class MicroEndRouter extends HTMLElement {
         return params;
     }
 
-    findMostMatchingRoute = async (pathSegments: string[], retry: boolean = true): Promise<{
+    findMostMatchingRoute = async (pathSegments: string[], retry: boolean = false): Promise<{
         route: string,
         moduleSourceId: string,
         dependencies: string[]

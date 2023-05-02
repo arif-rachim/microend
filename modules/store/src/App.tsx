@@ -1,4 +1,4 @@
-import {IoAddCircleOutline, IoCheckmarkCircle} from "react-icons/io5";
+import {IoAddCircleOutline, IoCheckmarkCircle, IoTrashBin} from "react-icons/io5";
 import {AnimatePresence, motion} from "framer-motion";
 import {ContentInfo, Store, StoreValueRenderer, useSlidePanel, useStore, useStoreValue} from "@microend/utils";
 import {getAllModules, Module, saveModuleCodes, getMicroEnd, MicroEnd} from "@microend/lib";
@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {ModuleDetailPanel} from "./ModuleDetailPanel";
 import {ServerModuleDetailPanel} from "./ServerModuleDetailPanel";
 import {compareVersions, satisfies} from "compare-versions";
+import {showModal} from "@microend/lib/src/showModal";
 
 const me: MicroEnd = getMicroEnd();
 
@@ -299,6 +300,23 @@ export function App() {
                                             </AnimatePresence>
                                         </div>
                                     }}/>
+                <motion.label
+                    whileTap={{scale:0.98}}
+                    onClick={async () => {
+                        const result = await showModal('Are you sure you want to uninstall all apps','Yes','No');
+                        if(result === 'Yes'){
+                            const request = window.indexedDB.deleteDatabase("routing-registry");
+                            request.onsuccess = async () => {
+                                await showModal('All apps successfully uninstalled','Ok');
+                                if(window.top){
+                                    window.top.postMessage({intent:'reload'});
+                                }else{
+                                    window.location.reload();
+                                }
+                            }
+                        }
+                    }}
+                    style={{display:'flex',backgroundColor:'#7A0A20',color:'white',flexDirection:'row',alignItems:'center',border:'1px solid rgba(0,0,0,0.1)',padding:5,borderRadius:5}}><IoTrashBin style={{marginRight:5}}/> Uninstall all modules</motion.label>
             </div>
             <div style={{
                 display: 'flex',

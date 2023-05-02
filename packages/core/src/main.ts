@@ -4,11 +4,10 @@ import storeHtml from "@microend/store/dist/index.html?raw";
 import launcherHtml from "@microend/launcher/dist/index.html?raw";
 import microendText from "./microend.html?raw";
 
-saveModuleCodes({contents: [storeHtml, launcherHtml], autoAccept: true, skipIfItsAlreadyInstalled: true}).then();
-
-
-customElements.define('microend-router', MicroEndRouter);
-customElements.define('microend-home', MicroEndHomeButton);
+saveModuleCodes({contents: [storeHtml, launcherHtml], autoAccept: true, skipIfItsAlreadyInstalled: true}).then(() => {
+    customElements.define('microend-router', MicroEndRouter);
+    customElements.define('microend-home', MicroEndHomeButton);
+});
 
 window.addEventListener('beforeinstallprompt', async (e: any) => {
     // Prevents the default mini-infobar or install dialog from appearing on mobile

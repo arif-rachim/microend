@@ -1,31 +1,5 @@
 [
     {
-        "name": "file-manager@1.0.0",
-        "dependencies": [],
-        "description": "File Manager to store file and retrieve file and to interact with user",
-        "author": "a.arif.r@gmail.com",
-        "iconDataURI": "stores/file-manager/1.0.0.html.icon.txt",
-        "visibleInHomeScreen": true,
-        "title": "File Manager",
-        "path": "file-manager",
-        "version": "1.0.0",
-        "size": 337839,
-        "source": "stores/file-manager/1.0.0.html"
-    },
-    {
-        "name": "iam@1.0.0",
-        "dependencies": [],
-        "description": "Identity Access Management allows user to add roles and user into the application",
-        "author": "arif.rachim@gmail.com",
-        "iconDataURI": "stores/iam/1.0.0.html.icon.txt",
-        "visibleInHomeScreen": true,
-        "title": "IAM",
-        "path": "iam",
-        "version": "1.0.0",
-        "size": 353768,
-        "source": "stores/iam/1.0.0.html"
-    },
-    {
         "name": "launcher@1.0.0",
         "dependencies": [
             "*@*"
@@ -65,7 +39,7 @@
         "title": "Store",
         "path": "store",
         "version": "1.0.0",
-        "size": 275305,
+        "size": 277740,
         "source": "stores/store/1.0.0.html"
     }
 ]
