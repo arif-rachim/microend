@@ -6,9 +6,8 @@ import {useEffect, useState} from "react";
 import {ModuleDetailPanel} from "./ModuleDetailPanel";
 import {ServerModuleDetailPanel} from "./ServerModuleDetailPanel";
 import {compareVersions, satisfies} from "compare-versions";
-import background from "./background/background.jpg";
 
-const me:MicroEnd = getMicroEnd();
+const me: MicroEnd = getMicroEnd();
 
 export interface ServerModule extends ContentInfo {
     source: string;
@@ -39,10 +38,14 @@ function downloadedModules() {
 const dm = downloadedModules();
 
 async function initiateDownload(modules: ServerModule[]) {
+
     const responses = await Promise.all(modules.map(module => fetch(`${me.origin}/${module.source}`)));
     const contents = await Promise.all(responses.map((responses, index) => {
         const module = modules[index];
         let loaded = 0;
+        if(!responses.ok){
+            return '';
+        }
         let contentLength = responses.headers.get('content-length')!;
         const total = parseInt(contentLength, 10);
         const res = new Response(new ReadableStream({
@@ -174,8 +177,10 @@ export function App() {
         })();
         (async () => {
             const response = await fetch(`${me.origin}/stores/index.json`);
-            const serverModules: ServerModule[] = await response.json();
-            $serverModules.set(serverModules);
+            if (response.ok) {
+                const serverModules: ServerModule[] = await response.json();
+                $serverModules.set(serverModules);
+            }
         })();
     }, []);
 
@@ -195,9 +200,9 @@ export function App() {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        alignItems: 'center'
+        alignItems: 'center',
+        background: 'linear-gradient(#F9F6F3 70%,#FCF6F0 100%)'
     }}>
-        <img src={background} style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',minWidth:800,zIndex:-1}}/>
         <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -205,12 +210,11 @@ export function App() {
             overflow: 'auto',
             width: '100%',
             maxWidth: 800,
-            padding : 20,
-            backdropFilter:'blur(100px)',
-            background:'rgba(255,255,255,0.1)',
+            padding: 20,
+            backdropFilter: 'blur(100px)'
         }}>
             <div
-                style={{display: 'flex', flexDirection: 'row',marginBottom:20}}>
+                style={{display: 'flex', flexDirection: 'row', marginBottom: 20}}>
                 <input style={{width: '100%', borderRadius: 20, padding: '10px 15px'}} type={'search'}
                        placeholder={'Search Modules'} value={searchQuery} onChange={(e) => {
                     const value = e.target.value;
@@ -223,7 +227,13 @@ export function App() {
                     justifyContent: 'center',
                     marginLeft: 10
                 }} whileHover={{scale: 1.03}} whileTap={{scale: 0.98}}>
-                    <IoAddCircleOutline style={{fontSize: 38, color: 'rgba(255,255,255,0.9)',backgroundColor:'rgba(0,0,0,0.3)',borderRadius:20,boxShadow:'0 5px 5px -3px rgba(0,0,0,0.1)'}}/>
+                    <IoAddCircleOutline style={{
+                        fontSize: 38,
+                        color: 'rgba(255,255,255,0.9)',
+                        backgroundColor: 'rgba(0,0,0,0.3)',
+                        borderRadius: 20,
+                        boxShadow: '0 5px 5px -3px rgba(0,0,0,0.1)'
+                    }}/>
                     <input type={"file"} multiple accept={"text/html"} style={{display: 'none'}}
                            onChange={async (event) => {
                                const input = event.target as HTMLInputElement;
@@ -240,7 +250,7 @@ export function App() {
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                marginBottom:20
+                marginBottom: 20
             }}>
                 <label style={{fontSize: 18, marginBottom: 10}}>Installed Modules</label>
                 <StoreValueRenderer store={$installedModules} selector={s => s}
@@ -254,7 +264,7 @@ export function App() {
                                                                            display: 'flex',
                                                                            flexDirection: 'column',
                                                                            margin: 5,
-                                                                           alignItems:'center'
+                                                                           alignItems: 'center'
                                                                        }}
                                                                        initial={{scale: 0}} animate={{scale: 1}}
                                                                        exit={{scale: 0}}
@@ -280,7 +290,10 @@ export function App() {
                                                                  height={32}/>
                                                         </div>
                                                         <label
-                                                            style={{textAlign: 'center',fontSize:12}}>{installedModule.title}</label>
+                                                            style={{
+                                                                textAlign: 'center',
+                                                                fontSize: 12
+                                                            }}>{installedModule.title}</label>
                                                     </motion.div>
                                                 })}
                                             </AnimatePresence>
@@ -335,9 +348,14 @@ export function IconImage(props: { module: ContentInfo, width: number, height: n
     const [icon, setIcon] = useState('');
     useEffect(() => {
         (async () => {
+
             const response = await fetch(`${me.origin}/${m.iconDataURI}`);
-            const iconText = await response.text();
-            setIcon(iconText);
+            if (response.ok) {
+                const iconText = await response.text();
+                setIcon(iconText);
+            }
+
+
         })();
     }, [m.iconDataURI])
     if (icon === '') {

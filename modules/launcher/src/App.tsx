@@ -1,7 +1,6 @@
 import {getAllModules, getMicroEnd, Module} from "@microend/lib";
 import {useEffect, useState} from "react";
 import {AnimatePresence, motion} from "framer-motion";
-import background from "./background/background.jpg";
 const me = getMicroEnd();
 
 export function App() {
@@ -14,8 +13,8 @@ export function App() {
         })();
     }, []);
     const [search,setSearch] = useState('');
-    return <div style={{display:'flex',flexDirection:'column',height:'100%',alignItems:'center'}}>
-        <img src={background} style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',minWidth:800,zIndex:-1}}/>
+    return <div style={{display:'flex',flexDirection:'column',height:'100%',alignItems:'center',background:'linear-gradient(#F9F6F3 70%,#FCF6F0 100%)'}}>
+        {/*<img src={background} style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',minWidth:800,zIndex:-1}}/>*/}
         <div style={{display:'flex',flexDirection:'column',width:'100%',maxWidth:800,padding:20}}>
             <input style={{padding:'10px 15px',borderRadius:20}} placeholder={'Search Modules'} type={'search'} value={search} onChange={(event) => {
                 setSearch(event.target.value);
